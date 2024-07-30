@@ -8,6 +8,11 @@ import matplotlib.pyplot as plt
 kegg_2018_0 = pd.read_csv('Data/reaction_edges_2018.csv.zip', compression='zip', index_col=0).applymap(eval).applymap(set)
 # kegg_2024_0 - derived from reaction entries in Jan 2024 KEGG pull in Big Data folder
 kegg_2024_0 = pd.read_csv('Data/reaction_edges_2024_01.csv.zip', compression='zip', index_col=0).applymap(eval).applymap(set)
+# kegg_2024_1 - derived from reaction entries in July 2024 KEGG pull in Big Data folder
+kegg_reactions = pd.read_csv('Data/kegg_data_R_basic.csv.zip', index_col=0)
+kegg_reactions.update(kegg_reactions.filter(like='_IDS').applymap(lambda x: set(x.split(' ')), na_action='ignore'))
+kegg_reactions = kegg_reactions.rename(columns={'LEFT_IDS': 'left', 'RIGHT_IDS': 'right'})#.dropna(subset=['left', 'right'], how='any')
+kegg_2024_1 = kegg_reactions.query('NO_GLYCANS')[['left','right']]
 # appendable reactions: carbonate-bicarbonate equilibrium and water dissociation. negligible effects on expansion (a few cps arrive earlier)
 appended_reactions = pd.DataFrame({'R99999': {'left': {'C00001'}, 'right': {'C01328','C00080'}},
                       'R99998': {'left': {'C01353'}, 'right': {'C00288', 'C00080'}}}).T
@@ -20,7 +25,7 @@ brenda_flagged = (pd.read_csv('Data/Reactions_BKMS.tsv', sep='\t')
 """COMPOUND SCOPES"""
 # default starting seed set of compounds
 primordial_seed_set = ["C00001","C00080","C00009","C00014","C00059","C00011"]
-all_poss_cps = list(set.union(*kegg_2018_0.stack()).union(*kegg_2024_0.stack()))
+all_poss_cps = list(set.union(*kegg_2018_0.stack()).union(*kegg_2024_0.stack()).union(*kegg_2024_1.stack()))
 # we still need chirality for some compounds; in the meantime, treat those as NaN
 chiral_labels = (pd.read_csv('Data/chiral_labels.csv', index_col=0, usecols=[1,3])
                  .assign(is_chiral = lambda x: x.Chiral_Centers>0)).join(pd.DataFrame(index=all_poss_cps), how='outer')
