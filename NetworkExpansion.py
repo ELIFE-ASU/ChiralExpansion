@@ -21,6 +21,8 @@ brenda_flagged = (pd.read_csv('Data/Reactions_BKMS.tsv', sep='\t')
           .dropna(subset='Reaction_ID_KEGG').dropna(subset=['Missing_Substrate','Missing_Product'], how='all')
           .drop_duplicates(subset=['Reaction_ID_KEGG','Reaction','Missing_Product','Missing_Substrate'], keep='first')
           .set_index('Reaction_ID_KEGG'))
+# reactions flagged in Table S3 of Goldford et al 2024, as "elementally inconsistent"
+goldford_flagged = open('Data/Goldford2024_TableS3_rnums.txt', 'r').read().split(' ')
 
 """COMPOUND SCOPES"""
 # default starting seed set of compounds
