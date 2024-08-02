@@ -46,7 +46,7 @@ file = os.path.join(os.getcwd(), "Data", "kegg_data_C_inchi.csv")
 data = load_data(file)
 
 # select only the first 100 molecules
-data = data.head(100)
+# data = data.head(100)
 
 n = len(data["Source_ID"])
 print("There are {} molecules in the dataset".format(n))
