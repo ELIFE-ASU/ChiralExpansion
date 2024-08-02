@@ -307,14 +307,6 @@ def load_by_mass(in_data, out_data, n_pick=1000):
 
 
 if __name__ == "__main__":
-    # mol = Chem.MolFromSmiles('BrC=C[C@H]1OC(C2)(F)C2(Cl)C1')
-    # mol = embed_mol(mol)
-    # tmp = rdkit.Chem.FindMolChiralCenters(mol, useLegacyImplementation=False, includeUnassigned=True)
-    # print(len(tmp))
-    # print(rdkit.Chem.FindMolChiralCenters(mol))
-    # print(rdkit.Chem.rdMolDescriptors.CalcNumAtomStereoCenters(mol))
-    #
-    # exit()
     print("Program started", flush=True)
     if os.name == "nt":
         data_dir = r"C:\Users\louie\skunkworks\data"
@@ -330,10 +322,10 @@ if __name__ == "__main__":
 
     # First make all the directories of the data by hand
     # Sort the GDB17 data by number of heavy atoms
-    # write_data_by_mass(os.path.join(data_dir, r"GDB17.smi"), in_data_17)
+    write_data_by_mass(os.path.join(data_dir, r"GDB17.smi"), in_data_17)
 
     # Merge the three datasets
-    # merge_mass_data(in_data_11, in_data_13, in_data_17, merged_data_dir, f_debug=False)
+    merge_mass_data(in_data_11, in_data_13, in_data_17, merged_data_dir, f_debug=False)
 
     # Load the data by mass and pick random molecules and save the chirality data
     load_by_mass(merged_data_dir, merged_data_file, n_pick=5000)
