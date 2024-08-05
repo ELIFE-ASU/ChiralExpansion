@@ -28,7 +28,7 @@ get_sides = lambda x: x[['left','right']]
 primordial_seed_set = ["C00001","C00080","C00009","C00014","C00059","C00011"]
 all_poss_cps = list(kegg_reactions[['left','right']].stack().explode().unique())
 # we still need chirality for some compounds; in the meantime, treat those as NaN
-chiral_labels = (pd.read_csv('Data/chiral_labels.csv', index_col=0, usecols=[1,3])
+chiral_labels = (pd.read_csv('Data/kegg_data_C_detailed.csv.zip', index_col=0)
                  .assign(is_chiral = lambda x: x.Chiral_Centers>0)).join(pd.DataFrame(index=all_poss_cps), how='outer')
 
 """FUNCTIONS"""
