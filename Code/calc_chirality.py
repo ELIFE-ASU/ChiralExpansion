@@ -15,11 +15,16 @@ lg.setLevel(RDLogger.CRITICAL)
 
 
 def embed_mol(mol):
-    Chem.SanitizeMol(mol)  # Sanitise the molecule
-    mol.UpdatePropertyCache()  # Update the properties
-    Chem.Kekulize(mol)  # kekulize the molecule
-    mol = rdkit.Chem.AddHs(mol)  # Add hydrogens
-    Chem.EmbedMolecule(mol)  # Embed the molecule
+    # Sanitise the molecule
+    Chem.SanitizeMol(mol)
+    # Update the properties
+    mol.UpdatePropertyCache()
+    # kekulize the molecule
+    Chem.Kekulize(mol)
+    # Add hydrogens
+    mol = rdkit.Chem.AddHs(mol)
+    # Embed the molecule
+    Chem.EmbedMolecule(mol)
     return mol
 
 
@@ -44,8 +49,10 @@ def divvy_into_cores(data, ncores):
     return (data2.sort_values(by=['core', 'bottcher_index']))
 
 
-data = divvy_into_cores(pd.read_csv(os.path.join(os.getcwd(), "Data", "kegg_data_C.csv.zip"), index_col=0), 8)
-data['n_chiral_centers'] = get_chirality(data['InChI'].apply(rdkit.Chem.MolFromInchi).parallel_apply(embed_mol))
-data.sort_index().to_csv(os.path.join(os.getcwd(), "Data", "kegg_data_C_detailed.csv.zip"),
-                         compression='zip',
-                         encoding='utf-8')
+if __name__ == '__main__':
+    data_dir = "../Data"
+    data = divvy_into_cores(pd.read_csv(os.path.join(data_dir, "kegg_data_C.csv.zip"), index_col=0), 8)
+    data['n_chiral_centers'] = get_chirality(data['InChI'].apply(rdkit.Chem.MolFromInchi).parallel_apply(embed_mol))
+    data.sort_index().to_csv(os.path.join(data_dir, "kegg_data_C_detailed.csv.zip"),
+                             compression='zip',
+                             encoding='utf-8')

@@ -2,7 +2,7 @@ import pandas as pd
 
 """REACTION SCOPE"""
 # kegg_reactions: derived from reaction entries in July 2024 KEGG pull in Big Data folder
-kegg_reactions = pd.read_csv('Data/kegg_data_R_basic.csv.zip', index_col=0).query('NO_GLYCANS')
+kegg_reactions = pd.read_csv('../Data/kegg_data_R_basic.csv.zip', index_col=0).query('NO_GLYCANS')
 kegg_reactions.update(kegg_reactions.filter(like='_IDS').applymap(lambda x: set(x.split(' ')), na_action='ignore'))
 kegg_reactions = kegg_reactions.rename(columns={'LEFT_IDS': 'left', 'RIGHT_IDS': 'right'})
 # appendable reactions: carbonate-bicarbonate equilibrium and water dissociation. negligible effects on expansion (a few cps arrive earlier)
@@ -15,7 +15,7 @@ brenda_flagged = (pd.read_csv('Data/Reactions_BKMS.tsv', sep='\t')
                                    keep='first')
                   .set_index('Reaction_ID_KEGG'))
 # reactions flagged in Table S3 of Goldford et al 2024, as "elementally inconsistent"
-goldford_flagged_entries = open('Data/Goldford2024_TableS3_rnums.txt', 'r').read().split(' ')
+goldford_flagged_entries = open('../Data/Goldford2024_TableS3_rnums.txt', 'r').read().split(' ')
 # add these flags to reaction info
 kegg_reactions['NO_BRENDA_FLAG'] = kegg_reactions.index.isin(brenda_flagged.index) == False
 kegg_reactions['NO_GOLDFORD_FLAG'] = kegg_reactions.index.isin(goldford_flagged_entries) == False
@@ -26,7 +26,7 @@ get_sides = lambda x: x[['left', 'right']]
 primordial_seed_set = ["C00001", "C00080", "C00009", "C00014", "C00059", "C00011"]
 all_poss_cps = list(kegg_reactions[['left', 'right']].stack().explode().unique())
 # we still need chirality for some compounds; in the meantime, treat those as NaN
-chiral_labels = (pd.read_csv('Data/kegg_data_C_detailed.csv.zip', index_col=0)
+chiral_labels = (pd.read_csv('../Data/kegg_data_C_detailed.csv.zip', index_col=0)
                  .assign(is_chiral=lambda x: x.Chiral_Centers > 0)).join(pd.DataFrame(index=all_poss_cps), how='outer')
 
 """FUNCTIONS"""
