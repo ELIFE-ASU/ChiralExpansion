@@ -35,4 +35,4 @@ def divvy_into_cores(data, ncores):
 
 data = divvy_into_cores(pd.read_csv(os.path.join(os.getcwd(), "Data", "kegg_data_C.csv.zip"), index_col=0), 8)
 data['n_chiral_centers'] = get_chirality(data['InChI'].apply(rdkit.Chem.MolFromInchi).parallel_apply(embed_mol))
-data.sort_index().to_csv(os.path.join(os.getcwd(), "Data", "kegg_data_C_inKeggR_and_keggdataC_applied.csv"), encoding='utf-8')
+data.sort_index().to_csv(os.path.join(os.getcwd(), "Data", "kegg_data_C_detailed.csv.zip"), compression='zip', encoding='utf-8')
