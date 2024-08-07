@@ -1,5 +1,6 @@
 import pandas as pd
 import os
+import networkx as nx
 
 try: 
     tests = os.listdir('../Data')
@@ -81,7 +82,15 @@ def expand_from_seed_set(seeds, reactions: pd.DataFrame, max_gen: int):
     return ({'rns': rns, 'cps': cps, 'cp_sets': cp_sets, 'rn_sets': rn_sets, 'reaction_pool': reactions, 'seeds': seeds,
              'chiral_fraction': chiral_fraction, 'directions': directions})
 
-
-# used for viz + analysis, not expansion. turns dataframes like kegg_2018_0 into something that can be fed to networkx via from_pandas_edgelist
+# used for viz + analysis, not expansion itself. turns dataframes with opposite reaction sides into unipartite edgelists, for from_pandas_edgelist
 def generate_edge_df(reactions: pd.DataFrame):
     return (reactions.explode('left').explode('right').reset_index(names='reaction').query('left!=right'))
+
+def define_reachable_components(seeds, reactions: pd.DataFrame):
+    bipartite_edges = reactions.applymap(list).stack().groupby(level=0).sum().explode().reset_index()
+    bipartite_graph = nx.from_pandas_edgelist(bipartite_edges, source='index', target=0, create_using=nx.Graph)
+    accessible_nodes = set.union(*[nx.node_connected_component(bipartite_graph, i) for i in seeds])
+    del bipartite_graph; del bipartite_edges
+    return({'reachable_compounds': [i for i in accessible_nodes if i.startswith('C')],
+            'reachable_reactions': [i for i in accessible_nodes if i.startswith('R')]})
+
