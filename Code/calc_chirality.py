@@ -2,7 +2,6 @@ import os
 
 import numpy as np
 import pandas as pd
-import psutil
 import rdkit.Chem
 import rdkit.Chem.rdMolDescriptors
 from pandarallel import pandarallel
@@ -69,7 +68,7 @@ if __name__ == '__main__':
     f_parallel = False
     if f_parallel:
         pandarallel.initialize(progress_bar=True, verbose=0)
-        data_file = r"kegg_data_C.csv.zip" # was: r"C:\Users\louie\skunkworks\lets-get-kegg\kegg_data_C.csv.zip"
+        data_file = r"kegg_data_C.csv.zip"  # was: r"C:\Users\louie\skunkworks\lets-get-kegg\kegg_data_C.csv.zip"
         data = divvy_into_cores(pd.read_csv(os.path.join(data_dir, data_file), index_col=0))
         data['n_chiral_centers'] = get_chirality(
             data['smiles'].apply(rdkit.Chem.MolFromSmiles).parallel_apply(standardize_mol))
@@ -77,7 +76,7 @@ if __name__ == '__main__':
                                  compression='zip',
                                  encoding='utf-8')
     else:
-        data_file = r"kegg_data_C.csv.zip" # was: r"C:\Users\louie\skunkworks\lets-get-kegg\kegg_data_C.csv.zip"
+        data_file = r"kegg_data_C.csv.zip"  # was: r"C:\Users\louie\skunkworks\lets-get-kegg\kegg_data_C.csv.zip"
         data = pd.read_csv(os.path.join(data_dir, data_file), index_col=0)
         data['n_chiral_centers'] = get_chirality(
             data['smiles'].apply(rdkit.Chem.MolFromSmiles).apply(standardize_mol))
