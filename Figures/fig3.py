@@ -14,25 +14,26 @@ def expand_children(df, level):
 
 def categorize_chirality(n):
     if n == 0:
-        return (False)
+        return False
     elif n > 0:
-        return (True)
+        return True
     else:
-        return (float('NaN'))
+        return float('NaN')
 
 
-cpd_appearances = (pd.read_csv("../Data/compound_appearances.csv",
-                               index_col=0,
-                               usecols=['Compound', 'Timestep_Appear']).rename(
-    columns={'Timestep_Appear': 'Expansion Step'}))
+heavy_percent_labs = ['0 - 20th', '21 - 40th', '41 - 60th', '61 - 80th', '81 - 100th']
+
+cpd_appearances = pd.read_csv("../Data/compound_appearances.csv",
+                              index_col=0,
+                              usecols=['Compound', 'Timestep_Appear']).rename(
+    columns={'Timestep_Appear': 'Expansion Step'})
 cpd_info = pd.read_csv("../Data/kegg_data_C_detailed.csv.zip", index_col=0).set_index('CID')
 cpd_appearances['Heavy Atoms'] = cpd_appearances.index.map(cpd_info['N Heavy'])
 cpd_appearances['Chiral Centers'] = cpd_appearances.index.map(cpd_info['n_chiral_centers'])
 percentiles = cpd_appearances['Heavy Atoms'].quantile([0.0, 0.2, 0.4, 0.6, 0.8, 1.0])
 cpd_appearances['Heavy Atoms Percentile'] = pd.cut(cpd_appearances['Heavy Atoms'],
                                                    bins=percentiles,
-                                                   labels=['0 - 20th', '21 - 40th', '41 - 60th', '61 - 80th',
-                                                           '81 - 100th'])
+                                                   labels=heavy_percent_labs)
 
 brite = json.load(open("../Data/br08001.json"))  # NEED THE UPDATED VERSION OF THIS FILE.
 brite = pd.DataFrame(brite)['children'].apply(pd.Series).set_index('name').explode('children')
@@ -48,7 +49,7 @@ brite_cpd_appearances['Chiral Centers'] = brite_cpd_appearances['id'].map(cpd_in
 brite_cpd_appearances['is_chiral'] = brite_cpd_appearances['Chiral Centers'].apply(categorize_chirality)
 # Find chirality of each label. (prev: "Make sub-dataframe for each class")
 # Results differ from before, because this accommodates multiple labels per cpd.
-print(brite_cpd_appearances.groupby('Labels')['is_chiral'].mean())
+print(brite_cpd_appearances.groupby('Labels')['is_chiral'].mean(), flush=True)
 
 font = {"size": 22}
 for key, value in font.items():
@@ -72,12 +73,10 @@ plt.show()
 
 # Plotting all cpds, (eventually) coloring by num heavy atoms
 df = cpd_appearances
-
 average_heavy_atoms = df.groupby(by=['Expansion Step', 'Chiral Centers'])['Heavy Atoms'].mean().reset_index()
 average_heavy_atoms['Heavy Atoms Percentile'] = pd.cut(average_heavy_atoms['Heavy Atoms'],
                                                        bins=percentiles,
-                                                       labels=['0 - 20th', '21 - 40th', '41 - 60th', '61 - 80th',
-                                                               '81 - 100th'])
+                                                       labels=heavy_percent_labs)
 sns.set_palette(sns.color_palette("copper_r"))
 g = sns.jointplot(data=average_heavy_atoms.sort_values(by='Heavy Atoms', ascending=False),
                   # CHANGES BASED ON SORTING. do we want to take (relative) percentile value of the mean number of heavy atoms, of a given stack of dots?
@@ -113,8 +112,7 @@ df = cpd_appearances
 average_heavy_atoms = df.groupby(by=['Expansion Step', 'Chiral Centers'])['Heavy Atoms'].mean().reset_index()
 average_heavy_atoms['Heavy Atoms Percentile'] = pd.cut(average_heavy_atoms['Heavy Atoms'],
                                                        bins=percentiles,
-                                                       labels=['0 - 20th', '21 - 40th', '41 - 60th', '61 - 80th',
-                                                               '81 - 100th'])
+                                                       labels=heavy_percent_labs)
 sns.set_palette(sns.color_palette("copper_r"))
 
 # Doesn't calculate average and plot percentile of that average.
@@ -149,9 +147,16 @@ bins = np.arange(-0.5, 11.5, 1)
 df['is_chiral_bool'] = df['Chiral Centers'] > 0
 
 fig = plt.figure(figsize=(16, 8))
-gs = fig.add_gridspec(2, 2, width_ratios=(4, 1), height_ratios=(1, 4),
-                      left=0.1, right=0.9, bottom=0.1, top=0.9,
-                      wspace=0.05, hspace=0.05)
+gs = fig.add_gridspec(nrows=2,
+                      ncols=2,
+                      width_ratios=(4, 1),
+                      height_ratios=(1, 4),
+                      left=0.1,
+                      right=0.9,
+                      bottom=0.1,
+                      top=0.9,
+                      wspace=0.05,
+                      hspace=0.05)
 ax = fig.add_subplot(gs[1, 0])
 ax_histy = fig.add_subplot(gs[1, 1], sharey=ax)
 df.plot.scatter(ax=ax,
