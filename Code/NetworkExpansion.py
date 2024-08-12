@@ -4,10 +4,12 @@ import networkx as nx
 import pandas as pd
 
 try:
-    tests = os.listdir('../Data')
+    tests = os.listdir('../Data/')
     data_folder = '../Data/'
 except:
     data_folder = 'Data/'
+if not os.path.exists('Output/'):
+    os.mkdir('Output/')
 
 """REACTION SCOPE"""
 # kegg_reactions: derived from reaction entries in July 2024 KEGG pull in Big Data folder
@@ -35,8 +37,11 @@ get_sides = lambda x: x[['left', 'right']]
 primordial_seed_set = ["C00001", "C00080", "C00009", "C00014", "C00059", "C00011"]
 all_poss_cps = list(kegg_reactions[['left', 'right']].stack().explode().unique())
 # we still need chirality for some compounds; in the meantime, treat those as NaN
-chiral_labels = (pd.read_csv(data_folder + 'kegg_data_C_detailed.csv.zip', index_col=0)
-                 .assign(is_chiral=lambda x: x.Chiral_Centers > 0)).join(pd.DataFrame(index=all_poss_cps), how='outer')
+chiral_labels = ((pd.read_csv(data_folder + 'kegg_data_C_detailed.csv.zip', index_col=0)
+                 .assign(is_chiral=lambda x: x.n_chiral_centers > 0)
+                 .rename(columns={'n_chiral_centers':'Chiral_Centers'})
+                 .set_index('CID'))
+                 .join(pd.DataFrame(index=all_poss_cps), how='outer'))
 
 """FUNCTIONS"""
 
