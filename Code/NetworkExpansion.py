@@ -69,7 +69,7 @@ def expand_from_seed_set(seeds, reactions: pd.DataFrame, max_gen: int):
         has_L = reactions['left'].apply(lambda x: x <= compound_pool)  # are all left-side compounds present?
         rns[g + 1] = (has_R + has_L) > 0  # if so, reaction is enabled
         fwd_rns = fwd_rns.union(set(reactions[has_L > has_R].index))  # new compounds will be from right side
-        bwd_rns = fwd_rns.union(set(reactions[has_L < has_R].index))  # new compounds will be from left side
+        bwd_rns = bwd_rns.union(set(reactions[has_L < has_R].index))  # new compounds will be from left side
         compound_pool = set.union(compound_pool, *reactions.loc[
             rns[g + 1]].stack())  # and the other side of that reaction is added to the pool
         cps[g + 1] = dict(zip(compound_pool, len(compound_pool) * [True]))
