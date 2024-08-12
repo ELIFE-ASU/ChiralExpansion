@@ -1,5 +1,7 @@
-import pandas as pd
 import os
+
+import pandas as pd
+
 
 # purpose: store raw and processed output of network expansions.
 
@@ -13,5 +15,4 @@ def write_output_files(results: dict, edges: dict):
     [df.to_csv(f'Output/{name}/edges.csv.zip', compression='zip', encoding='utf-8') for name, df in edges.items()]
     output_folders = set(os.listdir('Output')).intersection(results.keys())
     print('\n\nResult folder(s) in Output:\n', '\n'.join(output_folders), sep='')
-    return(None)
-
+    return (None)

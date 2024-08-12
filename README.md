@@ -21,3 +21,13 @@ Get the data from here: https://gdb.unibe.ch/downloads/
 Get the following files and uncompress and put in relevant files: GDB17.50000000.smi.gz (314 MB), gdb13.tgz (2.6 GB), gdb11.tgz (122 MB)
 
 Run calc_chirality_gdb.py
+
+
+## Required packages
+pandas, chemparse, numpy, rdkit, matplotlib, scipy, networkx
+
+conda install pandas numpy matplotlib scipy
+
+pip install --user --upgrade chemparse networkx[default]
+
+conda install -c conda-forge rdkit

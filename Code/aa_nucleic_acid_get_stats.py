@@ -1,7 +1,7 @@
 import os
 
-import pandas as pd
 import chemparse
+import pandas as pd
 
 
 def get_heavy_atoms(formula):
