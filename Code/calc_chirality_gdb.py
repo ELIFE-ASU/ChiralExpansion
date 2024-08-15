@@ -6,9 +6,13 @@ import numpy as np
 import pandas as pd
 import rdkit.Chem
 import rdkit.Chem.rdMolDescriptors
+from rdkit import RDLogger
 from rdkit.Chem import AllChem as Chem
 
 plt.rcParams['axes.linewidth'] = 2.0
+
+lg = RDLogger.logger()
+lg.setLevel(RDLogger.CRITICAL)
 
 
 def n_plot(xlab, ylab, xs=14, ys=14):
@@ -42,8 +46,8 @@ def analyze_data(fname):
     all_data["nA"] = all_data["nA"].astype(int) + 1
     # Determine the chirality and split the data
     all_data["chiral"] = all_data["nStero"].map(lambda x: x > 0)
-    chiral_data = all_data[all_data["chiral"] == True]
-    achiral_data = all_data[all_data["chiral"] == False]
+    chiral_data = all_data[all_data["chiral"] is True]
+    achiral_data = all_data[all_data["chiral"] is False]
     # Reorganize to get the information we need
     chiral_counts = chiral_data.groupby("nA").count().unstack()["SMILES"]
     achiral_counts = achiral_data.groupby("nA").count().unstack()["SMILES"]
@@ -113,7 +117,7 @@ def load_data(i, in_data):
     data = np.empty(0, dtype=str)
     for ii, file in enumerate([os.path.basename(f).split(".")[0] for f in in_data]):
         if file == str(i) and os.stat(in_data[ii]).st_size > 0:
-            data = np.genfromtxt(in_data[ii], delimiter="\t", dtype=str, usecols=0, comments=None)
+            data = np.genfromtxt(os.path.abspath(in_data[ii]), delimiter="\t", dtype=str, usecols=0, comments=None)
     return data
 
 
@@ -271,6 +275,17 @@ def pick_n_random(data, n_pick=1000):
     return np.random.choice(data, min(n_pick, len(data)), replace=False)
 
 
+def get_chirality(mol):
+    return len(rdkit.Chem.FindMolChiralCenters(mol,
+                                               useLegacyImplementation=False,
+                                               includeUnassigned=True,
+                                               includeCIP=False))
+
+
+def get_heavy_atoms(mol):
+    return mol.GetNumHeavyAtoms()
+
+
 def load_by_mass(in_data, out_data, n_pick=1000):
     # Get all the files
     in_data = file_list_all(in_data)
@@ -299,9 +314,8 @@ def load_by_mass(in_data, out_data, n_pick=1000):
             for ii, s in enumerate(all_smiles):
                 mol = rdkit.Chem.MolFromSmiles(s)
                 mol = embed_mol(mol)
-                info_stero = rdkit.Chem.FindMolChiralCenters(mol, useLegacyImplementation=False, includeUnassigned=True)
-                nA = count_atoms(s)
-                nStereo = len(info_stero)
+                nA = get_heavy_atoms(mol)
+                nStereo = get_chirality(mol)
                 file.write(f"{ii},{s.strip()},{nA},{nStereo}\n")
     return None
 
