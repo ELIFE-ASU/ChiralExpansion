@@ -7,37 +7,13 @@ import pandas as pd
 import rdkit.Chem
 import rdkit.Chem.rdMolDescriptors
 from rdkit import RDLogger
-from rdkit.Chem import AllChem as Chem
+
+import utilities as ut
 
 plt.rcParams['axes.linewidth'] = 2.0
 
 lg = RDLogger.logger()
 lg.setLevel(RDLogger.CRITICAL)
-
-
-def n_plot(xlab, ylab, xs=14, ys=14):
-    plt.minorticks_on()
-    plt.tick_params(axis='both', which='major', labelsize=ys - 2, direction='in', length=6, width=2)
-    plt.tick_params(axis='both', which='minor', labelsize=ys - 2, direction='in', length=4, width=2)
-    plt.tick_params(axis='both', which='both', top=True, right=True)
-    plt.xlabel(xlab, fontsize=xs)
-    plt.ylabel(ylab, fontsize=ys)
-    plt.tight_layout()
-    return None
-
-
-def embed_mol(mol):
-    # Sanitise the molecule
-    Chem.SanitizeMol(mol)
-    # Update the properties
-    mol.UpdatePropertyCache()
-    # kekulize the molecule
-    Chem.Kekulize(mol)
-    # Add hydrogens
-    mol = rdkit.Chem.AddHs(mol)
-    # Embed the molecule
-    Chem.EmbedMolecule(mol)
-    return mol
 
 
 def analyze_data(fname):
@@ -87,30 +63,6 @@ def plot_chiral(in_data, xs=14, ys=14):
     plt.show()
     plt.close()
     return None
-
-
-def list_folders(target):
-    return [f for f in os.listdir(target) if os.path.isdir(os.path.join(target, f))]
-
-
-def file_list_all(mypath=None):
-    """
-    This function generates a list of all files in a specified directory and its subdirectories.
-    If no directory is specified, it defaults to the current working directory.
-
-    Parameters:
-    mypath (str, optional): The path to the directory. Defaults to None, which means the current working directory.
-
-    Returns:
-    list: A list of all files in the specified directory and its subdirectories.
-    """
-    mypath = mypath or os.getcwd()  # If no path is provided, use the current working directory
-    files = []
-    # os.walk generates the file names in a directory tree by walking the tree either top-down or bottom-up
-    for dirpath, dirnames, filenames in os.walk(mypath):
-        for filename in filenames:
-            files.append(os.path.join(dirpath, filename))
-    return files
 
 
 def load_data(i, in_data):
@@ -234,9 +186,9 @@ def write_data_by_mass(in_data, output_data):
 
 def merge_mass_data(in_data_1, in_data_2, in_data_3, out_data, f_debug=True):
     # Get all the files
-    in_data_1 = file_list_all(in_data_1)
-    in_data_2 = file_list_all(in_data_2)
-    in_data_3 = file_list_all(in_data_3)
+    in_data_1 = ut.file_list_all(in_data_1)
+    in_data_2 = ut.file_list_all(in_data_2)
+    in_data_3 = ut.file_list_all(in_data_3)
 
     # Get the expected unique files
     f_names_1 = [os.path.basename(f).split(".")[0] for f in in_data_1]
@@ -282,13 +234,9 @@ def get_chirality(mol):
                                                includeCIP=False))
 
 
-def get_heavy_atoms(mol):
-    return mol.GetNumHeavyAtoms()
-
-
 def load_by_mass(in_data, out_data, n_pick=1000):
     # Get all the files
-    in_data = file_list_all(in_data)
+    in_data = ut.file_list_all(in_data)
     if len(in_data) == 0:
         print("No files found", flush=True)
         exit()
@@ -297,9 +245,10 @@ def load_by_mass(in_data, out_data, n_pick=1000):
     print(f"Total number of files to process: {len(in_data)}", flush=True)
     # Open the output file
     with open(out_data, "w") as file:
+        # Write the header
         file.write(",SMILES,nA,nStero\n")
 
-        # Loop over the files
+        # Loop over the files of the combined data of the corresponding mass
         for i, f in enumerate(in_data):
             print(f"Processing file {i}: {f}", flush=True)
             # Load the data line by line
@@ -309,14 +258,15 @@ def load_by_mass(in_data, out_data, n_pick=1000):
             if n_pick is not None:
                 print(f"Picking {n_pick} random molecules", flush=True)
                 all_smiles = pick_n_random(all_smiles, n_pick=n_pick)
-
+            # Embed the molecules
+            mols = [ut.embed_mol(rdkit.Chem.MolFromSmiles(s), f_3d=True) for s in all_smiles]
+            # Get the number of heavy atoms and chirality
+            nA = list(ut.get_heavy_atoms(mols).values())
+            nStereo = list(ut.get_chirality(mols).values())
             # Loop over the molecules
             for ii, s in enumerate(all_smiles):
-                mol = rdkit.Chem.MolFromSmiles(s)
-                mol = embed_mol(mol)
-                nA = get_heavy_atoms(mol)
-                nStereo = get_chirality(mol)
-                file.write(f"{ii},{s.strip()},{nA},{nStereo}\n")
+                # Write the data to the appropriate file
+                file.write(f"{ii},{s.strip()},{nA[ii]},{nStereo[ii]}\n")
     return None
 
 
