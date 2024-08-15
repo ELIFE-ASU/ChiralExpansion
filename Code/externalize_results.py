@@ -10,7 +10,17 @@ def write_output_files(results: dict):
         if not os.path.exists(f'Output/{name}'):
             os.mkdir(f'Output/{name}')
         for infotype, df in info.items():
-            if type(df) in [pd.DataFrame, pd.Series]:
+            if type(df) == pd.DataFrame:
+                output_df = df.copy(deep=True).fillna('')
+                if infotype == 'participants':
+                    output_df.drop(index=0, inplace=True)
+                sets = output_df.convert_dtypes().select_dtypes(set).applymap(' '.join)
+                output_df.loc[:,sets.columns] = sets.copy()                
+                output_df.to_csv(f'Output/{name}/{infotype}.csv.zip', compression='zip', encoding='utf-8')
+            elif type(df) in [list, set]:
+                with open(f'Output/{name}/{infotype}.txt', 'w') as f:
+                    f.write(' '.join(df))
+            elif type(df) == pd.Series:
                 df.to_csv(f'Output/{name}/{infotype}.csv.zip', compression='zip', encoding='utf-8')
     output_folders = set(os.listdir('Output')).intersection(results.keys())
     print('\n\nResult folder(s) in Output:\n', '\n'.join(output_folders), sep='')

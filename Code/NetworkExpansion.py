@@ -91,8 +91,9 @@ def expand_from_seed_set(seeds, reactions: pd.DataFrame, max_gen: int):
     edge_pool[['source','target']] = pd.concat([a,b], axis=0)
     edge_pool.drop(columns=['left','right'], inplace=True)
     edge_pool.reset_index(drop=False, names='reaction', inplace=True)
-    return ({'rns': rns, 'cps': cps, 'cp_sets': cp_sets, 'rn_sets': rn_sets, 'reaction_pool': reactions, 'seeds': seeds,
-             'chiral_fraction': chiral_fraction, 'directions': directions, 'edge_pool': edge_pool})
+    participants = pd.DataFrame({'reactions': rn_sets, 'compounds': cp_sets})
+    return ({'rns': rns, 'cps': cps, 'participants': participants, 'reaction_pool': list(reactions.keys()), 'seeds': seeds,
+             'chiral_fraction': chiral_fraction, 'edge_pool': edge_pool})
 
 
 def make_bipartite_edgelist(edge_pool):
