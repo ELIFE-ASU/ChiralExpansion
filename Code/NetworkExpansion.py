@@ -77,11 +77,22 @@ def expand_from_seed_set(seeds, reactions: pd.DataFrame, max_gen: int):
     rns, cps = pd.DataFrame(rns), pd.DataFrame(cps).dropna(how='all').fillna(False).T.cummax().T  # store outputs
     rns = rns[rns].dropna(how='all').fillna(False)
     directions = pd.concat([pd.Series(index=fwd_rns, data='fwd'), pd.Series(index=bwd_rns, data='bwd')])
-    cp_sets = cps.mul(cps.index, axis=0).apply(set) - {''}
-    rn_sets = get_rn_sets(rns)
+    cp_sets, rn_sets = cps.mul(cps.index, axis=0).apply(set) - {''}, get_rn_sets(rns)
     chiral_fraction = cp_sets.apply(lambda x: chiral_labels.loc[list(x), 'is_chiral'].mean())
+    # generate info for edge lists
+    steps = rns.T.idxmax() # note first appearance of each reaction
+    edge_pool = reactions.loc[rns.index].copy(deep=True).assign(step=rns.index.map(steps)) # these reactions were enabld
+    edge_pool['directed'] = edge_pool.index.isin(bwd_rns.union(fwd_rns)) # these actively expanded (not infilled) the network
+    edge_pool['backward'] = edge_pool.index.isin(bwd_rns) # these did so in the backward direction
+    a = (edge_pool.query('backward==False or directed==False').copy(deep=True)
+         [['left','right']].rename(columns={'left':'source','right':'target'})) # forward + incidental reactions go L-R
+    b = (edge_pool.query('backward==True').copy(deep=True)
+         [['right','left']].rename(columns={'right':'source','left':'target'})) # backward reactions go R-L
+    edge_pool[['source','target']] = pd.concat([a,b], axis=0)
+    edge_pool.drop(columns=['left','right'], inplace=True)
+    edge_pool.reset_index(drop=False, names='reaction', inplace=True)
     return ({'rns': rns, 'cps': cps, 'cp_sets': cp_sets, 'rn_sets': rn_sets, 'reaction_pool': reactions, 'seeds': seeds,
-             'chiral_fraction': chiral_fraction, 'directions': directions})
+             'chiral_fraction': chiral_fraction, 'directions': directions, 'edge_pool': edge_pool})
 
 
 # used for viz + analysis, not expansion itself. turns dataframes with opposite reaction sides into unipartite edgelists, for from_pandas_edgelist
