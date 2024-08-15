@@ -42,7 +42,8 @@ pw_df = pw_df.explode('subclass').reset_index().drop(columns='children')
 pw_df[['id', 'subclass']] = pw_df['subclass'].str.split('  ', expand=True)
 pw_df.set_index(pw_df['id'].astype(int), inplace=True)
 df = pw_df.join(df, how='inner').sort_values(by='Chirality')
-# df.index.difference(pw_df.index) #https://bio2rdf.org/describe/?uri=http://bio2rdf.org/kegg:map01130&inf=skos-trans&sas=yes&sid=2996
+# df.index.difference(pw_df.index)
+# #https://bio2rdf.org/describe/?uri=http://bio2rdf.org/kegg:map01130&inf=skos-trans&sas=yes&sid=2996
 # [231, 1130] no longer present in kegg... Puromycin biosynthesis [kegg:ko00231] and biosynthesis of antibiotics map01130
 # 970 says it's Genetic Information Processing; Translation, not metabolism.  pw_df.loc[970] 
 to_replace = {'Metabolism of Terpenoids And Polyketides': 'Terpenoids and Polyketides',

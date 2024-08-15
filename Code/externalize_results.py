@@ -15,7 +15,7 @@ def write_output_files(results: dict):
                 if infotype == 'participants':
                     output_df.drop(index=0, inplace=True)
                 sets = output_df.convert_dtypes().select_dtypes(set).applymap(' '.join)
-                output_df.loc[:,sets.columns] = sets.copy()                
+                output_df.loc[:, sets.columns] = sets.copy()
                 output_df.to_csv(f'Output/{name}/{infotype}.csv.zip', compression='zip', encoding='utf-8')
             elif type(df) in [list, set]:
                 with open(f'Output/{name}/{infotype}.txt', 'w') as f:
@@ -24,4 +24,4 @@ def write_output_files(results: dict):
                 df.to_csv(f'Output/{name}/{infotype}.csv.zip', compression='zip', encoding='utf-8')
     output_folders = set(os.listdir('Output')).intersection(results.keys())
     print('\n\nResult folder(s) in Output:\n', '\n'.join(output_folders), sep='')
-    return (None)
+    return None
