@@ -95,6 +95,13 @@ def expand_from_seed_set(seeds, reactions: pd.DataFrame, max_gen: int):
              'chiral_fraction': chiral_fraction, 'directions': directions, 'edge_pool': edge_pool})
 
 
+def make_bipartite_edgelist(edge_pool):
+    incoming = edge_pool.drop(columns='target').rename(columns={'reaction':'target'}).explode('source')
+    outgoing = edge_pool.drop(columns='source').rename(columns={'reaction':'source'}).explode('target')
+    edges = pd.concat([incoming, outgoing], axis=0).reset_index(drop=True).assign(reaction=lambda x: x[['source','target']].T.max())
+    return(edges)
+
+
 # used for viz + analysis, not expansion itself. turns dataframes with opposite reaction sides into unipartite edgelists, for from_pandas_edgelist
 def generate_edge_df(reactions: pd.DataFrame):
     return (reactions.explode('left').explode('right').reset_index(names='reaction').query('left!=right'))
