@@ -101,6 +101,9 @@ def make_bipartite_edgelist(edge_pool):
     edges = pd.concat([incoming, outgoing], axis=0).reset_index(drop=True).assign(reaction=lambda x: x[['source','target']].T.max())
     return(edges)
 
+def make_unipartite_edgelist(edge_pool):
+    return(edge_pool.explode('source').explode('target').reset_index(drop=True))
+
 
 # used for viz + analysis, not expansion itself. turns dataframes with opposite reaction sides into unipartite edgelists, for from_pandas_edgelist
 def generate_edge_df(reactions: pd.DataFrame):
