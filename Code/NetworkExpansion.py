@@ -64,25 +64,20 @@ def expand_from_seed_set(seeds, reactions: pd.DataFrame, max_gen: int):
     compound_pool = set(seeds)
     cp_sets = dict({1: compound_pool})
     fwd_rns, bwd_rns = set(), set()
-    for g in range(max_gen + 2):
+    for g in range(1, max_gen + 1):
         has_R = reactions['right'].apply(lambda x: x <= compound_pool)  # are all right-side compounds present?
         has_L = reactions['left'].apply(lambda x: x <= compound_pool)  # are all left-side compounds present?
-        rns[g + 1] = (has_R + has_L) > 0  # if so, reaction is enabled
+        rns[g] = (has_R + has_L) > 0  # if so, reaction is enabled
         fwd_rns = fwd_rns.union(set(reactions[has_L > has_R].index))  # new compounds will be from right side
         bwd_rns = bwd_rns.union(set(reactions[has_L < has_R].index))  # new compounds will be from left side
-        compound_pool = set.union(compound_pool, *reactions.loc[
-            rns[g + 1]].stack())  # and the other side of that reaction is added to the pool
-        cps[g + 1] = dict(zip(compound_pool, len(compound_pool) * [True]))
-        cp_sets[g + 2] = set(list(compound_pool))  # so that indexing matches w/prior expansion output.
-        if (cp_sets[g + 2] == cp_sets[
-            g + 1]):  # if no more reactions were enabled by the addition of reactions last time...
-            del cp_sets[g + 2]  # no need to store duplicate generations
-            del cps[g + 1]
-            break
+        compound_pool = set.union(compound_pool, *reactions.loc[rns[g]].stack())  # add new-compound side to the pool
+        cps[g] = dict(zip(compound_pool, len(compound_pool) * [True]))
+        if cps[g] == cps[g-1]:  # if no new compounds were added,
+            break # stop expanding
     rns, cps = pd.DataFrame(rns), pd.DataFrame(cps).dropna(how='all').fillna(False).T.cummax().T  # store outputs
     rns = rns[rns].dropna(how='all').fillna(False)
     directions = pd.concat([pd.Series(index=fwd_rns, data='fwd'), pd.Series(index=bwd_rns, data='bwd')])
-    cp_sets = pd.Series(cp_sets)
+    cp_sets = cps.mul(cps.index, axis=0).apply(set) - {''}
     rn_sets = get_rn_sets(rns)
     chiral_fraction = cp_sets.apply(lambda x: chiral_labels.loc[list(x), 'is_chiral'].mean())
     return ({'rns': rns, 'cps': cps, 'cp_sets': cp_sets, 'rn_sets': rn_sets, 'reaction_pool': reactions, 'seeds': seeds,
