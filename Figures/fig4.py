@@ -15,7 +15,7 @@ nums = [1194, 10434, 267, 6112]
 occs = pd.DataFrame({i: pd.read_csv(j).drop_duplicates().set_index('Cpd').iloc[:, 0] for i, j in zip(realm, files)})
 univ = occs / nums
 
-chir = pd.read_csv('../Data/kegg_data_C_detailed.csv.zip').set_index('CID')[['n_chiral_centers']]
+chir = pd.read_csv('../Data/kegg_data_C.csv.zip').set_index('CID')[['n_chiral_centers']]
 chir_cpds_found = chir.query('n_chiral_centers>0').index.intersection(occs.index)
 achir_cpds_found = chir.query('n_chiral_centers==0').index.intersection(occs.index)
 

@@ -27,7 +27,7 @@ cpd_appearances = pd.read_csv("../Data/compound_appearances.csv",
                               index_col=0,
                               usecols=['Compound', 'Timestep_Appear']).rename(
     columns={'Timestep_Appear': 'Expansion Step'})
-cpd_info = pd.read_csv("../Data/kegg_data_C_detailed.csv.zip", index_col=0).set_index('CID')
+cpd_info = pd.read_csv("../Data/kegg_data_C.csv.zip", index_col=0).set_index('CID')
 cpd_appearances['Heavy Atoms'] = cpd_appearances.index.map(cpd_info['N Heavy'])
 cpd_appearances['Chiral Centers'] = cpd_appearances.index.map(cpd_info['n_chiral_centers'])
 percentiles = cpd_appearances['Heavy Atoms'].quantile([0.0, 0.2, 0.4, 0.6, 0.8, 1.0])
