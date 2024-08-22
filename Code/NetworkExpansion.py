@@ -54,7 +54,6 @@ all_poss_cps = list(get_sides(kegg_reactions).stack().explode().unique())
 def get_rn_sets(rndf: pd.DataFrame):
     return rndf[rndf].apply(lambda x: set(x.dropna().index))
 
-
 # removes reactions that are flagged in BRENDA as having missing substrates or products
 def remove_questionable_brenda(x):
     return x.drop(x.index.intersection(brenda_flagged.index))
@@ -90,10 +89,14 @@ def expand_from_seed_set(seeds, reactions: pd.DataFrame, max_gen: int):
         cps[g] = dict(zip(compound_pool, len(compound_pool) * [True]))
         if cps[g] == cps[g - 1]:  # if no new compounds were added,
             break  # stop expanding
-    rns, cps = pd.DataFrame(rns), pd.DataFrame(cps).dropna(how='all').fillna(False).T.cummax().T  # store outputs
-    rns = rns[rns].dropna(how='all').fillna(False)
     directions = pd.concat([pd.Series(index=fwd_rns, data='fwd'), pd.Series(index=bwd_rns, data='bwd')])
-    cp_sets, rn_sets = cps.mul(cps.index, axis=0).apply(set) - {''}, get_rn_sets(rns)
+    rns = pd.DataFrame(rns).replace(False,float('nan')).dropna(how='all').fillna(False).T.cummax().T
+    cps = pd.DataFrame(cps).dropna(how='all').fillna(False).T.cummax().T  # store outputs
+    cp_sets = pd.Series({i: set(j)-{''} for i, j in cps.mul(cps.index, axis=0).fillna('').to_dict(orient='list').items()})
+    try:
+        rn_sets = get_rn_sets(rns)
+    except:
+        rn_sets = pd.Series(index=cp_sets.index, data=float('nan'))
     chiral_fraction = cp_sets.apply(lambda x: chiral_labels.loc[list(x), 'is_chiral'].mean())
     # generate info for edge lists
     steps = rns.T.idxmax()  # note first appearance of each reaction
