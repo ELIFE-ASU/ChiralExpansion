@@ -4,7 +4,6 @@ import pandas as pd
 
 
 # purpose: store raw and processed output of network expansions.
-
 def write_output_files(results: dict):
     for name, info in results.items():
         if not os.path.exists(f'Output/{name}'):
@@ -14,7 +13,7 @@ def write_output_files(results: dict):
                 output_df = df.copy(deep=True).fillna('')
                 if infotype == 'participants':
                     output_df.drop(index=0, inplace=True)
-                sets = output_df.convert_dtypes().select_dtypes(set).applymap(' '.join)
+                sets = output_df.convert_dtypes().select_dtypes(set).applymap(lambda x: ' '.join([str(s) for s in x]), na_action='ignore')
                 output_df.loc[:, sets.columns] = sets.copy()
                 output_df.to_csv(f'Output/{name}/{infotype}.csv.zip', compression='zip', encoding='utf-8')
             elif type(df) in [list, set]:
@@ -25,3 +24,4 @@ def write_output_files(results: dict):
     output_folders = set(os.listdir('Output')).intersection(results.keys())
     print('\n\nResult folder(s) in Output:\n', '\n'.join(output_folders), sep='')
     return None
+
