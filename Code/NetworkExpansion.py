@@ -27,7 +27,7 @@ for i in ['left','right']:
     kegg_reactions[i] = kegg_reactions[i].str.split(' ').apply(lambda x: set([i for i in x if i.startswith('C')]))
 kegg_reactions['has_chiral_info'] = (get_sides(kegg_reactions).applymap(list).sum(axis=1).apply(set)
                                       - set(chiral_labels.index)).apply(len)==0
-kegg_reactions = kegg_reactions.query('has_chiral_info')
+kegg_reactions = kegg_reactions.query('has_chiral_info==True & reaction.str.contains("G")==False')
 
 # reactions flagged as questionable in BRENDA: https://bkms.brenda-enzymes.org/download.php
 brenda_flagged = (pd.read_csv(data_folder + 'Reactions_BKMS.tsv', sep='\t', low_memory=False)
