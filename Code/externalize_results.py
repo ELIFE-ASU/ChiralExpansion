@@ -12,10 +12,8 @@ def write_output_files(results: dict):
         for infotype, df in info.items():
             if type(df) == pd.DataFrame:
                 output_df = df.copy(deep=True).fillna('')
-                if infotype == 'participants':
-                    output_df.drop(index=0, inplace=True)
-                sets = output_df.convert_dtypes().select_dtypes(set).applymap(lambda x: ' '.join([str(s) for s in x]), na_action='ignore')
-                output_df.loc[:, sets.columns] = sets.copy()
+                if infotype in ['participants', 'edge_pool']:
+                    output_df = make_lists_printable(output_df)
                 output_df.to_csv(f'Output/{name}/{infotype}.csv.zip', compression='zip', encoding='utf-8')
             elif type(df) in [list, set]:
                 with open(f'Output/{name}/{infotype}.txt', 'w') as f:
