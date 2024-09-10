@@ -21,7 +21,8 @@ chiral_labels = ((pd.read_csv(data_folder + 'kegg_data_C.csv.zip', index_col=0)
 chiral_labels['elements'] = chiral_labels['formula'].apply(lambda x:  set([s.strip('+-1234567890') for s in re.split("([A-Z][^A-Z]*)", x) if s]))
 
 # kegg_reactions: derived from reaction entries in July 2024 KEGG pull in Big Data folder
-kegg_reactions = pd.read_csv(data_folder + 'kegg_data_R.csv.zip', index_col=0).set_index('id', drop=True)
+# https://github.com/ELIFE-ASU/lets-get-kegg/blob/6e4ae42309970acca24e420eaf9ff7ad1f9a1f80/Data/atlas_data_kegg_R_processed.csv.zip
+kegg_reactions = pd.read_csv(data_folder + 'kegg_data_R.csv.zip', index_col=0)
 kegg_reactions[['left','right']] = kegg_reactions['reaction'].str.split('<=>', expand=True)
 for i in ['left','right']:
     kegg_reactions[i] = kegg_reactions[i].str.split(' ').apply(lambda x: set([i for i in x if i.startswith('C')]))
