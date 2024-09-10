@@ -115,8 +115,9 @@ def expand_from_seed_set(seeds, reactions: pd.DataFrame, max_gen: int):
     edge_pool.drop(columns=['left', 'right'], inplace=True)
     edge_pool.reset_index(drop=False, names='reaction', inplace=True)
     participants = pd.DataFrame({'reactions': rn_sets, 'compounds': cp_sets})
+    participants.loc[0, 'reactions'] = set(seeds) - set(seeds)
     return (
-        {'rns': rns, 'cps': cps, 'participants': participants, 'reaction_pool': list(reaction_pool.keys()), 'seeds': seeds,
+        {'rns': rns, 'cps': cps, 'participants': participants, 'reaction_pool': list(reaction_pool.index), 'seeds': seeds,
          'chiral_fraction': chiral_fraction, 'edge_pool': edge_pool})
 
 
