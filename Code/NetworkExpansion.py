@@ -47,7 +47,8 @@ appendable_reactions = pd.DataFrame({'R99999': {'left': {'C00001'}, 'right': {'C
                                      'R99998': {'left': {'C01353'}, 'right': {'C00288', 'C00080'}}}).T
 
 # default starting seed set of compounds
-primordial_seed_set = ["C00001", "C00080", "C00009", "C00014", "C00059", "C00011"]
+seed_candidates = pd.read_csv('Data/SampleSeeds.csv.zip', index_col = 0, compression = 'zip')
+primordial_seed_set = list(seed_candidates.query('Source.str.contains("2017")').index) # was: ["C00001", "C00080", "C00009", "C00014", "C00059", "C00011"]
 all_poss_cps = list(get_sides(kegg_reactions).stack().explode().unique())
 
 # turns a boolean DataFrame into a series of lists; entry shows which rows are true for a given column, i.e.,
