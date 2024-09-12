@@ -28,8 +28,8 @@ def write_output_files(results: dict):
 # purpose: convert list-like entries in a dataframe to strings for easy read/write
 
 def make_lists_printable(df):
-   list_like_cols = df.loc[:, df.iloc[0].apply(type).apply(lambda x: x in [set, list])]
-   printable_cols = list_like_cols.applymap(' '.join)
-   printable_df = df.copy(deep=True)
-   printable_df.loc[:, printable_cols.columns] = printable_cols
-   return(printable_df)
+    list_like_cols = df.loc[:, df.iloc[0].apply(type).apply(lambda x: x in [set, list])]
+    printable_cols = list_like_cols.applymap(' '.join)
+    printable_df = df.copy(deep=True)
+    printable_df.loc[:, printable_cols.columns] = printable_cols
+    return (printable_df)
