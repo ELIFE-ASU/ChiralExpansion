@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-
+import matplotlib.pyplot as plt
 
 # purpose: store raw and processed output of network expansions.
 
@@ -35,9 +35,26 @@ def make_lists_printable(df):
 
 
 # purpose: output only info necessary to replicate expansion: seed scope, reaction scope, and expansion record
+
 def write_edgelist_csvs(results):
     for i in results.keys():
         expansion_scope =  '#'+'|'.join(results[i]['seeds'])+'|'+'|'.join(results[i]['reaction_pool'])
         open('Output/'+i+'_bipartite_edgelist.csv','w').write(expansion_scope+'\n')
         results[i]['bipartite_edgelist'].to_csv('Output/'+i+'_bipartite_edgelist.csv', sep=',', index=True, mode='a')
     return([i for i in os.listdir('Output/') if i.endswith('.csv')])
+
+
+# purpose: plot summary of expansion results
+
+def plot_expansion_summary(summaries, filename='expansion_comparison_plot.pdf'):
+    order = summaries['compound count'].iloc[-1].sort_values(ascending=False).index
+    fig, ax = plt.subplots(len(summaries.keys()), 1, figsize=(4, 7), sharex=True, layout='compressed')
+    for ict, iname in enumerate(summaries.keys()):
+        summaries[iname].loc[:, order].plot(ax=ax[ict], ylabel=iname, legend=False, grid=True, xlabel='expansion step', cmap='coolwarm')
+    ax[2].legend(loc='center', bbox_to_anchor=(0.5, -0.5), title='', ncols=2)
+    ax[2].axhline(0.5, color='gray', linestyle='dotted', lw=0.7)
+    plt.savefig('Output/'+filename, dpi=300, edgecolor='w', facecolor='w')
+    plt.show()
+    plt.close()
+    return(None)
+
