@@ -33,7 +33,8 @@ for reaction_file in [i for i in os.listdir('Data/reaction_pools/') if i.endswit
 
     # plot results
     plot_expansion_summary(summaries, filename=model_run_name+'_seed_set_comparison.pdf')
-
+    plt.close()
+    
     # write output files
     if write_outputs:
         output_results = dict()
