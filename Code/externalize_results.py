@@ -54,6 +54,5 @@ def plot_expansion_summary(summaries, filename='expansion_comparison_plot.pdf'):
     ax[2].legend(loc='center', bbox_to_anchor=(0.5, -0.5), title='', ncols=2)
     ax[2].axhline(0.5, color='gray', linestyle='dotted', lw=0.7)
     plt.savefig('Output/'+filename, dpi=300, edgecolor='w', facecolor='w')
-    plt.close()
     return(None)
 
