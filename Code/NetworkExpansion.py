@@ -1,6 +1,5 @@
 import os
 import re
-
 import networkx as nx
 import pandas as pd
 
@@ -14,46 +13,15 @@ if not os.path.exists('Output/'):
 
 get_sides = lambda x: x[['left', 'right']]
 
-# compound info
-chiral_labels = ((pd.read_csv(data_folder + 'kegg_data_C.csv.zip', index_col=0)
-                  .assign(is_chiral=lambda x: x.n_chiral_centers > 0)
-                  .rename(columns={'n_chiral_centers': 'Chiral_Centers'})
-                  .set_index('compound_id')))
-chiral_labels['elements'] = chiral_labels['formula'].apply(
-    lambda x: set([s.strip('+-1234567890') for s in re.split("([A-Z][^A-Z]*)", x) if s]))
-
-# kegg_reactions: derived from reaction entries in July 2024 KEGG pull in Big Data folder
-# https://github.com/ELIFE-ASU/lets-get-kegg/blob/6e4ae42309970acca24e420eaf9ff7ad1f9a1f80/Data/atlas_data_kegg_R_processed.csv.zip
-kegg_reactions = pd.read_csv(data_folder + 'kegg_data_R.csv.zip', index_col=0)
-kegg_reactions[['left', 'right']] = kegg_reactions['reaction'].str.split('<=>', expand=True)
-for i in ['left', 'right']:
-    kegg_reactions[i] = kegg_reactions[i].str.split(' ').apply(lambda x: set([i for i in x if i.startswith('C')]))
-kegg_reactions['has_chiral_info'] = (get_sides(kegg_reactions).applymap(list).sum(axis=1).apply(set)
-                                     - set(chiral_labels.index)).apply(len) == 0
-kegg_reactions = kegg_reactions.query('has_chiral_info==True & reaction.str.contains("G")==False')
-
-# reactions flagged as questionable in BRENDA: https://bkms.brenda-enzymes.org/download.php
-brenda_flagged = (pd.read_csv(data_folder + 'Reactions_BKMS.tsv', sep='\t', low_memory=False)
-                  .dropna(subset='Reaction_ID_KEGG').dropna(subset=['Missing_Substrate', 'Missing_Product'], how='all')
-                  .drop_duplicates(subset=['Reaction_ID_KEGG', 'Reaction', 'Missing_Product', 'Missing_Substrate'],
-                                   keep='first')
-                  .set_index('Reaction_ID_KEGG'))
-# reactions flagged in Table S3 of Goldford et al. 2024, as "elementally inconsistent"
-goldford_flagged_entries = open(data_folder + 'Goldford2024_TableS3_rnums.txt', 'r').read().split(' ')
-# add these flags to reaction info
-kegg_reactions['NO_BRENDA_FLAG'] = kegg_reactions.index.isin(brenda_flagged.index) == False
-kegg_reactions['NO_GOLDFORD_FLAG'] = kegg_reactions.index.isin(goldford_flagged_entries) == False
-# appendable reactions: carbonate-bicarbonate equilibrium and water dissociation.
-# negligible effects on expansion (a few cps arrive earlier)
-appendable_reactions = pd.DataFrame({'R99999': {'left': {'C00001'}, 'right': {'C01328', 'C00080'}},
-                                     'R99998': {'left': {'C01353'}, 'right': {'C00288', 'C00080'}}}).T
-
-# default starting seed set of compounds
-seed_candidates = pd.read_csv('Data/SampleSeeds.csv.zip', index_col=0, compression='zip')
-primordial_seed_set = list(seed_candidates.query(
-    'Source.str.contains("2017")').index)  # was: ["C00001", "C00080", "C00009", "C00014", "C00059", "C00011"]
-all_poss_cps = list(get_sides(kegg_reactions).stack().explode().unique())
-
+# imports a reaction dataframe, removes glycan reactions and reactions for which chiral info is missing
+def import_reactions(df):
+    df[['left', 'right']] = df['reaction'].str.split(' <=> ', expand=True)
+    for i in ['left', 'right']:
+        df[i] = df[i].str.split(' ').apply(lambda x: set([j for j in x if j.startswith('C')]))
+    df['has_chiral_info'] = (get_sides(df).applymap(list).sum(axis=1).apply(set)
+                            - set(chiral_labels.index)).apply(len) == 0
+    df = df.query('has_chiral_info & reaction.str.contains("G")==False')
+    return df
 
 # turns a boolean DataFrame into a series of lists; entry shows which rows are true for a given column, i.e.,
 # which reactions are enabled.
@@ -142,7 +110,7 @@ def make_unipartite_edgelist(edge_pool):
 def generate_edge_df(reactions: pd.DataFrame):
     return reactions.explode('left').explode('right').reset_index(names='reaction').query('left!=right')
 
-
+# identifies what compounds and reactions in the database are reachable from at least one seed compound
 def define_reachable_components(seeds, reactions: pd.DataFrame):
     bipartite_edges = reactions.applymap(list).stack().groupby(level=0).sum().explode().reset_index()
     bipartite_graph = nx.from_pandas_edgelist(bipartite_edges, source='id', target=0, create_using=nx.Graph)
@@ -151,3 +119,39 @@ def define_reachable_components(seeds, reactions: pd.DataFrame):
     del bipartite_edges
     return ({'reachable_compounds': [i for i in accessible_nodes if i.startswith('C')],
              'reachable_reactions': [i for i in accessible_nodes if i.startswith('R')]})
+
+
+# VARIABLES AND DATASETS
+# compound info
+chiral_labels = ((pd.read_csv(data_folder + 'kegg_data_C.csv.zip', index_col=0)
+                  .assign(is_chiral=lambda x: x.n_chiral_centers > 0)
+                  .rename(columns={'n_chiral_centers': 'Chiral_Centers'})
+                  .set_index('compound_id')))
+chiral_labels['elements'] = chiral_labels['formula'].apply(
+    lambda x: set([s.strip('+-1234567890') for s in re.split("([A-Z][^A-Z]*)", x) if s]))
+
+# kegg_reactions: derived from https://github.com/ELIFE-ASU/lets-get-kegg/blob/dcadcc97977dba8b3d65fab4e724bc0ecb5e5b6a/Data/kegg_data_R_processed.csv.zip
+kegg_reactions = import_reactions(pd.read_csv(data_folder + 'kegg_data_R_processed.csv.zip', index_col=0))
+
+# reactions flagged as questionable in BRENDA: https://bkms.brenda-enzymes.org/download.php
+brenda_flagged = (pd.read_csv(data_folder + 'Reactions_BKMS.tsv', sep='\t', low_memory=False)
+                  .dropna(subset='Reaction_ID_KEGG').dropna(subset=['Missing_Substrate', 'Missing_Product'], how='all')
+                  .drop_duplicates(subset=['Reaction_ID_KEGG', 'Reaction', 'Missing_Product', 'Missing_Substrate'],
+                                   keep='first')
+                  .set_index('Reaction_ID_KEGG'))
+# reactions flagged in Table S3 of Goldford et al. 2024, as "elementally inconsistent"
+goldford_flagged_entries = open(data_folder + 'Goldford2024_TableS3_rnums.txt', 'r').read().split(' ')
+# add these flags to reaction info
+kegg_reactions['NO_BRENDA_FLAG'] = kegg_reactions.index.isin(brenda_flagged.index) == False
+kegg_reactions['NO_GOLDFORD_FLAG'] = kegg_reactions.index.isin(goldford_flagged_entries) == False
+# appendable reactions: carbonate-bicarbonate equilibrium and water dissociation.
+# negligible effects on expansion (a few cps arrive earlier)
+appendable_reactions = pd.DataFrame({'R99999': {'left': {'C00001'}, 'right': {'C01328', 'C00080'}},
+                                     'R99998': {'left': {'C01353'}, 'right': {'C00288', 'C00080'}}}).T
+overall_reactions = ['R13204', 'R13205', 'R13206', 'R13207', 'R13208', 'R13209', 'R13210', 'R13211', 'R13222']
+kegg_reactions.drop(overall_reactions, inplace=True, errors='ignore')
+
+# default starting seed set of compounds
+all_poss_cps = set.union(*get_sides(kegg_reactions).stack())
+seed_candidates = pd.read_csv('Data/SampleSeeds.csv.zip', index_col=0, compression='zip')
+seed_candidates = seed_candidates[seed_candidates.index.isin(all_poss_cps)]
