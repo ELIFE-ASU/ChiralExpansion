@@ -101,7 +101,7 @@ def expand_from_seed_set(seeds, reactions: pd.DataFrame, max_gen: int):
          'chiral_fraction': chiral_fraction, 'edge_pool': edge_pool})
 
 
-def make_unipartite_edgelist(edge_pool):
+def make_unipartite_edgelist(edge_pool: pd.DataFrame):
     return edge_pool.explode('source').explode('target').reset_index(drop=True)
 
 
@@ -119,6 +119,16 @@ def define_reachable_components(seeds, reactions: pd.DataFrame):
     del bipartite_edges
     return ({'reachable_compounds': [i for i in accessible_nodes if i.startswith('C')],
              'reachable_reactions': [i for i in accessible_nodes if i.startswith('R')]})
+
+# generates a bipartite edgelist from expand_from_seed_set's edge_pool output
+def make_bipartite_edgelist(edge_pool: pd.DataFrame):
+    df = edge_pool.copy(deep=True)
+    sub_edges = df.explode('source').drop(columns='target').rename(columns={'reaction':'target'})
+    prod_edges = df.explode('target').drop(columns='source').rename(columns={'reaction':'source'})
+    all_edges = pd.concat([sub_edges, prod_edges], axis=0, ignore_index=True)
+    all_edges['reaction'] = all_edges[['source','target']].max(axis=1)
+    all_edges = all_edges.sort_values(by=['step','reaction','source','target']).reset_index(drop=True).loc[:,all_edges.nunique().sort_values().index]
+    return(all_edges)
 
 
 # VARIABLES AND DATASETS

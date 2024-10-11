@@ -1,5 +1,4 @@
 import os
-
 import pandas as pd
 
 
@@ -33,3 +32,12 @@ def make_lists_printable(df):
     printable_df = df.copy(deep=True)
     printable_df.loc[:, printable_cols.columns] = printable_cols
     return (printable_df)
+
+
+# purpose: output only info necessary to replicate expansion: seed scope, reaction scope, and expansion record
+def write_edgelist_csvs(results):
+    for i in results.keys():
+        expansion_scope =  '#'+'|'.join(results[i]['seeds'])+'|'+'|'.join(results[i]['reaction_pool'])
+        open('Output/'+i+'_bipartite_edgelist.csv','w').write(expansion_scope+'\n')
+        results[i]['bipartite_edgelist'].to_csv('Output/'+i+'_bipartite_edgelist.csv', sep=',', index=True, mode='a')
+    return([i for i in os.listdir('Output/') if i.endswith('.csv')])
