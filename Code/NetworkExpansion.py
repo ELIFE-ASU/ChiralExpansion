@@ -11,11 +11,12 @@ except:
 if not os.path.exists('Output/'):
     os.mkdir('Output/')
 
+rxn_db_dir = '../lets-get-kegg/Data/'
 get_sides = lambda x: x[['left', 'right']]
 
 # imports a reaction dataframe, removes glycan reactions and reactions for which chiral info is missing
-def import_reaction_file(fname):
-    df = pd.read_csv(data_folder + fname, index_col=0)
+def import_reaction_file(fpath=rxn_db_dir+'kegg_data_R_processed.csv.zip'):
+    df = pd.read_csv(fpath, index_col=0)
     if 'id' in df.columns:
         df.set_index('id', inplace=True)
     df[['left', 'right']] = df['reaction'].str.split(' <=> ', expand=True)
@@ -150,7 +151,7 @@ chiral_labels['elements'] = chiral_labels['formula'].apply(
 # ec_rns: KEGG reaction-enzyme entry linkages. TODO - remove when this is obtained using lets-get-kegg
 ec_rns = pd.read_csv('https://rest.kegg.jp/link/enzyme/reaction', sep='\t', header=None).applymap(lambda x: x.split(':')[1]).groupby(0)[1].apply(list).apply('|'.join)
 # kegg_reactions: derived from https://github.com/ELIFE-ASU/lets-get-kegg/blob/dcadcc97977dba8b3d65fab4e724bc0ecb5e5b6a/Data/kegg_data_R_processed.csv.zip
-kegg_reactions = import_reaction_file('kegg_data_R_processed.csv.zip')
+kegg_reactions = import_reaction_file()
 
 # reactions flagged as questionable in BRENDA: https://bkms.brenda-enzymes.org/download.php
 brenda_flagged = (pd.read_csv(data_folder + 'Reactions_BKMS.tsv', sep='\t', low_memory=False)

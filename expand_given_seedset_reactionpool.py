@@ -7,13 +7,13 @@ import os
 
 write_outputs = True
 max_generation = 80
-seed_groups = ['JM', 'JM|G17', 'JM|G24', 'G24', 'JM|G24|TW', 'JM|G24|G17|TW']
+seed_groups = ['JM', 'G17', 'G24', 'JM|G24|G17|TW']
 
-for reaction_file in [i for i in os.listdir('Data/reaction_pools/') if i.endswith('.csv.zip')]:
+for reaction_file in [i for i in os.listdir(rxn_db_dir) if i.endswith('.csv.zip') and 'processed' in i]:
     model_run_name = reaction_file.replace('_processed','').replace('.csv.zip','').replace('_data_R','')
     
     # define chemical scope
-    reaction_scope = get_sides(import_reaction_file('reaction_pools/'+reaction_file))
+    reaction_scope = get_sides(import_reaction_file(rxn_db_dir+reaction_file))
     compound_scope = set.union(*reaction_scope.stack())
     seed_scope = seed_candidates.loc[seed_candidates.index.isin(compound_scope)]
     seed_sets = {i: seed_scope.query('Source.str.contains("'+i+'")').index for i in seed_groups}
@@ -21,6 +21,7 @@ for reaction_file in [i for i in os.listdir('Data/reaction_pools/') if i.endswit
     # run network expansions
     results = dict()
     for name, seeds in seed_sets.items():
+        print('Expanding case: ', model_run_name, name, sep='\t')
         results[name] = expand_from_seed_set(seeds=seeds, reactions=reaction_scope, max_gen=max_generation)
         results[name]['bipartite_edgelist'] = make_bipartite_edgelist(results[name]['edge_pool'])
 
