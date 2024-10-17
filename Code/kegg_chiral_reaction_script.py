@@ -1,6 +1,7 @@
+import re
 
 import pandas as pd
-import re
+
 
 # Load the compound and reaction files
 def load_files(compound_file, reaction_file):
@@ -8,9 +9,11 @@ def load_files(compound_file, reaction_file):
     kegg_data_R = pd.read_csv(reaction_file)
     return kegg_data_C, kegg_data_R
 
+
 # Create a dictionary from kegg_data_C for quick lookup of compound chiral centers
 def create_compound_dict(kegg_data_C):
     return kegg_data_C.set_index('compound_id')['n_chiral_centers'].to_dict()
+
 
 # Function to parse reactions and extract compounds with their stoichiometry
 def parse_reaction_for_stoichiometry(reaction_str):
@@ -39,6 +42,7 @@ def parse_reaction_for_stoichiometry(reaction_str):
 
     return reactants, products, reactant_stoichiometries, product_stoichiometries
 
+
 # Function to label reaction type based on chiral centers
 def label_reaction(reactants_chiral, products_chiral):
     if reactants_chiral == 0 and products_chiral == 0:
@@ -47,6 +51,7 @@ def label_reaction(reactants_chiral, products_chiral):
         return "chiral conserving"
     else:
         return "chiral modulating"
+
 
 # Function to calculate chiral centers with error handling
 def calculate_chiral_centers_with_error_handling(compounds, compound_chiral_dict):
@@ -61,21 +66,23 @@ def calculate_chiral_centers_with_error_handling(compounds, compound_chiral_dict
             missing_compounds.append(compound_id)
     return total_chiral_centers, missing_compounds
 
+
 # Function to calculate the fraction of chiral compounds
 def calculate_fraction_chiral(reactants, products, compound_chiral_dict):
     total_chiral_compounds = 0
     total_compounds = 0
-    
+
     for compound_id, stoichiometry in reactants + products:
         chiral_centers = compound_chiral_dict.get(compound_id, 0)
         if chiral_centers > 0:
             total_chiral_compounds += 1 * stoichiometry
         total_compounds += 1 * stoichiometry
-    
+
     if total_compounds == 0:
         return 0  # Handle division by zero gracefully
-    
+
     return total_chiral_compounds / total_compounds
+
 
 # Main function to process reactions
 def process_reactions(kegg_data_R, compound_chiral_dict):
@@ -86,18 +93,21 @@ def process_reactions(kegg_data_R, compound_chiral_dict):
 
     for idx, row in kegg_data_R.iterrows():
         reaction_str = row['reaction']
-        
+
         try:
             # Parse the reaction to extract stoichiometric values
-            reactants, products, reactant_stoichiometries, product_stoichiometries = parse_reaction_for_stoichiometry(reaction_str)
-            
+            reactants, products, reactant_stoichiometries, product_stoichiometries = parse_reaction_for_stoichiometry(
+                reaction_str)
+
             # Join stoichiometries of reactants and products into a comma-separated string
             stoichiometry_value = ', '.join(reactant_stoichiometries + product_stoichiometries)
-            
+
             # Calculate chiral centers for reactants and products, handle missing compounds
-            reactants_chiral, reactants_missing = calculate_chiral_centers_with_error_handling(reactants, compound_chiral_dict)
-            products_chiral, products_missing = calculate_chiral_centers_with_error_handling(products, compound_chiral_dict)
-            
+            reactants_chiral, reactants_missing = calculate_chiral_centers_with_error_handling(reactants,
+                                                                                               compound_chiral_dict)
+            products_chiral, products_missing = calculate_chiral_centers_with_error_handling(products,
+                                                                                             compound_chiral_dict)
+
             # If there is any issue with missing compounds or non-numeric stoichiometry, mark the rxn_label as "NA"
             if reactants_missing or products_missing:
                 reaction_label = "NA"
@@ -133,9 +143,11 @@ def process_reactions(kegg_data_R, compound_chiral_dict):
 
     return kegg_data_R
 
+
 # Save processed data to CSV
 def save_to_csv(kegg_data_R, output_file):
     kegg_data_R.to_csv(output_file, index=False)
+
 
 # Example usage
 if __name__ == "__main__":
