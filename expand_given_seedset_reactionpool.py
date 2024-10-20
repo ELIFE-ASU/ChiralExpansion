@@ -41,6 +41,6 @@ for reaction_file in [i for i in os.listdir(rxn_db_dir) if i.endswith('.csv.zip'
         output_results = dict()
         for i in results.keys():
             output_results[model_run_name+'_'+i] = results[i]
-        write_edgelist_csvs(results=output_results)
+        write_expansion_csv(results=output_results)
 
 
