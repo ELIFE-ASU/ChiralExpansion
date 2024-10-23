@@ -1,4 +1,5 @@
 import os
+import pandas as pd
 
 import matplotlib.pyplot as plt
 import rdkit.Chem
@@ -96,3 +97,38 @@ def get_heavy_atoms(mol_obj_series):
         except:
             heavy_dict[cpd] = float('NaN')
     return heavy_dict
+
+def getCpdCount(cpd_df, kegg_df, ischiral_flag):
+    count = list()
+    for i in range(len(cpd_df.columns)):
+        sub_df = kegg_df[kegg_df["compound_id"].isin(cpd_df.index[cpd_df[i] == True].tolist())]
+        if ischiral_flag:
+            count.append(len(sub_df[sub_df["n_chiral_centers"] != 0]))
+        else:
+            count.append(len(sub_df[sub_df["n_chiral_centers"] == 0]))
+
+    return pd.DataFrame(count)
+
+def getHeavyAtoms_perGen_fromKegg(cpd_df, kegg_df, ischiral_flag, calc):
+    heavy_atoms = list()
+    print(cpd_df)
+    for i in range(len(cpd_df.columns)):
+        sub_df = kegg_df[kegg_df["compound_id"].isin(cpd_df.index[cpd_df[i] == True].tolist())]
+        if ischiral_flag:
+            sub_df = sub_df[sub_df["n_chiral_centers"] != 0]
+        else:
+            sub_df = sub_df[sub_df["n_chiral_centers"] == 0]
+
+        if calc == "mean":
+            if len(sub_df) > 0:
+                heavy_atoms.append(sub_df["n_heavy_atoms"].mean())
+            else:
+                heavy_atoms.append(0)
+        elif calc == "std":
+            if len(sub_df) > 0:
+                heavy_atoms.append(sub_df["n_heavy_atoms"].std())
+            else:
+                heavy_atoms.append(0)
+
+    return pd.DataFrame(heavy_atoms)
+
