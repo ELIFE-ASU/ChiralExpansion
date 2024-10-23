@@ -38,8 +38,8 @@ def make_lists_printable(df):
 
 def write_expansion_csv(results):
     for i in results.keys():
-        expansion_scope =  '#'+'|'.join(results[i]['seeds'])+'|'+'|'.join(results[i]['reaction_pool'])
-        open('Output/'+i+'_bipartite_edgelist.csv','w').write(expansion_scope+'\n')
+        expansion_scope =  '#'+'|'.join(results[i]['seeds'])
+        open('Output/'+i+'_expansion.csv','w').write(expansion_scope+'\n')
         make_lists_printable(results[i]['edge_pool']).to_csv('Output/'+i+'_expansion.csv', sep=',', index=True, mode='a')
     return([i for i in os.listdir('Output/') if i.endswith('.csv')])
 
