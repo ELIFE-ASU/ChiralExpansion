@@ -35,32 +35,15 @@ def get_rn_sets(rndf: pd.DataFrame):
     return rndf[rndf].apply(lambda x: set(x.dropna().index))
 
 
-# removes reactions that are flagged in BRENDA as having missing substrates or products
-#def remove_questionable_brenda(x):
-#    return x.drop(x.index.intersection(brenda_flagged.index))
-
-
-def restrict_elemental_scope(seeds, reactions: pd.DataFrame):
-    # makes sure that reactions only involve elements present in the seed set
-    cps_w_all_els = chiral_labels['elements'].explode()
-    cps_w_els_notinseed = cps_w_all_els[~cps_w_all_els.isin(cps_w_all_els.loc[seeds])]
-    ok_cps = chiral_labels.index.difference(cps_w_els_notinseed.index)
-
-    rns_w_all_cps = get_sides(reactions).stack().reset_index(level=1, drop=True).explode()
-    rns_w_els_notinseed = rns_w_all_cps[~rns_w_all_cps.isin(ok_cps)].index
-    ok_rns = reactions.copy(deep=True).drop(rns_w_els_notinseed)
-    return (ok_rns)
-
-
 def expand_from_seed_set(seeds, reactions: pd.DataFrame, max_gen: int):
     # seeds : list-like, the seed set of compounds from which to start the expansion
     # reactions : pool of reactions to draw from; if all compounds on one side of a reaction are present, the reaction is enabled
     # max_gen : max # of expansion generations calculated, e.g. if you only care about early stages.
     rns, cps = dict(), {0: dict(zip(seeds, len(seeds) * [True]))}
-    compound_pool = set(seeds)
-    reaction_pool = reactions
-    cp_sets = dict({1: compound_pool})
+    compound_pool, reaction_pool = set(seeds), reactions
     fwd_rns, bwd_rns = set(), set()
+    cp_sets = dict({1: compound_pool})
+    # actual expansion code starts here
     for g in range(1, max_gen + 1):
         has_R = reaction_pool['right'].apply(lambda x: x <= compound_pool)  # are all right-side compounds present?
         has_L = reaction_pool['left'].apply(lambda x: x <= compound_pool)  # are all left-side compounds present?
@@ -72,6 +55,7 @@ def expand_from_seed_set(seeds, reactions: pd.DataFrame, max_gen: int):
         cps[g] = dict(zip(compound_pool, len(compound_pool) * [True]))
         if cps[g] == cps[g - 1]:  # if no new compounds were added,
             break  # stop expanding
+    # end of actual expansion code, start of processing
     directions = pd.concat([pd.Series(index=fwd_rns, data='fwd'), pd.Series(index=bwd_rns, data='bwd')])
     rns = pd.DataFrame(rns).replace(False, float('nan')).dropna(how='all').fillna(False).T.cummax().T
     cps = pd.DataFrame(cps).dropna(how='all').fillna(False).T.cummax().T  # store outputs
@@ -82,10 +66,16 @@ def expand_from_seed_set(seeds, reactions: pd.DataFrame, max_gen: int):
     except:
         rn_sets = pd.Series(index=cp_sets.index, data=float('nan'))
     chiral_fraction = cp_sets.apply(lambda x: chiral_labels.loc[list(x), 'is_chiral'].mean())
+    participants = pd.DataFrame({'reactions': rn_sets, 'compounds': cp_sets})
+    try:
+        participants.loc[0, 'reactions'] = set(seeds) - set(seeds)
+    except:
+        participants.loc[0, 'reactions'] = pd.NA   
+    arrival_step = participants.stack().explode().drop_duplicates().dropna().reset_index().set_index(0)['level_0']
     # generate info for edge lists
     steps = rns.T.idxmax()  # note first appearance of each reaction
     edge_pool = reaction_pool.loc[rns.index].copy(deep=True).assign(
-        step=rns.index.map(steps))  # these reactions were enabld
+        step=rns.index.map(steps))  # these reactions were enabled
     edge_pool['directed'] = edge_pool.index.isin(
         bwd_rns.union(fwd_rns))  # these actively expanded (not infilled) the network
     edge_pool['backward'] = edge_pool.index.isin(bwd_rns)  # these did so in the backward direction
@@ -96,25 +86,11 @@ def expand_from_seed_set(seeds, reactions: pd.DataFrame, max_gen: int):
     edge_pool[['source', 'target']] = pd.concat([a, b], axis=0)
     edge_pool.drop(columns=['left', 'right'], inplace=True)
     edge_pool.reset_index(drop=False, names='reaction', inplace=True)
-    participants = pd.DataFrame({'reactions': rn_sets, 'compounds': cp_sets})
-    try:
-        participants.loc[0, 'reactions'] = set(seeds) - set(seeds)
-    except:
-        participants.loc[0, 'reactions'] = pd.NA
     return (
         {'rns': rns, 'cps': cps, 'participants': participants, 'reaction_pool': list(reaction_pool.index),
-         'seeds': seeds,
+         'seeds': seeds, 'arrival_step': arrival_step,
          'chiral_fraction': chiral_fraction, 'edge_pool': edge_pool})
 
-
-def make_unipartite_edgelist(edge_pool: pd.DataFrame):
-    return edge_pool.explode('source').explode('target').reset_index(drop=True)
-
-
-# used for viz + analysis, not expansion itself. turns dataframes with opposite reaction sides
-# into unipartite edgelists, for from_pandas_edgelist
-def generate_edge_df(reactions: pd.DataFrame):
-    return reactions.explode('left').explode('right').reset_index(names='reaction').query('left!=right')
 
 # identifies what compounds and reactions in the database are reachable from at least one seed compound
 def define_reachable_components(seeds, reactions: pd.DataFrame):
@@ -129,14 +105,27 @@ def define_reachable_components(seeds, reactions: pd.DataFrame):
 # generates a bipartite edgelist from expand_from_seed_set's edge_pool output
 def make_bipartite_edgelist(edge_pool: pd.DataFrame):
     df = edge_pool.copy(deep=True)
-    df['reaction'] = df['reaction'].str.replace('A', 'T')
+    df['reaction'] = df['reaction'].str.replace('A', 'T') # so that max identifies reaction, not compound
     sub_edges = df.explode('source').drop(columns='target').rename(columns={'reaction':'target'})
     prod_edges = df.explode('target').drop(columns='source').rename(columns={'reaction':'source'})
     all_edges = pd.concat([sub_edges, prod_edges], axis=0, ignore_index=True)
     all_edges['reaction'] = all_edges[['source','target']].max(axis=1)
     all_edges = all_edges.sort_values(by=['step','reaction','source','target']).reset_index(drop=True).loc[:,all_edges.nunique().sort_values().index]
-    all_edges.update(all_edges[['source','target','reaction']].applymap(lambda x: x.replace('T','A')))
+    all_edges.update(all_edges[['source','target','reaction']].applymap(lambda x: x.replace('T','A')))  # revert back to original
     return(all_edges)
+
+
+def add_bipartite_edge_context(results):
+    for name in results.keys():
+        results[name]['bipartite_edgelist'] = (results[name]['bipartite_edgelist'].join(results[name]['bipartite_edgelist']
+                                        [['reaction','source','target']].applymap(lambda x: results[name]['arrival_step'][x]).add_suffix('_step')))
+        df = results[name]['bipartite_edgelist']
+        impactful_precursors = df.query('directed').query('(target==reaction & reaction_step>source_step) | (reaction==source & reaction_step==target_step)').index
+        immediate_precursors = df.loc[impactful_precursors].query('~(reaction_step-source_step!=1)').index
+        results[name]['bipartite_edgelist'] = results[name]['bipartite_edgelist'].assign(
+                impactful_precursor = df.index.isin(impactful_precursors),
+                immediate_precursor = df.index.isin(immediate_precursors))
+    return(results)
 
 
 # VARIABLES AND DATASETS
