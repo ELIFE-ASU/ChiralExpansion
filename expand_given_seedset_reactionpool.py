@@ -21,7 +21,7 @@ for reaction_file in [i for i in os.listdir(rxn_db_dir) if i.endswith('.csv.zip'
     # run network expansions
     results = dict()
     for name, seeds in seed_sets.items():
-        print('Expanding case: ', model_run_name, name, sep='\t')
+        # print('Expanding case: ', model_run_name, name, sep='\t')
         results[name] = expand_from_seed_set(seeds=seeds, reactions=reaction_scope, max_gen=max_generation)
         results[name]['bipartite_edgelist'] = make_bipartite_edgelist(results[name]['edge_pool'])
 

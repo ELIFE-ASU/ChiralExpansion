@@ -111,7 +111,6 @@ def getCpdCount(cpd_df, kegg_df, ischiral_flag):
 
 def getHeavyAtoms_perGen_fromKegg(cpd_df, kegg_df, ischiral_flag, calc):
     heavy_atoms = list()
-    print(cpd_df)
     for i in range(len(cpd_df.columns)):
         sub_df = kegg_df[kegg_df["compound_id"].isin(cpd_df.index[cpd_df[i] == True].tolist())]
         if ischiral_flag:
