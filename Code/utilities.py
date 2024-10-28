@@ -99,6 +99,9 @@ def get_heavy_atoms(mol_obj_series):
     return heavy_dict
 
 def getCpdCount(cpd_df, kegg_df, ischiral_flag):
+    """
+    Given a dataframe of compounds, return the number of compounds that are chiral or achiral (depending on state of ischiral_flag)
+    """
     count = list()
     for i in range(len(cpd_df.columns)):
         sub_df = kegg_df[kegg_df["compound_id"].isin(cpd_df.index[cpd_df[i] == True].tolist())]
@@ -110,6 +113,10 @@ def getCpdCount(cpd_df, kegg_df, ischiral_flag):
     return pd.DataFrame(count)
 
 def getHeavyAtoms_perGen_fromKegg(cpd_df, kegg_df, ischiral_flag, calc):
+    """
+    Given a dataframe of compounds, return the either the average of standard deviation (dependant on calc value) of heavy atoms 
+    from either chiral or achiral compounds (dependant on ischiral_flag)
+    """
     heavy_atoms = list()
     for i in range(len(cpd_df.columns)):
         sub_df = kegg_df[kegg_df["compound_id"].isin(cpd_df.index[cpd_df[i] == True].tolist())]
@@ -130,4 +137,20 @@ def getHeavyAtoms_perGen_fromKegg(cpd_df, kegg_df, ischiral_flag, calc):
                 heavy_atoms.append(0)
 
     return pd.DataFrame(heavy_atoms)
+
+
+def getRandomSeedSet(kegg_df, size, chirality="both"):
+    """
+    Return a seed set of a given size that is ready to be thrown into the network expansion algorithm
+    Chirality options: "both" (default), "chiral", "achiral"
+    """
+
+    if chirality == "chiral":
+        sub_df = kegg_df[kegg_df["n_chiral_centers"] != 0]
+    elif chirality == "achiral":
+        sub_df = kegg_df[kegg_df["n_chiral_centers"] == 0]
+    else:
+        sub_df = kegg_df #To ensure remainder of code works
+
+    return sub_df["compound_id"].values
 
