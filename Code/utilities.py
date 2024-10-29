@@ -152,5 +152,18 @@ def getRandomSeedSet(kegg_df, size, chirality="both"):
     else:
         sub_df = kegg_df #To ensure remainder of code works
 
-    return sub_df["compound_id"].values
+    return sub_df["compound_id"].sample(size).values
+
+def get_ChiralPercentage(cum_chiral, cum_achiral):
+    """ Get percentage chiral at a specific location
+
+    Args:
+        cum_chiral (list): cumulative sum of chiral compounds over generations
+        cum_achiral (list): cumulative sum of achiral compounds over generations
+    """
+    chiral_percent = []
+    for i in range(len(cum_chiral)):
+        chiral_percent.append( float(cum_chiral[i]) / (cum_chiral[i] + cum_achiral[i]))
+    
+    return chiral_percent
 
