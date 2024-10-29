@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import numpy as np
 
 import matplotlib.pyplot as plt
 import rdkit.Chem
@@ -166,4 +167,32 @@ def get_ChiralPercentage(cum_chiral, cum_achiral):
         chiral_percent.append( float(cum_chiral[i]) / (cum_chiral[i] + cum_achiral[i]))
     
     return chiral_percent
+
+def linkArrivalStepHeavyAtoms(arrival_df, kegg_df):
+    kegg_df = pd.merge(kegg_df, arrival_df, how="left", left_on="compound_id", right_index=True).dropna()
+    kegg_df = kegg_df.rename(columns={"level_0": "arrival"}) #Cleaning up merge notation
+
+    heavy_atom_counts = np.array(kegg_df["n_heavy_atoms"])
+
+    heavy_atom_percentiles = []
+    for ha in kegg_df["n_heavy_atoms"].to_list():
+        try: #Account for possible NaNs
+            #Bins of 20 (10 bins) & 40 (5 bins) heavy atoms
+            if ha <= np.percentile(heavy_atom_counts, 20):
+                heavy_atom_percentiles.append("0 - 20th")
+            elif ha <= np.percentile(heavy_atom_counts, 40):
+                heavy_atom_percentiles.append("21 - 40th")
+            elif ha <= np.percentile(heavy_atom_counts, 60):
+                heavy_atom_percentiles.append("41 - 60th")
+            elif ha <= np.percentile(heavy_atom_counts, 80):
+                heavy_atom_percentiles.append("61 - 80th")
+            else:
+                heavy_atom_percentiles.append("81 - 100th")
+
+        except:
+            heavy_atom_percentiles.append("0 - 20th")
+
+    kegg_df["heavy atom percentile"] = heavy_atom_percentiles
+
+    return kegg_df
 
