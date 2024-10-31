@@ -1,11 +1,15 @@
 import warnings
-warnings.simplefilter(action='ignore', category=FutureWarning) #To ignore future warnings in network expansion code
+#warnings.simplefilter(action='ignore', category=FutureWarning) #To ignore future warnings in network expansion code
+warnings.filterwarnings("ignore")
 
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 import seaborn as sns
+import pickle
+import csv
 from NetworkExpansion import *
 from utilities import *
 
@@ -238,7 +242,6 @@ def fig3(seed_name, crossover_step):
         results[name] = expand_from_seed_set(seeds=seeds, reactions=reaction_scope, max_gen=max_generation)
 
     expansion_arrival_df = linkArrivalStepHeavyAtoms(results[name]['arrival_step'], keggC_df)
-    print(expansion_arrival_df)
 
     sns.set_palette(sns.color_palette("copper"))
     g = sns.jointplot(data=expansion_arrival_df.sort_values(by="n_heavy_atoms"), x="arrival", y="n_chiral_centers", 
@@ -260,9 +263,7 @@ def fig3(seed_name, crossover_step):
     cpd_degrees = dict.fromkeys(expansion_arrival_df["compound_id"], 0)
     cpd_degrees = get_CpdDegrees(cpd_degrees=cpd_degrees)
 
-    print(expansion_arrival_df)
     expansion_arrival_df["degree"] = expansion_arrival_df["compound_id"].map(cpd_degrees)
-    print(expansion_arrival_df)
 
     # #Only include up to expansion step 14 to match network (TODO: why is this here?)
     # sub_df = df[df["Expansion Step"] <= 14]
@@ -283,7 +284,257 @@ def fig3(seed_name, crossover_step):
     plt.savefig("../Figures/Fig3c.png", format="png")
     plt.savefig("../Figures/Fig3c.svg", format="svg")
     plt.close()
+
+def fig4():
+    ### Plotting details
+    chiral_ls = "dashed"
+    achiral_ls = "dotted"
+    chnops_color = "dimgrey"
+    kegg_color = "darkgrey"
+    color_number = {"LUCA":"#10D410", "Archaea":"#D65E00", "Bacteria":"#0B77B5", 
+                "Eukarya":"#E69F03", "Metagenome":"#009E73", "Biosphere": "#4B0092"} 
     
+    ### Load data
+    data_dir = "../Data/"
+    df = dict()
+    for domain in ["Archaea", "Metagenome", "Bacteria", "Eukarya", "Biosphere", "LUCA"]:
+        df[domain] = pd.read_csv(data_dir + "species_chirality_in_%s.csv"%domain)
+
+    ## Reaxys Data
+    chnops = pickle.load(file=open("../Data/chiral_chnops_sampling_FULL.p", "rb"))
+    kegg = pickle.load(file=open("../Data/chiral_kegg_sampling_FULL.p", "rb"))
+    mws = np.arange(100,7100,100)
+
+    chnops_avgs = []
+    for s in chnops:
+        chnops_avgs.append(np.mean(s))
+    kegg_avgs = []
+    for s in kegg:
+        kegg_avgs.append(np.mean(s))
+
+    #Find unversalities, and rank-order each
+    #Read in occurence data & create universality percentages
+
+    num_bacteria = 10434
+    num_archaea = 1194
+    num_eukarya = 267
+    num_metagenomes = 6112
+
+    with open("../Data/archaea_occurance.csv") as f:
+        next(f)
+        reader = csv.reader(f, skipinitialspace=True)
+        a_cpd_occurances = dict(reader)
+
+    with open("../Data/bacteria_occurance.csv") as f:
+        next(f)
+        reader = csv.reader(f, skipinitialspace=True)
+        b_cpd_occurances = dict(reader)
+
+    with open("../Data/eukarya_occurance.csv") as f:
+        next(f)
+        reader = csv.reader(f, skipinitialspace=True)
+        e_cpd_occurances = dict(reader)
+
+    with open("../Data/metagenome_occurance.csv") as f:
+        next(f)
+        reader = csv.reader(f, skipinitialspace=True)
+        m_cpd_occurances = dict(reader)
+
+    #Translate occurances into % universality
+    a_cpd_universality = {}
+    b_cpd_universality = {}
+    e_cpd_universality = {}
+    m_cpd_universality = {}
+
+    #Num archaea: 1194
+    for item in a_cpd_occurances.items():
+        a_cpd_universality[item[0]] = float(item[1]) / num_archaea
+
+    #num bacteria = 10434
+    for item in b_cpd_occurances.items():
+        b_cpd_universality[item[0]] = float(item[1]) / num_bacteria
+
+    #Num eukarya: 267
+    for item in e_cpd_occurances.items():
+        e_cpd_universality[item[0]] = float(item[1]) / num_eukarya
+
+    #Num metagenomes = 6112
+    for item in m_cpd_occurances.items():
+        m_cpd_universality[item[0]] = float(item[1]) / num_metagenomes
+
+
+    a_chiral_universality, a_achiral_universality = find_chiral(a_cpd_universality, keggC_df)
+    a_chiral_universality = {k: v for k, v in sorted(a_chiral_universality.items(), key = lambda item: item[1], reverse=True)}
+    a_achiral_universality = {k: v for k, v in sorted(a_achiral_universality.items(), key = lambda item: item[1], reverse=True)}
+
+    b_chiral_universality, b_achiral_universality = find_chiral(b_cpd_universality, keggC_df)
+    b_chiral_universality = {k: v for k, v in sorted(b_chiral_universality.items(), key = lambda item: item[1], reverse=True)}
+    b_achiral_universality = {k: v for k, v in sorted(b_achiral_universality.items(), key = lambda item: item[1], reverse=True)}
+
+    e_chiral_universality, e_achiral_universality = find_chiral(e_cpd_universality, keggC_df)
+    e_chiral_universality = {k: v for k, v in sorted(e_chiral_universality.items(), key = lambda item: item[1], reverse=True)}
+    e_achiral_universality = {k: v for k, v in sorted(e_achiral_universality.items(), key = lambda item: item[1], reverse=True)}
+
+    m_chiral_universality, m_achiral_universality = find_chiral(m_cpd_universality, keggC_df)
+    m_chiral_universality = {k: v for k, v in sorted(m_chiral_universality.items(), key = lambda item: item[1], reverse=True)}
+    m_achiral_universality = {k: v for k, v in sorted(m_achiral_universality.items(), key = lambda item: item[1], reverse=True)}
+
+    ### Full Gridspec figure (formatting is important here)
+    plt.figure(figsize=(16,16))
+    gs = gridspec.GridSpec(10,10)
+    num_bins = 100
+
+    ax1 = plt.subplot(gs[0:5,0:6])
+
+    list_domain = ["Metagenome", "Bacteria", "Archaea", "Eukarya"]
+
+    handles = [] #Handle array used for legend compatibility with Reaxys sampling
+
+    for domain in list_domain:
+        x = df[domain].total_size
+        y = df[domain].ratio_chiral
+        s = ax1.scatter(x, y, label = domain, s=5, color=color_number[domain], alpha=0.8, zorder=2)
+        handles.append(s) #Adding lines to an array for legend labeling
+        find_fit(x, y, color_number[domain])
+
+    # Add Reaxys averages to scatter plot
+    ax1.scatter(mws, chnops_avgs, color=chnops_color, s=15, zorder=2)
+    # ax1.annotate("Reaxys CHNOPS", (6000, 0.575), color=chnops_color, weight='bold', 
+    #             fontsize=16, ha='center', va='center')
+
+    ax1.scatter(mws, kegg_avgs, color=kegg_color, s=15, zorder=2)
+    # ax1.annotate("Reaxys KEGG", (6000, 0.55), color=kegg_color, weight='bold', 
+    #             fontsize=16, ha='center', va='center')
+
+    # Add scaling fits (fit a polyfit line to averages)
+    find_fit(mws, chnops_avgs, chnops_color)
+    find_fit(mws, kegg_avgs, kegg_color)
+
+    # Line for biosphere
+    x = df["Biosphere"].total_size
+    chiral_y = df["Biosphere"].ratio_chiral.values
+    s = ax1.scatter(x, chiral_y, s=100, color="k") #, label="Biosphere")
+    ax1.annotate("Biosphere", (x - 150, chiral_y + 0.01), color="k", weight='bold', 
+                fontsize=16, ha='center', va='center')
+    #handles.append(s)
+    ax1.axhline(chiral_y, 0, 1, ls='--', color="k", alpha=1, zorder=1)
+
+    # Line for Luca
+    x = df["LUCA"].total_size
+    chiral_y = df["LUCA"].ratio_chiral.values
+    s = ax1.scatter(x, chiral_y, s=100, color="k", zorder=2) #, label="LUCA")
+    ax1.annotate("LUCA", (x - 250, chiral_y + 0.01), color="k", weight='bold', 
+                fontsize=16, ha='center', va='center', zorder=2)
+    #handles.append(s)
+    ax1.axhline(chiral_y, 0, 1, ls='--', color="k", alpha=1, zorder=1)
+
+    #Add Reaxys to Legend
+    chnops_patch = plt.Line2D([], [], color=chnops_color, marker="o", markersize=2, label='Reaxys: CHNOPS Elements')
+    kegg_patch = plt.Line2D([], [], color=kegg_color, marker="o", markersize=2, label='Reaxys: KEGG Elements')
+    handles.extend([chnops_patch, kegg_patch])
+
+    # rxysKegg_patch = plt.Line2D([], [], color=kegg_color, linestyle="-", linewidth=5, label='Reaxys: KEGG')
+    # rxysChnops_patch = plt.Line2D([], [], color=chnops_color, linestyle="-", linewidth=5, label='Reaxys: CHNOPS')
+    # Labels
+    font_size = 14
+    ax1.set_xlabel("System Size (unique compounds)") #TODO: why isn't this label showing up
+    ax1.set_ylabel("$\mathbb{C}$")
+    ax1.legend(bbox_to_anchor=(1.43, 1.2), markerscale=5, handles=handles, ncol=3, prop={"size": 20})
+
+    # Axis
+    ax1.set_ylim(0.4, 0.8)
+    ax1.set_xlim(-300, 7900)
+
+    ### Inset distribution axes
+    ax2 = plt.subplot(gs[0:5,7:])
+
+    #Graph Reaxys graphs first so they're in the back
+    ax2.hist([x for sub in kegg for x in sub], num_bins, label="Reaxys:\nKEGG Elements", facecolor=kegg_color, alpha=0.8, orientation="horizontal")
+    ax2.hist([x for sub in chnops for x in sub], num_bins, label="Reaxys:\nCHNOPS Elements", facecolor=chnops_color, alpha=0.8, orientation="horizontal")
+
+    list_domain = ["Bacteria", "Metagenome",  "Archaea", "Eukarya"]
+    for domain in list_domain:
+        x = df[domain].total_size
+        y = df[domain].ratio_chiral
+        num_bins = 100
+        n, bins, patches = ax2.hist(y, num_bins, label=domain, facecolor=color_number[domain], alpha=0.8, orientation="horizontal")
+
+
+    # Line for biosphere
+    x = df["Biosphere"].total_size
+    y = df["Biosphere"].ratio_chiral
+
+    # Line for Luca
+    x = df["LUCA"].total_size
+    y = df["LUCA"].ratio_chiral
+
+    # Labels
+    ax2.set_ylabel("$\mathbb{C}$")
+    ax2.set_xlabel("Samples")
+
+    ax2.set_xscale('log')
+    ax2.tick_params(axis="both", which="major")
+    ax2.set_ylim(0.4, 0.8)
+
+    ax3 = plt.subplot(gs[6:,0:5])
+    ax4 = plt.subplot(gs[6:,6:])
+
+    print("-- Table A Data --")
+    m_chiral = make_AUC_dashes(m_chiral_universality, "Metagenome, Chiral", color_number["Metagenome"], chiral_ls, ax3)
+    m_achiral = make_AUC_dashes(m_achiral_universality, "Metagenome, Achiral", color_number["Metagenome"], achiral_ls, ax3)
+
+    e_chiral = make_AUC_dashes(e_chiral_universality, "Eukarya, Chiral", color_number["Eukarya"], chiral_ls, ax3)
+    e_achiral = make_AUC_dashes(e_achiral_universality, "Eukarya, Achiral", color_number["Eukarya"], achiral_ls, ax3)
+
+    b_chiral = make_AUC_dashes(b_chiral_universality, "Bacteria, Chiral", color_number["Bacteria"], chiral_ls, ax3)
+    b_achiral = make_AUC_dashes(b_achiral_universality, "Bacteria, Achiral", color_number["Bacteria"], achiral_ls, ax3)
+
+    a_chiral = make_AUC_dashes(a_chiral_universality, "Archaea, Chiral", color_number["Archaea"], chiral_ls, ax3)
+    a_achiral = make_AUC_dashes(a_achiral_universality, "Archaea, Achiral", color_number["Archaea"], achiral_ls, ax3)
+
+    ax3.grid()
+    ax3.set_ylabel("Universality")
+    ax3.set_xlabel("Normalized rank-order")
+
+    #Legend
+    handles = []
+    chiral_patch = plt.Line2D([], [], color="k", linestyle="--", linewidth=5, label='Chiral')
+    achiral_patch = plt.Line2D([], [], color="k", linestyle=":", linewidth=5, label='Achiral')
+
+    ## Add Reaxys patches to handles
+    handles.extend([chiral_patch, achiral_patch])
+    ax3.legend(handles = handles, prop={"size": 20})
+
+    # Hide the right and top spines
+    ax3.spines[['right', 'top']].set_visible(False)
+    ax3.set_xticklabels(["", "", "", "", "", ""])
+
+    ### Ax4, chiral differences
+    get_chiral_difference(m_chiral, m_achiral, color_number["Metagenome"], "Metagenome", ax4)
+    get_chiral_difference(a_chiral, a_achiral, color_number["Archaea"], "Archaea", ax4)
+    get_chiral_difference(b_chiral, b_achiral, color_number["Bacteria"], "Bacteria", ax4)
+    get_chiral_difference(e_chiral, e_achiral, color_number["Eukarya"], "Eukarya", ax4)
+
+    ax4.grid()
+    #ax4.legend(bbox_to_anchor=(0.7, 2.9), prop={"size":20}, ncol=4)
+
+    ax4.annotate("More Chiral", xy=(40, 0.1), xytext=(69, 0.15), color="k", 
+                arrowprops={"arrowstyle": "simple", "color": "k"}, fontsize=16, ha='center', va='center', zorder=3)
+    ax4.annotate("More Achiral", xy=(55, -0.15), xytext=(30, -0.24), color="k",
+                arrowprops={"arrowstyle": "simple", "color": "k"}, fontsize=16, ha='center', va='center', zorder=3)
+
+    ax4.set_xticklabels(["", "", "", "", "", ""])
+    ax4.set_yticklabels([-0.6, -0.4, -0.2, 0, 0.2, 0.4])
+    ax4.set_ylabel("Universality Difference")
+    ax4.set_xlabel("Normalized rank-order")
+
+    ax4.spines[['right', 'top']].set_visible(False)
+
+    plt.tight_layout(pad=0.25)
+
+    plt.savefig("../Figures/fig4.svg", format="svg")
+    plt.savefig("../Figures/fig4.png", format="png")
+
 
 def main():
     pd.set_option('future.no_silent_downcasting', True) #To avoid future warnings
@@ -293,14 +544,15 @@ def main():
     for key, value in font.items():
         plt.rcParams.update({"font." + key : value})
         
-    # print("---- Generating Figure 2 ----")
-    # #~Three minutes per 1000 random expansions (depends on chirality & size)
-    # crossover_step = fig2(seed_name="JM", random_seed_set_size=10, n_iter=1000)
-
-    crossover_step = 13 ##TODO: take out in full run
+    print("---- Generating Figure 2 ----")
+    #~Three minutes per 1000 random expansions (depends on chirality & size)
+    crossover_step = fig2(seed_name="JM", random_seed_set_size=10, n_iter=1000)
 
     print("---- Generating Figure 3 ----")
     fig3(seed_name="JM", crossover_step=crossover_step) 
+
+    print("---- Generating Figure 4 ----")
+    fig4()
 
 if __name__ == "__main__":
     main()
