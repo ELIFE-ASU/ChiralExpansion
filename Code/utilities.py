@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import numpy as np
 
 import matplotlib.pyplot as plt
 import rdkit.Chem
@@ -167,3 +168,98 @@ def get_ChiralPercentage(cum_chiral, cum_achiral):
     
     return chiral_percent
 
+def linkArrivalStepHeavyAtoms(arrival_df, kegg_df):
+    kegg_df = pd.merge(kegg_df, arrival_df, how="left", left_on="compound_id", right_index=True).dropna()
+    kegg_df = kegg_df.rename(columns={"level_0": "arrival"}) #Cleaning up merge notation
+
+    heavy_atom_counts = np.array(kegg_df["n_heavy_atoms"])
+
+    heavy_atom_percentiles = []
+    for ha in kegg_df["n_heavy_atoms"].to_list():
+        try: #Account for possible NaNs
+            #Bins of 20 (10 bins) & 40 (5 bins) heavy atoms
+            if ha <= np.percentile(heavy_atom_counts, 20):
+                heavy_atom_percentiles.append("0 - 20th")
+            elif ha <= np.percentile(heavy_atom_counts, 40):
+                heavy_atom_percentiles.append("21 - 40th")
+            elif ha <= np.percentile(heavy_atom_counts, 60):
+                heavy_atom_percentiles.append("41 - 60th")
+            elif ha <= np.percentile(heavy_atom_counts, 80):
+                heavy_atom_percentiles.append("61 - 80th")
+            else:
+                heavy_atom_percentiles.append("81 - 100th")
+
+        except:
+            heavy_atom_percentiles.append("0 - 20th")
+
+    kegg_df["heavy atom percentile"] = heavy_atom_percentiles
+
+    return kegg_df
+
+def degrees_PerRxn(rxnString, cpd_degrees):
+    rxn = rxnString.split("<=>")
+    reactants = rxn[0]
+    products = rxn[1]
+
+    reactant_cpds = []
+    product_cpds = []
+
+    for pCpd in reactants.split(" "):
+        if pCpd.startswith("C"):
+            reactant_cpds.append(pCpd)
+    for pCpd in products.split(" "):
+        if pCpd.startswith("C"):
+            product_cpds.append(pCpd)
+
+    for cpd in reactant_cpds:
+        if cpd not in cpd_degrees:
+            cpd_degrees[cpd] = 1
+        else:
+            cpd_degrees[cpd] += len(product_cpds)
+    for cpd in product_cpds:
+        if cpd not in cpd_degrees:
+            cpd_degrees[cpd] = 1
+        else:
+            cpd_degrees[cpd] += len(reactant_cpds)
+
+def get_CpdDegrees(cpd_degrees):
+    #atlas_kegg_processed_merged is the current source of truth (right, @Camerian & @Louie?)
+    rxn_df = pd.read_csv("../../lets-get-kegg/Data/atlas_kegg_processed_merged.csv.zip", index_col=0, compression="zip")
+    rxn_df.drop_duplicates(subset="reaction", inplace=True) #TODO: fully check for duplicates (or wait for lets-get-kegg to be fixed)
+    
+    #print(rxn_df)
+    rxn_df["reaction"].apply(degrees_PerRxn, args=(cpd_degrees,))
+
+    return cpd_degrees
+
+def scatter_hist(x, y, ax, ax_histy, c):
+    """ 
+    Scatter plot analysis for Figure 3C
+    """
+    achiral_color = "#FFC012"
+    chiral_color = "#34CCFF"
+    max_size = 100 #Maximum size of scatter points (for readability)
+
+    ax_histy.tick_params(axis="y", labelleft=False)
+
+    #Plot by chiral/achiral color, and size by degree
+    for i in range(len(x)):
+        if y[i] == 0:
+            ax.scatter(x[i], y[i], color=achiral_color, s=min(x[i]/10, max_size))
+        else:
+            ax.scatter(x[i], y[i], color=chiral_color, s=min(x[i]/10, max_size))
+
+    #Set bins to middle of chiral center y-values to line up across axes
+    bins = np.arange(-0.5,11.5,1)
+    cnts, values, bars = ax_histy.hist(np.array(y)-0.5, orientation='horizontal', color=c, bins=bins, edgecolor="k")
+
+    #Make sure labels are smaller on histogram than scatter plot
+    ax_histy.set_xlabel("Count", fontsize=14)
+    ax_histy.tick_params(axis='both', which='major', labelsize=14)
+
+    #Change color of histogram bars
+    for i, (cnt, value, bar) in enumerate(zip(cnts, values, bars)):
+        if i == 0:
+            bar.set_facecolor(achiral_color)
+        else:
+            bar.set_facecolor(chiral_color)
