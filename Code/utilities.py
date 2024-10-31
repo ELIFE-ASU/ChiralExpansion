@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 import numpy as np
+import scipy.stats as stats
 
 import matplotlib.pyplot as plt
 import rdkit.Chem
@@ -227,7 +228,6 @@ def get_CpdDegrees(cpd_degrees):
     rxn_df = pd.read_csv("../../lets-get-kegg/Data/atlas_kegg_processed_merged.csv.zip", index_col=0, compression="zip")
     rxn_df.drop_duplicates(subset="reaction", inplace=True) #TODO: fully check for duplicates (or wait for lets-get-kegg to be fixed)
     
-    #print(rxn_df)
     rxn_df["reaction"].apply(degrees_PerRxn, args=(cpd_degrees,))
 
     return cpd_degrees
@@ -263,3 +263,56 @@ def scatter_hist(x, y, ax, ax_histy, c):
             bar.set_facecolor(achiral_color)
         else:
             bar.set_facecolor(chiral_color)
+
+def find_fit(X,Y,color):
+    slope, intercept, r_value, p_value, std_err = stats.linregress(X,Y)
+    # print('Slope: {:.6f}'.format(slope),'Intercept: {:.6f}'.format(intercept),'R-squared: {:.6f}'.format(r_value**2),'Std_err: {:.6f}'.format(std_err))
+    x_dummy = np.linspace(start=0, stop=8000, num=100)
+    plt.plot(x_dummy,slope*x_dummy + intercept,color=color)
+    plt.fill_between(x_dummy,slope*x_dummy+intercept-std_err,slope*x_dummy+intercept+std_err,color=color, alpha=0.2)
+
+def make_AUC_dashes(u, label, c, ls, ax):
+    yvals = list(u.values())
+    xvals = np.linspace(0, 1, num=len(yvals))
+
+    #Calculate AUC using composite travezoidal rule
+    area = np.trapz(yvals, dx=xvals[1])
+
+    ax.plot(xvals, yvals, label = label, color=c, 
+    linestyle=ls, linewidth=4)
+
+    print(label + " AUC = " + str(round(area, 4)))
+
+    return yvals
+
+def find_chiral(u, df):
+    achiral = {}
+    chiral = {}
+
+    for _, row in df.iterrows():
+        if row["compound_id"] in u:
+            if row["n_chiral_centers"] > 0:
+                chiral[row["compound_id"]] = u[row["compound_id"]]
+            else:
+                achiral[row["compound_id"]] = u[row["compound_id"]]
+
+    return chiral, achiral
+
+def get_chiral_difference(chiral_values, achiral_values, c, l, ax):
+
+    #Step 1: get rank-order percentile values
+    m_chiral_percentiles = []
+    for i in np.linspace(0, len(chiral_values)-1, 100):
+        m_chiral_percentiles.append(chiral_values[int(i)])
+
+    m_achiral_percentiles = []
+    for i in np.linspace(0, len(achiral_values)-1, 100):
+        m_achiral_percentiles.append(achiral_values[int(i)])
+
+    #Step 2: find difference
+    m_diffs = list(np.array(m_chiral_percentiles) - np.array(m_achiral_percentiles))
+
+    #Step 3: plot
+    label = ax.plot(m_diffs, color=c, linewidth=3, label=l)
+
+    return label
