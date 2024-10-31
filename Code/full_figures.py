@@ -256,6 +256,34 @@ def fig3(seed_name, crossover_step):
     plt.savefig("../Figures/Fig3b.svg", format="svg")
     plt.close()
 
+    ### Get degrees for each compound & merge into expansion arrival dataframe 
+    cpd_degrees = dict.fromkeys(expansion_arrival_df["compound_id"], 0)
+    cpd_degrees = get_CpdDegrees(cpd_degrees=cpd_degrees)
+
+    print(expansion_arrival_df)
+    expansion_arrival_df["degree"] = expansion_arrival_df["compound_id"].map(cpd_degrees)
+    print(expansion_arrival_df)
+
+    # #Only include up to expansion step 14 to match network (TODO: why is this here?)
+    # sub_df = df[df["Expansion Step"] <= 14]
+
+    fig = plt.figure(figsize=(16, 8))
+    gs = fig.add_gridspec(2, 2,  width_ratios=(4, 1), height_ratios=(1, 4),
+                        left=0.1, right=0.9, bottom=0.1, top=0.9,
+                        wspace=0.05, hspace=0.05)
+    ax = fig.add_subplot(gs[1, 0])
+    ax_histy = fig.add_subplot(gs[1, 1], sharey=ax)
+    scatter_hist(list(expansion_arrival_df["degree"]), list(expansion_arrival_df["n_chiral_centers"]), ax, ax_histy, "k")
+
+    ax.set_xscale("log")
+
+    ax.set_xlabel("Degree")
+    ax.set_ylabel("Chiral Centers")
+
+    plt.savefig("../Figures/Fig3c.png", format="png")
+    plt.savefig("../Figures/Fig3c.svg", format="svg")
+    plt.close()
+    
 
 def main():
     pd.set_option('future.no_silent_downcasting', True) #To avoid future warnings
