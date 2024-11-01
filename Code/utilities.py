@@ -316,3 +316,40 @@ def get_chiral_difference(chiral_values, achiral_values, c, l, ax):
     label = ax.plot(m_diffs, color=c, linewidth=3, label=l)
 
     return label
+
+def check_rxn_chirality(rxnString, keggC_df):
+    rxn = rxnString.split("<=>")
+    reactants = rxn[0]
+    products = rxn[1]
+
+    reactant_cpds = []
+    product_cpds = []
+
+    for pCpd in reactants.split(" "):
+        if pCpd.startswith("C"):
+            reactant_cpds.append(pCpd)
+    for pCpd in products.split(" "):
+        if pCpd.startswith("C"):
+            product_cpds.append(pCpd)
+
+    reactant_chiral_count = 0
+    product_chiral_count = 0
+
+    for cpd in reactant_cpds:
+        if keggC_df.loc[cpd]["n_chiral_centers"]:
+            reactant_chiral_count += 1
+    for cpd in product_cpds:
+        if keggC_df.loc[cpd]["n_chiral_centers"]:
+            product_chiral_count += 1
+
+    return pd.Series([reactant_chiral_count, product_chiral_count], index=["Reactant Chiral Count", "Product Chiral Count"])
+
+def get_heatmap_array(keggC_df):
+    keggC_df = keggC_df.set_index("compound_id")
+    print(keggC_df)
+
+    #atlas_kegg_processed_merged is the current source of truth (right, @Camerian & @Louie?)    
+    rxn_df = pd.read_csv("../../lets-get-kegg/Data/atlas_kegg_processed_merged.csv.zip", index_col=0, compression="zip")
+
+    rxn_df[["Reactant Chiral Count", "Product Chiral Count"]] = rxn_df["reaction"].apply(check_rxn_chirality, args=(keggC_df,))
+    print(rxn_df)

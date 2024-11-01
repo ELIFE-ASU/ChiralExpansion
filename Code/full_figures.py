@@ -536,6 +536,29 @@ def fig4():
     plt.savefig("../Figures/fig4.png", format="png")
 
 
+def fig5(seed_name):
+    ### Panel 5A - chiral rxn counts
+    heatmap_array = get_heatmap_array(keggC_df)
+
+    ### Panel 5B - achiral/chiral modulating &conserving 
+    ### Get full seed set & reaction set
+    seed_groups = [seed_name]
+    rxn_db = "../../lets-get-kegg/Data/kegg_data_R_processed.csv.zip" #Default in NetworkExpansion.import_reaction_file
+    reaction_scope = get_sides(import_reaction_file(rxn_db))
+
+    compound_scope = set.union(*reaction_scope.stack())
+    seed_scope = seed_candidates.loc[seed_candidates.index.isin(compound_scope)]
+    seed_sets = {i: seed_scope.query('Source.str.contains("'+i+'")').index for i in seed_groups}
+    print("- Seed Set -")
+
+    ### Run network expansion on original seed set
+    results = dict()
+    for name, seeds in seed_sets.items():
+        print(seeds)
+        results[name] = expand_from_seed_set(seeds=seeds, reactions=reaction_scope, max_gen=max_generation)
+        results[name]['bipartite_edgelist'] = make_bipartite_edgelist(results[name]['edge_pool'])
+
+
 def main():
     pd.set_option('future.no_silent_downcasting', True) #To avoid future warnings
     # Matplotlib defaults
@@ -544,15 +567,18 @@ def main():
     for key, value in font.items():
         plt.rcParams.update({"font." + key : value})
         
-    print("---- Generating Figure 2 ----")
-    #~Three minutes per 1000 random expansions (depends on chirality & size)
-    crossover_step = fig2(seed_name="JM", random_seed_set_size=10, n_iter=1000)
+    # print("---- Generating Figure 2 ----")
+    # #~Three minutes per 1000 random expansions (depends on chirality & size)
+    # crossover_step = fig2(seed_name="JM", random_seed_set_size=10, n_iter=1000)
 
-    print("---- Generating Figure 3 ----")
-    fig3(seed_name="JM", crossover_step=crossover_step) 
+    # print("---- Generating Figure 3 ----")
+    # fig3(seed_name="JM", crossover_step=crossover_step) 
 
-    print("---- Generating Figure 4 ----")
-    fig4()
+    # print("---- Generating Figure 4 ----")
+    # fig4()
+
+    print("---- Generating Figure 5 ----")
+    fig5(seed_name="JM")
 
 if __name__ == "__main__":
     main()
