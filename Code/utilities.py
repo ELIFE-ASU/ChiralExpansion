@@ -2,6 +2,8 @@ import os
 import pandas as pd
 import numpy as np
 import scipy.stats as stats
+from tqdm import tqdm
+tqdm.pandas()
 
 import matplotlib.pyplot as plt
 import rdkit.Chem
@@ -316,3 +318,76 @@ def get_chiral_difference(chiral_values, achiral_values, c, l, ax):
     label = ax.plot(m_diffs, color=c, linewidth=3, label=l)
 
     return label
+
+def check_rxn_chirality(rxnString, keggC_df, rxn_chiral_count):
+    rxn = rxnString.split("<=>")
+    reactants = rxn[0]
+    products = rxn[1]
+
+    reactant_cpds = []
+    product_cpds = []
+
+    for pCpd in reactants.split(" "):
+        if pCpd.startswith("C"):
+            reactant_cpds.append(pCpd)
+    for pCpd in products.split(" "):
+        if pCpd.startswith("C"):
+            product_cpds.append(pCpd)
+
+    reactant_chiral_count = 0
+    product_chiral_count = 0
+
+    for cpd in reactant_cpds:
+        if keggC_df.loc[cpd]["n_chiral_centers"]:
+            reactant_chiral_count += 1
+    for cpd in product_cpds:
+        if keggC_df.loc[cpd]["n_chiral_centers"]:
+            product_chiral_count += 1
+
+    chiral_str = f"{reactant_chiral_count}_{product_chiral_count}"
+
+    if chiral_str not in rxn_chiral_count:
+        rxn_chiral_count[chiral_str] = 1
+    else:
+        rxn_chiral_count[chiral_str] += 1
+
+    return pd.Series([reactant_chiral_count, product_chiral_count], index=["Reactant Chiral Count", "Product Chiral Count"])
+
+def get_heatmap_array(keggC_df):
+    keggC_df = keggC_df.set_index("compound_id")
+    rxn_chiral_count = {}
+    heatmap_array = []
+
+    #atlas_kegg_processed_merged is the current source of truth (right, @Camerian & @Louie?)    
+    rxn_df = pd.read_csv("../../lets-get-kegg/Data/atlas_kegg_processed_merged.csv.zip", index_col=0, compression="zip")
+
+    print("- Calculating Reaction Chirality -")
+    rxn_df[["Reactant Chiral Count", "Product Chiral Count"]] = rxn_df["reaction"].progress_apply(check_rxn_chirality, args=(keggC_df, rxn_chiral_count))
+
+    for i in range(5):
+        row = []
+        for j in range(5):
+            chiral_str = f"{i}_{j}"
+            if chiral_str in rxn_chiral_count:
+                row.append(rxn_chiral_count[f"{i}_{j}"])
+            else:
+                row.append(0)
+        heatmap_array.append(row)
+
+    return heatmap_array, rxn_df
+
+def get_chiral_modulations(stepRxn_df, rxn_df):
+    chiral_modulating = []
+    chiral_conserving = []
+    achiral_conserving = []
+
+    for _, row in stepRxn_df.iterrows():
+        sub_rxn_df = rxn_df[rxn_df["id"].isin(row["reactions"])]
+        chiral_modulating.append(len(sub_rxn_df[sub_rxn_df["Reactant Chiral Count"] != sub_rxn_df["Product Chiral Count"]]))
+        chiral_conserving.append(len(sub_rxn_df[sub_rxn_df["Reactant Chiral Count"] == sub_rxn_df["Product Chiral Count"]]))
+
+        achiral_conserving_df = sub_rxn_df[sub_rxn_df["Reactant Chiral Count"] == 0]
+        achiral_conserving.append(len(achiral_conserving_df[achiral_conserving_df["Reactant Chiral Count"] == achiral_conserving_df["Product Chiral Count"]]))
+
+    return chiral_modulating, chiral_conserving, achiral_conserving
+
