@@ -222,7 +222,7 @@ def fig2(seed_name, random_seed_set_size, n_iter):
     plt.savefig("../Figures/Fig2D.png", format="png")
     plt.close()
 
-    return achiral_chiral_crossover_step
+    return achiral_chiral_crossover_step, first_chiral_step
 
 def fig3(seed_name, crossover_step):
     ### Get full seed set & reaction set
@@ -255,8 +255,8 @@ def fig3(seed_name, crossover_step):
 
     g.ax_joint.legend(title="Heavy Atom\nPercentiles", prop={"size":12})
 
-    plt.savefig("../Figures/Fig3b.png", format="png")
-    plt.savefig("../Figures/Fig3b.svg", format="svg")
+    plt.savefig("../Figures/Fig3B.png", format="png")
+    plt.savefig("../Figures/Fig3B.svg", format="svg")
     plt.close()
 
     ### Get degrees for each compound & merge into expansion arrival dataframe 
@@ -281,8 +281,8 @@ def fig3(seed_name, crossover_step):
     ax.set_xlabel("Degree")
     ax.set_ylabel("Chiral Centers")
 
-    plt.savefig("../Figures/Fig3c.png", format="png")
-    plt.savefig("../Figures/Fig3c.svg", format="svg")
+    plt.savefig("../Figures/Fig3C.png", format="png")
+    plt.savefig("../Figures/Fig3C.svg", format="svg")
     plt.close()
 
 def fig4():
@@ -536,9 +536,9 @@ def fig4():
     plt.savefig("../Figures/Fig4.png", format="png")
 
 
-def fig5(seed_name):
+def fig5(seed_name, crossover_step, first_chiral_step):
     ### Panel 5A - chiral rxn counts
-    heatmap_array = get_heatmap_array(keggC_df)
+    heatmap_array, rxn_df = get_heatmap_array(keggC_df)
 
     fig, ax = plt.subplots(figsize=(12,12))
     im = ax.imshow(heatmap_array)
@@ -587,7 +587,32 @@ def fig5(seed_name):
     for name, seeds in seed_sets.items():
         print(seeds)
         results[name] = expand_from_seed_set(seeds=seeds, reactions=reaction_scope, max_gen=max_generation)
-        results[name]['bipartite_edgelist'] = make_bipartite_edgelist(results[name]['edge_pool'])
+
+    print(rxn_df)
+    chiral_modulating, chiral_conserving, achiral_conserving = get_chiral_modulations(results[name]["participants"], rxn_df)
+
+    fig, ax = plt.subplots(figsize=(12,12))
+
+    ax.plot(chiral_modulating, linestyle="solid", linewidth=3, color='k', label="Chiral Modulating Rxns")
+    ax.plot(chiral_conserving, linestyle="dashed", linewidth=3, color='k', label="Chiral Conserving Rxns")
+    ax.plot(achiral_conserving, linestyle="dotted", linewidth=3, color='k', label="Achiral Conserving Rxns")
+
+    ax.axvline(x=crossover_step, color="k", linestyle="--", alpha=0.9)
+    ax.axvline(x=first_chiral_step, color="k", linestyle=":", alpha=0.5)
+    ax.annotate(f"Achiral-to-Chiral\nCrossover\nStep {crossover_step}", xy=(crossover_step, 3500), 
+                xytext=(crossover_step+8,3850), color="k", arrowprops={"arrowstyle": "simple", "color": "k"}, fontsize=14, 
+                ha='center', va='center', zorder=3)
+    ax.annotate(f"First Chiral\nCompound\nStep {first_chiral_step}", xy=(first_chiral_step, 3500), 
+                xytext=(first_chiral_step+5,3850), color="k", arrowprops={"arrowstyle": "simple", "color": "k"}, fontsize=14, 
+                ha='center', va='center', zorder=3)
+    
+    ax.legend(facecolor="white", framealpha=1, prop={"size":12})
+    ax.set_xlabel("Expansion Step")
+    ax.set_ylabel("Reaction Count")
+
+    plt.savefig("../Figures/Fig5B.svg", format="svg")
+    plt.savefig("../Figures/Fig5B.png", format="png")
+    plt.close()
 
 
 def main():
@@ -600,16 +625,16 @@ def main():
         
     # print("---- Generating Figure 2 ----")
     # #~Three minutes per 1000 random expansions (depends on chirality & size)
-    # crossover_step = fig2(seed_name="JM", random_seed_set_size=10, n_iter=1000)
+    crossover_step, first_chiral_step = fig2(seed_name="JM", random_seed_set_size=10, n_iter=1000)
 
-    # print("---- Generating Figure 3 ----")
-    # fig3(seed_name="JM", crossover_step=crossover_step) 
+    print("---- Generating Figure 3 ----")
+    fig3(seed_name="JM", crossover_step=crossover_step) 
 
-    # print("---- Generating Figure 4 ----")
-    # fig4()
+    print("---- Generating Figure 4 ----")
+    fig4()
 
     print("---- Generating Figure 5 ----")
-    fig5(seed_name="JM")
+    fig5(seed_name="JM", crossover_step=crossover_step, first_chiral_step=first_chiral_step)
 
 if __name__ == "__main__":
     main()

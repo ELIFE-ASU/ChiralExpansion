@@ -351,6 +351,8 @@ def check_rxn_chirality(rxnString, keggC_df, rxn_chiral_count):
     else:
         rxn_chiral_count[chiral_str] += 1
 
+    return pd.Series([reactant_chiral_count, product_chiral_count], index=["Reactant Chiral Count", "Product Chiral Count"])
+
 def get_heatmap_array(keggC_df):
     keggC_df = keggC_df.set_index("compound_id")
     rxn_chiral_count = {}
@@ -360,7 +362,7 @@ def get_heatmap_array(keggC_df):
     rxn_df = pd.read_csv("../../lets-get-kegg/Data/atlas_kegg_processed_merged.csv.zip", index_col=0, compression="zip")
 
     print("- Calculating Reaction Chirality -")
-    rxn_df["reaction"].progress_apply(check_rxn_chirality, args=(keggC_df, rxn_chiral_count))
+    rxn_df[["Reactant Chiral Count", "Product Chiral Count"]] = rxn_df["reaction"].progress_apply(check_rxn_chirality, args=(keggC_df, rxn_chiral_count))
 
     for i in range(5):
         row = []
@@ -372,4 +374,20 @@ def get_heatmap_array(keggC_df):
                 row.append(0)
         heatmap_array.append(row)
 
-    return heatmap_array
+    return heatmap_array, rxn_df
+
+def get_chiral_modulations(stepRxn_df, rxn_df):
+    chiral_modulating = []
+    chiral_conserving = []
+    achiral_conserving = []
+
+    for _, row in stepRxn_df.iterrows():
+        sub_rxn_df = rxn_df[rxn_df["id"].isin(row["reactions"])]
+        chiral_modulating.append(len(sub_rxn_df[sub_rxn_df["Reactant Chiral Count"] != sub_rxn_df["Product Chiral Count"]]))
+        chiral_conserving.append(len(sub_rxn_df[sub_rxn_df["Reactant Chiral Count"] == sub_rxn_df["Product Chiral Count"]]))
+
+        achiral_conserving_df = sub_rxn_df[sub_rxn_df["Reactant Chiral Count"] == 0]
+        achiral_conserving.append(len(achiral_conserving_df[achiral_conserving_df["Reactant Chiral Count"] == achiral_conserving_df["Product Chiral Count"]]))
+
+    return chiral_modulating, chiral_conserving, achiral_conserving
+
