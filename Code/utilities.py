@@ -2,6 +2,8 @@ import os
 import pandas as pd
 import numpy as np
 import scipy.stats as stats
+from tqdm import tqdm
+tqdm.pandas()
 
 import matplotlib.pyplot as plt
 import rdkit.Chem
@@ -317,7 +319,7 @@ def get_chiral_difference(chiral_values, achiral_values, c, l, ax):
 
     return label
 
-def check_rxn_chirality(rxnString, keggC_df):
+def check_rxn_chirality(rxnString, keggC_df, rxn_chiral_count):
     rxn = rxnString.split("<=>")
     reactants = rxn[0]
     products = rxn[1]
@@ -342,14 +344,32 @@ def check_rxn_chirality(rxnString, keggC_df):
         if keggC_df.loc[cpd]["n_chiral_centers"]:
             product_chiral_count += 1
 
-    return pd.Series([reactant_chiral_count, product_chiral_count], index=["Reactant Chiral Count", "Product Chiral Count"])
+    chiral_str = f"{reactant_chiral_count}_{product_chiral_count}"
+
+    if chiral_str not in rxn_chiral_count:
+        rxn_chiral_count[chiral_str] = 1
+    else:
+        rxn_chiral_count[chiral_str] += 1
 
 def get_heatmap_array(keggC_df):
     keggC_df = keggC_df.set_index("compound_id")
-    print(keggC_df)
+    rxn_chiral_count = {}
+    heatmap_array = []
 
     #atlas_kegg_processed_merged is the current source of truth (right, @Camerian & @Louie?)    
     rxn_df = pd.read_csv("../../lets-get-kegg/Data/atlas_kegg_processed_merged.csv.zip", index_col=0, compression="zip")
 
-    rxn_df[["Reactant Chiral Count", "Product Chiral Count"]] = rxn_df["reaction"].apply(check_rxn_chirality, args=(keggC_df,))
-    print(rxn_df)
+    print("- Calculating Reaction Chirality -")
+    rxn_df["reaction"].progress_apply(check_rxn_chirality, args=(keggC_df, rxn_chiral_count))
+
+    for i in range(5):
+        row = []
+        for j in range(5):
+            chiral_str = f"{i}_{j}"
+            if chiral_str in rxn_chiral_count:
+                row.append(rxn_chiral_count[f"{i}_{j}"])
+            else:
+                row.append(0)
+        heatmap_array.append(row)
+
+    return heatmap_array

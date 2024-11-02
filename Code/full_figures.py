@@ -532,13 +532,44 @@ def fig4():
 
     plt.tight_layout(pad=0.25)
 
-    plt.savefig("../Figures/fig4.svg", format="svg")
-    plt.savefig("../Figures/fig4.png", format="png")
+    plt.savefig("../Figures/Fig4.svg", format="svg")
+    plt.savefig("../Figures/Fig4.png", format="png")
 
 
 def fig5(seed_name):
     ### Panel 5A - chiral rxn counts
     heatmap_array = get_heatmap_array(keggC_df)
+
+    fig, ax = plt.subplots(figsize=(12,12))
+    im = ax.imshow(heatmap_array)
+
+    #ax.set_yticklabels(["", 0, "", 1, "", 2])
+
+    ax.tick_params(
+        axis='both',          # changes apply to the x-axis
+        which='both',      # both major and minor ticks are affected
+        bottom=False,      # ticks along the bottom edge are off
+        left=False)   
+
+    ax.set_ylabel("Substrate Chiral Compounds", fontsize=18)
+    ax.set_xlabel("Product Chiral Compounds", fontsize=18)
+
+    for i in range(5):
+        for j in range(5):
+            if i == 1 and j == 1:
+                c = "k"
+            else:
+                c = "silver"
+            text = ax.text(j, i, heatmap_array[i][j],
+                        ha = "center", va = "center", color = c, fontsize=14)
+
+    # Add the color bar
+    cbar = ax.figure.colorbar(im, ax = ax)
+    cbar.ax.set_ylabel("Total Reactions")
+
+    plt.savefig("../Figures/Fig5A.svg", format="svg")
+    plt.savefig("../Figures/Fig5A.png", format="png")
+    plt.close()
 
     ### Panel 5B - achiral/chiral modulating &conserving 
     ### Get full seed set & reaction set
