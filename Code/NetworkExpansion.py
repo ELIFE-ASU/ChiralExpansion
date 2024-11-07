@@ -11,7 +11,7 @@ except:
 if not os.path.exists('Output/'):
     os.mkdir('Output/')
 
-rxn_db_dir = '../lets-get-kegg/Data/'
+rxn_db_dir = '../../lets-get-kegg/Data/' #Assumes lets-get-kegg is two directories above it (JM-specific, TODO: look into relative paths)
 get_sides = lambda x: x[['left', 'right']]
 
 # imports a reaction dataframe, removes glycan reactions and reactions for which chiral info is missing
@@ -129,8 +129,8 @@ def add_bipartite_edge_context(results):
 
 
 # VARIABLES AND DATASETS
-# compound info
-chiral_labels = ((pd.read_csv(data_folder + 'kegg_data_C.csv.zip', index_col=0)
+# compound info (JM: Uses lets-get-kegg for compound parity)
+chiral_labels = ((pd.read_csv(rxn_db_dir + 'kegg_data_C.csv.zip', index_col=0)
                   .assign(is_chiral=lambda x: x.n_chiral_centers > 0)
                   .rename(columns={'n_chiral_centers': 'Chiral_Centers'})
                   .set_index('compound_id')))

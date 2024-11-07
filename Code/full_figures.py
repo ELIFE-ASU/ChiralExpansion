@@ -28,7 +28,7 @@ def fig2(seed_name, random_seed_set_size, n_iter):
     compound_scope = set.union(*reaction_scope.stack())
     seed_scope = seed_candidates.loc[seed_candidates.index.isin(compound_scope)]
     seed_sets = {i: seed_scope.query('Source.str.contains("'+i+'")').index for i in seed_groups}
-    print("- Seed Set -")
+    print(f"- Seed Set ({seed_name}) -")
 
     ### Run network expansion on original seed set
     results = dict()
@@ -589,7 +589,6 @@ def fig5(seed_name, crossover_step, first_chiral_step):
         print(seeds)
         results[name] = expand_from_seed_set(seeds=seeds, reactions=reaction_scope, max_gen=max_generation)
 
-    print(rxn_df)
     chiral_modulating, chiral_conserving, achiral_conserving = get_chiral_modulations(results[name]["participants"], rxn_df)
 
     fig, ax = plt.subplots(figsize=(12,12))
@@ -723,21 +722,21 @@ def main():
     # Seed set
     seed_name = "JM"
         
-    # print("---- Generating Figure 2 ----")
-    # #~Three minutes per 1000 random expansions (depends on chirality & size)
-    # random_seed_set_size = 10
-    # n_iter = 1000
-    # crossover_step, first_chiral_step = fig2(seed_name=seed_name, random_seed_set_size=random_seed_set_size, 
-    #                                          n_iter=n_iter)
+    print("---- Generating Figure 2 ----")
+    #~Three minutes per 1000 random expansions (depends on chirality & size)
+    random_seed_set_size = 10
+    n_iter = 1000
+    crossover_step, first_chiral_step = fig2(seed_name=seed_name, random_seed_set_size=random_seed_set_size, 
+                                             n_iter=n_iter)
 
-    # print("---- Generating Figure 3 ----")
-    # fig3(seed_name=seed_name, crossover_step=crossover_step) 
+    print("---- Generating Figure 3 ----")
+    fig3(seed_name=seed_name, crossover_step=crossover_step) 
 
-    # print("---- Generating Figure 4 ----")
-    # fig4()
+    print("---- Generating Figure 4 ----")
+    fig4()
 
-    # print("---- Generating Figure 5 ----")
-    # fig5(seed_name=seed_name, crossover_step=crossover_step, first_chiral_step=first_chiral_step)
+    print("---- Generating Figure 5 ----")
+    fig5(seed_name=seed_name, crossover_step=crossover_step, first_chiral_step=first_chiral_step)
 
     print("---- Generating Figure 6 ----")
     fig6()
