@@ -4,6 +4,10 @@ import numpy as np
 import scipy.stats as stats
 from tqdm import tqdm
 tqdm.pandas()
+from requests import Session
+from requests.adapters import HTTPAdapter
+from urllib3.util import Retry
+import time
 
 import matplotlib.pyplot as plt
 import rdkit.Chem
@@ -390,4 +394,168 @@ def get_chiral_modulations(stepRxn_df, rxn_df):
         achiral_conserving.append(len(achiral_conserving_df[achiral_conserving_df["Reactant Chiral Count"] == achiral_conserving_df["Product Chiral Count"]]))
 
     return chiral_modulating, chiral_conserving, achiral_conserving
+
+def prepare_session():
+    """ 
+    Set up KEGG RestAPI session (from lets-get-kegg)
+    """
+    # Make the session
+    s = Session()
+    # Add retries
+    retries = Retry(
+        total=5,
+        backoff_factor=0.1,
+        status_forcelist=[502, 503, 504],
+        allowed_methods={'POST'},
+    )
+    # Mount the session
+    s.mount('https://', HTTPAdapter(max_retries=retries))
+    return s
+
+def get_pathway_data(session, request_sleep=0.4):
+    """ 
+    Heavily modified version of get_data from lets-get-kegg, pings kegg for pathway information
+    """
+    ### Get compounds belonging to each pathway
+    print("- Getting KEGG pathway-compound links -")
+    response = session.get(f"https://rest.kegg.jp/link/pathway/compound", timeout=10.0)
+    time.sleep(request_sleep)
+    pathway_cpd_link = dict()
+    if response.ok:
+        res = response.text.split("\n")
+        for line in res:
+            if line.startswith("cpd"):
+                cpd_path = line.split("\t") #([0] = "cpd:CXXXXX" ; [1] = "path:mapXXXXX")
+                pathway_id = int(cpd_path[1].split(":")[1].replace("map", ""))
+                if pathway_id not in pathway_cpd_link:
+                    pathway_cpd_link[pathway_id] = [cpd_path[0].split(":")[1]]
+                else:
+                    pathway_cpd_link[pathway_id].append(cpd_path[0].split(":")[1])
+    else:
+        # Some error in the response
+        print(f"Error in /link/pathway/compound, response {response.status_code}", flush=True)
+        return False
+    
+    print("- Getting KEGG pathway names -")
+    response = session.get(f"https://rest.kegg.jp/list/pathway", timeout=10.0)
+    pathway_names = dict()
+    if response.ok:
+        res = response.text.split("\n")
+        for line in res:
+            if line.startswith("map03020"):
+                break #Stop after Metabolism pathways end ()
+            if line.startswith("map"):
+                pathway_name = line.split("\t") #([0] = "mapXXXXX" ; [1] = "<NAME>")
+                pathway_id = int(pathway_name[0].replace("map", ""))
+                if pathway_id not in pathway_names:
+                    pathway_names[pathway_id] = pathway_name[1]
+    else:
+        # Some error in the response
+        print(f"Error in /list/pathway, response {response.status_code}", flush=True)
+        return False
+
+    return pathway_cpd_link, pathway_names
+
+def get_chiral_percentage_fromList(cpds, keggC_df):
+    """
+    Given a list of KEGG compound IDs, find the chiral percentage
+    """
+    sub_df = keggC_df[keggC_df["compound_id"].isin(cpds)]
+    if len(sub_df):
+        return np.count_nonzero(sub_df["n_chiral_centers"]) / len(sub_df), len(sub_df)
+    else:
+        return 0, 0
+    
+
+def get_pathway_colors(pathway_df):
+    #Hardcoding metabolic pathway subgroup names & colors
+
+    metabolism_groups = {"Carbohydrate Metabolism": [10,20,30,40,51,52,53,500,520,620,630,640,650,660,562],
+                        "Glycan Biosynthesis": [510,513,512,515,514,532,534,533,531,563,601,603,604,540,542,541,550,511,571,572],
+                        "Terpenoids and Polyketides": [900,902,909,904,906,905,981,908,903,281,1052,522,1051,1059,1056,1057,253,523,1054,1053,1055],
+                        "Lipid Metabolism": [61,62,71,73,100,120,121,140,561,564,565,600,590,591,592,1040],
+                        "Secondary Metabolite Biosynthesis": [940,945,941,944,942,943,901,403,950,960,1058,232,965,966,402,311,332,261,331,521,524,525,401,404,405,333,254,999,998,997],
+                        "Nucleotide Metabolism": [230,240],
+                        "Amino Acid Metabolism": [250,260,270,280,290,300,310,220,330,340,350,360,380,400],
+                        "Metabolism of Other Amino Acids": [410,430,440,450,460,470,480],
+                        "Cofactors and Vitamins": [730,740,750,760,770,780,785,790,670,830,860,130],
+                        "Energy Metabolism": [190,195,196,710,720,680,910,920],
+                        "Xenobiotics": [362,627,364,625,361,623,622,633,642,643,791,930,363,621,626,624,365,984,980,982,983]}
+
+    colors = {"Carbohydrate Metabolism": "#aa0f35", 
+            "Glycan Biosynthesis": "#487c7c", 
+            "Terpenoids and Polyketides": "#009ecb", 
+            "Lipid Metabolism": "#abdbfc", 
+            "Secondary Metabolite Biosynthesis": "#430057", 
+            "Nucleotide Metabolism": "#a0a75c", 
+            "Amino Acid Metabolism": "#603734",
+            "Metabolism of Other Amino Acids": "#d97e43", 
+            "Cofactors and Vitamins": "#313a61", 
+            "Energy Metabolism": "#fdc799",
+            "Xenobiotics": "#f5c500"}
+
+    pathway_group_keys = {"Carbohydrate Metabolism": 1, 
+            "Glycan Biosynthesis": 2, 
+            "Terpenoids and Polyketides": 3, 
+            "Lipid Metabolism": 4, 
+            "Secondary Metabolite Biosynthesis": 5, 
+            "Nucleotide Metabolism": 6, 
+            "Amino Acid Metabolism": 7,
+            "Metabolism of Other Amino Acids": 8, 
+            "Cofactors and Vitamins": 9, 
+            "Energy Metabolism": 10,
+            "Xenobiotics": 11}
+
+    color_list = ["#aa0f35", 
+            "#487c7c", 
+            "#009ecb", 
+            "#abdbfc", 
+            "#430057", 
+            "#a0a75c", 
+            "#603734",
+            "#d97e43", 
+            "#fdc799",
+            "#313a61", 
+            "#f5c500"]
+    
+    #Assign colors to all metabolic pathways
+    pathway_groups = {}
+    pathway_group_colors = {}
+    pathway_groups_list = []
+    pathway_key_list = []
+    pathway_colors = []
+
+    for _, row in pathway_df.iterrows():
+        found_group = 0
+        for group, pathways in metabolism_groups.items():
+            if int(row["ID"]) in pathways:
+                pathway_groups[int(row["ID"])] = group
+                pathway_group_colors[int(row["ID"])] = colors[group]
+                pathway_groups_list.append(group)
+                pathway_key_list.append(pathway_group_keys[group])
+                pathway_colors.append(row["ID"])
+                found_group = 1
+        if not found_group:
+            pathway_groups_list.append(np.nan)
+            pathway_key_list.append(np.nan)
+            pathway_colors.append(np.nan)
+
+    pathway_df["Group"] = pathway_groups_list
+    pathway_df["Group Key"] = pathway_key_list
+    pathway_df["Color"] = pathway_colors
+
+    pathway_df = pathway_df.dropna()
+
+    #Setup for box & whisker plot - needs a 2d array of chiralities
+    chiralities = []
+    for group in colors.keys():
+        chiralities.append(pathway_df[pathway_df['ID'].isin(metabolism_groups[group])]["Chirality"].tolist())
+
+    return pathway_df, chiralities, pathway_group_colors, metabolism_groups, colors, color_list
+
+def set_box_color(bp, color):
+  plt.setp(bp['boxes'], color=color)
+  plt.setp(bp['whiskers'], color=color)
+  plt.setp(bp['caps'], color=color)
+  plt.setp(bp['medians'], color=color)
 

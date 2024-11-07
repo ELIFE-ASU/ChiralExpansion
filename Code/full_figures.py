@@ -7,6 +7,7 @@ import numpy as np
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
+import matplotlib.ticker as plticker
 import seaborn as sns
 import pickle
 import csv
@@ -614,6 +615,102 @@ def fig5(seed_name, crossover_step, first_chiral_step):
     plt.savefig("../Figures/Fig5B.png", format="png")
     plt.close()
 
+def fig6():
+    ### Get pathway names & cpd lists from KEGG (see slack for API calls)
+    session = prepare_session()
+    pathway_cpd_links, pathway_names = get_pathway_data(session=session)
+    pathway_chiralPercentage = dict()
+    pathway_size = dict()
+
+    ### Get chirality of each pathway
+    print("- Calculating chiral percentage of pathways -")
+    for pathway in tqdm(pathway_cpd_links.keys()):
+        pathway_chiralPercentage[pathway], pathway_size[pathway] = get_chiral_percentage_fromList(pathway_cpd_links[pathway], keggC_df) 
+
+    pathway_df = pd.DataFrame([pathway_chiralPercentage, pathway_names, pathway_size]).transpose().dropna().sort_values(by=[0], ascending=False)
+    pathway_df = pathway_df.rename(columns={0: "Chirality", 1: "Name", 2: "Size"})
+
+    pathway_df['ID'] = pathway_df.index
+    #Get color setup & information
+    print("- Getting color schema -")
+    pathway_df, chiralities, pathway_group_colors, metabolism_groups, colors, color_list = get_pathway_colors(pathway_df)
+
+    ### Port over colors & plot individual panels
+    #Label with pathway number
+    labels = pathway_df['ID'].tolist()
+
+    #Define each angle for plotting
+    angles = np.linspace(0, 2*np.pi, len(labels), endpoint=False)
+    stats = pathway_df['Chirality'].tolist()
+
+    fig, ax = plt.subplots(figsize=(8,8), subplot_kw={'projection': 'polar'})
+    ax.plot(angles, stats, 'o-', linewidth=2, color="dimgrey")
+    ax.fill(angles, stats, alpha=0.25, color="dimgrey")
+    ax.set_thetagrids(angles * 180/np.pi, labels,)
+
+    #Make all angles rotated according to placement on the image
+    angles[np.cos(angles) < 0] = angles[np.cos(angles) < 0] + np.pi
+    angles = np.rad2deg(angles)
+    for label, angle in zip(ax.get_xticklabels(), angles):
+        x,y = label.get_position()
+        try:
+            lab = ax.text(x, y, label.get_text(), transform=label.get_transform(), 
+                        ha=label.get_ha(), va=label.get_va(), color=str(pathway_group_colors[int(label.get_text())]),
+                        fontsize=12)
+        except:
+            lab = ax.text(x, y, label.get_text(), transform=label.get_transform(), 
+                        ha=label.get_ha(), va=label.get_va(), color='k', fontsize=1)
+        lab.set_rotation(angle)
+        labels.append(lab)
+    ax.set_xticklabels([])
+    ax.set_yticklabels(["0.2", "0.4", "0.6", "0.8", ""], fontsize=14)
+
+    #label chiral percentage 
+    label_pos = ax.get_rlabel_position()
+    ax.text(np.radians(label_pos+10), ax.get_rmax()/2. + 0.05, "$\mathbb{C}$",
+            rotation=label_pos+4, ha='center', va='center', fontsize=30, weight="bold")
+    
+    plt.savefig("../Figures/Fig6A.svg", format="svg")
+    plt.savefig("../Figures/Fig6A.png", format="png")
+    plt.close()
+
+    ### Boxplot of pathway chirality distribution per metabolic group
+    fig, ax = plt.subplots(figsize=(12,8))
+
+    c = colors["Carbohydrate Metabolism"]
+    bplot = ax.boxplot(chiralities, patch_artist=True, positions=np.array(range(len(chiralities)))*1.0-0.4, widths=0.6, medianprops=dict(color="black")) # color=colors["Carbohydrate Metabolism"])
+    for patch, c in zip(bplot["boxes"], color_list):
+        patch.set_color(c)
+
+    ax.set_ylabel("$\mathbb{C}$", fontsize=30)
+    ax.xaxis.set_ticks([])
+
+    #legend of label colors
+    markers = [plt.Line2D([0,0],[0,0],color=color, marker='o', linestyle='', markersize=15) for color in colors.values()]
+    ax.legend(markers, colors.keys(), bbox_to_anchor=(1, 0.7), loc="upper left", numpoints=1, frameon=False, prop={"size":14})
+    ax.grid(True)
+    plt.tight_layout()
+
+    plt.savefig("../Figures/Fig6B.svg", format="svg")
+    plt.savefig("../Figures/Fig6B.png", format="png")
+    plt.close()
+
+    ### Pathway size by chirality
+    fig, ax = plt.subplots(figsize=(16,8))
+
+    pathway_df.sort_values(by="Group Key", inplace=True)
+    ax.scatter(pathway_df['Size'], pathway_df['Chirality'], c=pathway_df['Group'].map(colors), s=50)
+
+    ax.set_ylabel("$\mathbb{C}$", fontsize=30)
+    ax.set_xlabel("System Size (Compounds Per Pathway)")
+    loc = plticker.MultipleLocator(base=20.0) # this locator puts ticks at regular intervals
+    ax.xaxis.set_major_locator(loc)
+    ax.set_ylim(-.05, 1.05)
+
+    plt.savefig("../Figures/Fig6C.svg", format="svg")
+    plt.savefig("../Figures/Fig6C.png", format="png")
+    plt.close()
+
 
 def main():
     pd.set_option('future.no_silent_downcasting', True) #To avoid future warnings
@@ -622,19 +719,28 @@ def main():
         "size" : 22}
     for key, value in font.items():
         plt.rcParams.update({"font." + key : value})
+
+    # Seed set
+    seed_name = "JM"
         
     # print("---- Generating Figure 2 ----")
     # #~Three minutes per 1000 random expansions (depends on chirality & size)
-    crossover_step, first_chiral_step = fig2(seed_name="JM", random_seed_set_size=10, n_iter=1000)
+    # random_seed_set_size = 10
+    # n_iter = 1000
+    # crossover_step, first_chiral_step = fig2(seed_name=seed_name, random_seed_set_size=random_seed_set_size, 
+    #                                          n_iter=n_iter)
 
-    print("---- Generating Figure 3 ----")
-    fig3(seed_name="JM", crossover_step=crossover_step) 
+    # print("---- Generating Figure 3 ----")
+    # fig3(seed_name=seed_name, crossover_step=crossover_step) 
 
-    print("---- Generating Figure 4 ----")
-    fig4()
+    # print("---- Generating Figure 4 ----")
+    # fig4()
 
-    print("---- Generating Figure 5 ----")
-    fig5(seed_name="JM", crossover_step=crossover_step, first_chiral_step=first_chiral_step)
+    # print("---- Generating Figure 5 ----")
+    # fig5(seed_name=seed_name, crossover_step=crossover_step, first_chiral_step=first_chiral_step)
+
+    print("---- Generating Figure 6 ----")
+    fig6()
 
 if __name__ == "__main__":
     main()
