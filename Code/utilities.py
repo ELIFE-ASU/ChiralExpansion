@@ -8,6 +8,7 @@ from requests import Session
 from requests.adapters import HTTPAdapter
 from urllib3.util import Retry
 import time
+import math
 
 import matplotlib.pyplot as plt
 import rdkit.Chem
@@ -559,3 +560,43 @@ def set_box_color(bp, color):
   plt.setp(bp['caps'], color=color)
   plt.setp(bp['medians'], color=color)
 
+
+def get_chiral_fraction_atHeavyAtomCounts(df):
+    """ 
+    Chiral fractions at increasing heavy atom counts
+    """
+    chiral_fraction = []
+    for i in range(1, int(max(df["n_heavy_atoms"]))):
+        sub_df = df[df["n_heavy_atoms"] == i]
+        if len(sub_df) >= 10: #Only do this for heavy atom counts >= 10
+            chiral_fraction.append(sub_df["n_chiral_centers"].astype(bool).sum(axis=0) / float(len(sub_df)))
+        else:
+            chiral_fraction.append(float("NaN"))
+
+    achiral_fraction = []
+    for cf in chiral_fraction:
+        if not math.isnan(cf):
+            achiral_fraction.append(1 - cf)
+        else:
+            achiral_fraction.append(float("NaN"))
+
+    return chiral_fraction, achiral_fraction
+
+
+def get_chiral_order_parameters(keggC_df):
+    """
+    Get chiral order parameters (cop) for GDB  & KEGG
+    """
+    gdb_counts_df = pd.read_csv("../Data/GDB_raw_counts.csv")
+    gdb_cop = []
+    for _, row in gdb_counts_df.iterrows():
+        gdb_cop.append(row["count_chiral"] / (row["count_achiral"] + row["count_chiral"]))
+
+    kegg_cop = []
+    for i in range(17):
+        sub_df = keggC_df[keggC_df["n_heavy_atoms"] == i]
+        achiral = len(sub_df[sub_df["n_chiral_centers"] == 0])
+        chiral = len(sub_df[sub_df["n_chiral_centers"] != 0])
+        kegg_cop.append(chiral / (achiral + chiral))
+
+    return gdb_cop, kegg_cop
