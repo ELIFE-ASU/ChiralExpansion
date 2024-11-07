@@ -3,15 +3,20 @@ import re
 import networkx as nx
 import pandas as pd
 
-try:
-    tests = os.listdir('../Data/')
-    data_folder = '../Data/'
-except:
-    data_folder = 'Data/'
-if not os.path.exists('Output/'):
-    os.mkdir('Output/')
 
-rxn_db_dir = '../../lets-get-kegg/Data/' #Assumes lets-get-kegg is two directories above it (JM-specific, TODO: look into relative paths)
+# scans for a directory within higher-level directory structure; means code can run from any subdirectory of ChiralExpansion
+def get_dir_zoomout_level(dirname:str, attempts=5):
+    n = 0
+    while not os.path.isdir(dirname) and n < attempts:
+        dirname, n = '../' + dirname, n+1
+    if not os.path.isdir(dirname):
+        raise FileNotFoundError('Directory "'+dirname.replace('../','') + '" not found within '+str(attempts)+' levels.')
+    else: return dirname
+
+# find relative path to data source
+data_folder = get_dir_zoomout_level('Data/')
+rxn_db_dir = get_dir_zoomout_level('lets-get-kegg/Data/')
+
 get_sides = lambda x: x[['left', 'right']]
 
 # imports a reaction dataframe, removes glycan reactions and reactions for which chiral info is missing
