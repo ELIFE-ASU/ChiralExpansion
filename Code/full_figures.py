@@ -19,6 +19,65 @@ max_generation = 1000 #Arbitrarily large value
 seed_candidates = pd.read_csv('../Data/SampleSeeds.csv.zip', index_col=0, compression='zip')
 keggC_df = pd.read_csv("../../lets-get-kegg/Data/kegg_data_C.csv.zip", index_col=0, compression="zip")
 
+def fig1():
+    #GDB data
+    gdb_df = pd.read_csv("../Data/GDB_output.csv")
+    #Chiral fractions at heavy atom counts
+    chiral_fraction, achiral_fraction = get_chiral_fraction_atHeavyAtomCounts(keggC_df)
+    gdb_cop, kegg_cop = get_chiral_order_parameters(keggC_df)
+
+    import matplotlib.gridspec as gridspec
+
+    plt.rcParams['figure.constrained_layout.use'] = False
+    achiral_color = "#FFC012"
+    chiral_color = "#34CCFF"
+    plt.figure(figsize=(24,8))
+    gs = gridspec.GridSpec(2,6)
+
+    ax1 = plt.subplot(gs[:,0:2])
+    ax1.plot(gdb_df["fraction_achiral"], linewidth=3, label="Achiral", color=achiral_color)
+    ax1.plot(gdb_df["fraction_chiral"], linewidth=3, label="Chiral", color=chiral_color)
+    ax1.axvspan(7, 12, alpha=0.5, color='grey')
+
+    ax1.set_xlim(0,16)
+    ax1.set_ylim(-0.05, 1.05)
+    ax1.set_xticks(list(np.arange(0,16)), minor=True)
+    ax1.set_xlabel("Heavy Atoms")
+    ax1.set_ylabel("Fraction Achiral/Chiral")
+    ax1.set_title("GDB")
+
+    ax2 = plt.subplot(gs[:,2:4])
+    ax2.plot(achiral_fraction, linewidth=3, label="Achiral", color=achiral_color)
+    ax2.plot(chiral_fraction, linewidth=3, label="Chiral", color=chiral_color)
+    ax2.axvspan(7, 12, alpha=0.5, color='grey', label="Enumerated\nChemistry\nCrossover")
+
+    ax2.legend(prop={"size":14}, bbox_to_anchor=(1.01, 0.78), frameon=False)
+    ax2.set_xlim(0,16)
+    ax2.set_ylim(-0.05, 1.05)
+    ax2.set_xticks(list(np.arange(0,16)), minor=True)
+    ax2.set_xlabel("Heavy Atoms")
+    ax2.set_title("KEGG")
+
+    ax3 = plt.subplot(gs[1,4:])
+    ax3.plot(gdb_cop, linewidth=3, label="GDB ", color="k", linestyle="--")
+    ax3.plot(kegg_cop, linewidth=3, label="KEGG", color="k", linestyle=":")
+
+    ax3.legend(frameon=False, prop={"size":14})
+    ax3.set_xlim(0,16)
+    ax3.set_ylim(-0.05, 1.05)
+    ax3.set_xticks(list(np.arange(0,16)), minor=True)
+    ax3.set_xlabel("Heavy Atoms")
+    ax3.set_ylabel("Chiral Order Parameter $\mathbb{C}$")
+    ax3.annotate(xy=(0.45,0.6), text=r"$\mathbb{C} = \frac{C}{C+A}$", )
+
+    plt.subplots_adjust(wspace=0.5)
+
+    #Axis orientation is important, keeping figure 1 together
+    plt.savefig("../Figures/Fig1.svg", format="svg")
+    plt.savefig("../Figures/Fig1.png", format="png")
+    plt.close()
+
+
 def fig2(seed_name, random_seed_set_size, n_iter):
     ### Get full seed set & reaction set
     seed_groups = [seed_name]
@@ -79,8 +138,8 @@ def fig2(seed_name, random_seed_set_size, n_iter):
     ax.annotate(f"Achiral-to-Chiral\nCrossover\nStep {achiral_chiral_crossover_step}", xy=(achiral_chiral_crossover_step, 2500), 
                 xytext=(achiral_chiral_crossover_step+8,2850), color="k", arrowprops={"arrowstyle": "simple", "color": "k"}, fontsize=14, 
                 ha='center', va='center', zorder=3)
-    ax.annotate(f"First Chiral\nCompound\nStep {first_chiral_step}", xy=(first_chiral_step, 2500), 
-                xytext=(first_chiral_step+5,2850), color="k", arrowprops={"arrowstyle": "simple", "color": "k"}, fontsize=14, 
+    ax.annotate(f"First Chiral\nCompound\nStep {first_chiral_step}", xy=(first_chiral_step, 1750), 
+                xytext=(first_chiral_step+10,2000), color="k", arrowprops={"arrowstyle": "simple", "color": "k"}, fontsize=14, 
                 ha='center', va='center', zorder=3)
 
     ax.set_ylim([0, 3100])
@@ -253,8 +312,7 @@ def fig3(seed_name, crossover_step):
     g.set_axis_labels(xlabel="Expansion Step", ylabel="Chiral Centers")
 
     g.figure.set_size_inches((16, 8))
-
-    g.ax_joint.legend(title="Heavy Atom\nPercentiles", prop={"size":12})
+    g.ax_joint.legend(title="Heavy Atom\nPercentiles", bbox_to_anchor=(0.85,1), prop={"size":12})
 
     plt.savefig("../Figures/Fig3B.png", format="png")
     plt.savefig("../Figures/Fig3B.svg", format="svg")
@@ -265,9 +323,6 @@ def fig3(seed_name, crossover_step):
     cpd_degrees = get_CpdDegrees(cpd_degrees=cpd_degrees)
 
     expansion_arrival_df["degree"] = expansion_arrival_df["compound_id"].map(cpd_degrees)
-
-    # #Only include up to expansion step 14 to match network (TODO: why is this here?)
-    # sub_df = df[df["Expansion Step"] <= 14]
 
     fig = plt.figure(figsize=(16, 8))
     gs = fig.add_gridspec(2, 2,  width_ratios=(4, 1), height_ratios=(1, 4),
@@ -599,11 +654,11 @@ def fig5(seed_name, crossover_step, first_chiral_step):
 
     ax.axvline(x=crossover_step, color="k", linestyle="--", alpha=0.9)
     ax.axvline(x=first_chiral_step, color="k", linestyle=":", alpha=0.5)
-    ax.annotate(f"Achiral-to-Chiral\nCrossover\nStep {crossover_step}", xy=(crossover_step, 3500), 
-                xytext=(crossover_step+8,3850), color="k", arrowprops={"arrowstyle": "simple", "color": "k"}, fontsize=14, 
+    ax.annotate(f"Achiral-to-Chiral\nCrossover\nStep {crossover_step}", xy=(crossover_step, 4100), 
+                xytext=(crossover_step+8,4350), color="k", arrowprops={"arrowstyle": "simple", "color": "k"}, fontsize=14, 
                 ha='center', va='center', zorder=3)
-    ax.annotate(f"First Chiral\nCompound\nStep {first_chiral_step}", xy=(first_chiral_step, 3500), 
-                xytext=(first_chiral_step+5,3850), color="k", arrowprops={"arrowstyle": "simple", "color": "k"}, fontsize=14, 
+    ax.annotate(f"First Chiral\nCompound\nStep {first_chiral_step}", xy=(first_chiral_step, 3300), 
+                xytext=(first_chiral_step+10,3550), color="k", arrowprops={"arrowstyle": "simple", "color": "k"}, fontsize=14, 
                 ha='center', va='center', zorder=3)
     
     ax.legend(facecolor="white", framealpha=1, prop={"size":12})
@@ -720,7 +775,10 @@ def main():
         plt.rcParams.update({"font." + key : value})
 
     # Seed set
-    seed_name = "JM"
+    seed_name = "JM|G24|G17|TW"
+
+    print("---- Generating Figure 1 ----")
+    fig1()
         
     print("---- Generating Figure 2 ----")
     #~Three minutes per 1000 random expansions (depends on chirality & size)
