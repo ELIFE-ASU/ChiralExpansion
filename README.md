@@ -24,10 +24,10 @@ Run calc_chirality_gdb.py
 
 
 ## Required packages
-pandas, chemparse, numpy, rdkit, matplotlib, scipy, networkx, seaborn, tqdm, pickle, csv
+pandas, chemparse, numpy, rdkit, matplotlib, scipy, networkx, seaborn, tqdm, pickle, csv, json
 
 conda install pandas numpy matplotlib scipy
 
-pip install --user --upgrade chemparse networkx[default] seaborn tqdm pickle csv
+pip install --user --upgrade chemparse networkx[default] seaborn tqdm pickle csv json
 
 conda install -c conda-forge rdkit
