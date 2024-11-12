@@ -77,6 +77,7 @@ def expand_from_seed_set(seeds, reactions: pd.DataFrame, max_gen: int):
     except:
         participants.loc[0, 'reactions'] = pd.NA   
     arrival_step = participants.stack().explode().drop_duplicates().dropna().reset_index().set_index(0)['level_0']
+    participants = participants.join(participants.diff().fillna(participants).add_prefix('new '))
     # generate info for edge lists
     steps = rns.T.idxmax()  # note first appearance of each reaction
     edge_pool = reaction_pool.loc[rns.index].copy(deep=True).assign(
@@ -107,6 +108,16 @@ def define_reachable_components(seeds, reactions: pd.DataFrame):
     return ({'reachable_compounds': [i for i in accessible_nodes if i.startswith('C')],
              'reachable_reactions': [i for i in accessible_nodes if i.startswith('R') or i.startswith('A')]})
 
+
+# generates an annotated bipartite edgelist 
+def generate_annotated_bipartite_edgelist(single_result):
+    # use make_bipartite_edgelist to generate prelim edgelist
+    single_result['bipartite_edgelist'] = make_bipartite_edgelist(single_result['edge_pool'])
+    # use add_bipartite_edge_context to add context on essentiality of each edge
+    single_result = add_bipartite_edge_context(single_result)
+    return(single_result)
+
+
 # generates a bipartite edgelist from expand_from_seed_set's edge_pool output
 def make_bipartite_edgelist(edge_pool: pd.DataFrame):
     df = edge_pool.copy(deep=True)
@@ -120,17 +131,16 @@ def make_bipartite_edgelist(edge_pool: pd.DataFrame):
     return(all_edges)
 
 
-def add_bipartite_edge_context(results):
-    for name in results.keys():
-        results[name]['bipartite_edgelist'] = (results[name]['bipartite_edgelist'].join(results[name]['bipartite_edgelist']
-                                        [['reaction','source','target']].applymap(lambda x: results[name]['arrival_step'][x]).add_suffix('_step')))
-        df = results[name]['bipartite_edgelist']
-        impactful_precursors = df.query('directed').query('(target==reaction & reaction_step>source_step) | (reaction==source & reaction_step==target_step)').index
-        immediate_precursors = df.loc[impactful_precursors].query('~(reaction_step-source_step!=1)').index
-        results[name]['bipartite_edgelist'] = results[name]['bipartite_edgelist'].assign(
-                impactful_precursor = df.index.isin(impactful_precursors),
-                immediate_precursor = df.index.isin(immediate_precursors))
-    return(results)
+# adds context to each edge regarding its essentiality
+def add_bipartite_edge_context(single_result):
+    df = single_result['bipartite_edgelist']
+    df = (df.join(df[['reaction','source','target']].applymap(lambda x: single_result['arrival_step'][x]).add_suffix('_step')))
+    impactful_precursors = df.query('directed').query('(target==reaction & reaction_step>source_step) | (reaction==source & reaction_step==target_step)').index
+    immediate_precursors = df.loc[impactful_precursors].query('~(reaction_step-source_step!=1)').index
+    single_result['bipartite_edgelist'] = df.assign(impactful_precursor = df.index.isin(impactful_precursors),
+                                             immediate_precursor = df.index.isin(immediate_precursors))
+    return(single_result)
+
 
 
 # VARIABLES AND DATASETS
