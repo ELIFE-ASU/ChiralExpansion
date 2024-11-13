@@ -721,6 +721,8 @@ def get_chiral_order_parameters(keggC_df):
     for _, row in gdb_counts_df.iterrows():
         gdb_cop.append(row["count_chiral"] /
                        (row["count_achiral"] + row["count_chiral"]))
+        
+    print(f"- GDB Compound Totals:\n\tAchiral: {gdb_counts_df['count_achiral'].sum()}\n\tChiral: {gdb_counts_df['count_chiral'].sum()}")
 
     kegg_cop = []
     for i in range(17):
@@ -728,5 +730,7 @@ def get_chiral_order_parameters(keggC_df):
         achiral = len(sub_df[sub_df["n_chiral_centers"] == 0])
         chiral = len(sub_df[sub_df["n_chiral_centers"] != 0])
         kegg_cop.append(chiral / (achiral + chiral))
+
+    print(f"- KEGG Compound Size = {len(keggC_df)} -")
 
     return gdb_cop, kegg_cop
