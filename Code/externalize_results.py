@@ -1,6 +1,8 @@
 import os
-import pandas as pd
+
 import matplotlib.pyplot as plt
+import pandas as pd
+
 
 # purpose: store raw and processed output of network expansions.
 
@@ -38,21 +40,23 @@ def make_lists_printable(df):
 
 def write_expansion_csv(results):
     for i in results.keys():
-        expansion_scope =  '#'+'|'.join(results[i]['seeds'])
-        open('Output/'+i+'_expansion.csv','w').write(expansion_scope+'\n')
-        make_lists_printable(results[i]['edge_pool']).to_csv('Output/'+i+'_expansion.csv', sep=',', index=True, mode='a')
-    return([i for i in os.listdir('Output/') if i.endswith('.csv')])
+        expansion_scope = '#' + '|'.join(results[i]['seeds'])
+        open('Output/' + i + '_expansion.csv', 'w').write(expansion_scope + '\n')
+        make_lists_printable(results[i]['edge_pool']).to_csv('Output/' + i + '_expansion.csv', sep=',', index=True,
+                                                             mode='a')
+    return ([i for i in os.listdir('Output/') if i.endswith('.csv')])
 
 
 # purpose: plot summary of expansion results
 
 def plot_expansion_summary(summaries, filename='expansion_comparison_plot.pdf'):
     order = summaries['compound count'].iloc[-1].sort_values(ascending=False).index
-    fig, ax = plt.subplots(len(summaries.keys()), 1, figsize=(4, 2.2*len(summaries.keys())), sharex=True, layout='compressed')
+    fig, ax = plt.subplots(len(summaries.keys()), 1, figsize=(4, 2.2 * len(summaries.keys())), sharex=True,
+                           layout='compressed')
     for ict, iname in enumerate(summaries.keys()):
-        summaries[iname].loc[:, order].plot(ax=ax[ict], ylabel=iname, legend=False, grid=True, xlim=0, ylim=0, xlabel='expansion step')
-        if iname=='chiral fraction': ax[ict].axhline(0.5, color='gray', linestyle='dotted', lw=0.7)
+        summaries[iname].loc[:, order].plot(ax=ax[ict], ylabel=iname, legend=False, grid=True, xlim=0, ylim=0,
+                                            xlabel='expansion step')
+        if iname == 'chiral fraction': ax[ict].axhline(0.5, color='gray', linestyle='dotted', lw=0.7)
     ax[-1].legend(loc='center', bbox_to_anchor=(0.5, -0.5), title='', ncols=3)
-    plt.savefig('Output/'+filename, dpi=300, edgecolor='w', facecolor='w')
-    return(None)
-
+    plt.savefig('Output/' + filename, dpi=300, edgecolor='w', facecolor='w')
+    return (None)
