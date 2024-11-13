@@ -1,17 +1,21 @@
 import os
 import re
+
 import networkx as nx
 import pandas as pd
 
 
 # scans for a directory within higher-level directory structure; means code can run from any subdirectory of ChiralExpansion
-def get_dir_zoomout_level(dirname:str, attempts=5):
+def get_dir_zoomout_level(dirname: str, attempts=5):
     n = 0
     while not os.path.isdir(dirname) and n < attempts:
-        dirname, n = '../' + dirname, n+1
+        dirname, n = '../' + dirname, n + 1
     if not os.path.isdir(dirname):
-        raise FileNotFoundError('Directory "'+dirname.replace('../','') + '" not found within '+str(attempts)+' levels.')
-    else: return dirname
+        raise FileNotFoundError(
+            'Directory "' + dirname.replace('../', '') + '" not found within ' + str(attempts) + ' levels.')
+    else:
+        return dirname
+
 
 # find relative path to data source
 data_folder = get_dir_zoomout_level('Data/')
@@ -19,8 +23,9 @@ rxn_db_dir = get_dir_zoomout_level('lets-get-kegg/Data/')
 
 get_sides = lambda x: x[['left', 'right']]
 
+
 # imports a reaction dataframe, removes glycan reactions and reactions for which chiral info is missing
-def import_reaction_file(fpath=rxn_db_dir+'kegg_data_R_processed.csv.zip'):
+def import_reaction_file(fpath=rxn_db_dir + 'kegg_data_R_processed.csv.zip'):
     df = pd.read_csv(fpath, index_col=0).drop(columns=['Unnamed: 0', 'Unnamed: 0.1'], errors='ignore')
     if 'id' in df.columns:
         df.set_index('id', inplace=True)
@@ -28,11 +33,12 @@ def import_reaction_file(fpath=rxn_db_dir+'kegg_data_R_processed.csv.zip'):
     for i in ['left', 'right']:
         df[i] = df[i].str.split(' ').apply(lambda x: set([j for j in x if j.startswith('C')]))
     df['has_chiral_info'] = (get_sides(df).applymap(list).sum(axis=1).apply(set)
-                            - set(chiral_labels.index)).apply(len) == 0
+                             - set(chiral_labels.index)).apply(len) == 0
     df = df.query('has_chiral_info & reaction.str.contains("G")==False')
     overall_reactions = ['R13204', 'R13205', 'R13206', 'R13207', 'R13208', 'R13209', 'R13210', 'R13211', 'R13222']
     df.drop(overall_reactions, inplace=True, errors='ignore')
     return df
+
 
 # turns a boolean DataFrame into a series of lists; entry shows which rows are true for a given column, i.e.,
 # which reactions are enabled.
@@ -75,7 +81,7 @@ def expand_from_seed_set(seeds, reactions: pd.DataFrame, max_gen: int):
     try:
         participants.loc[0, 'reactions'] = set(seeds) - set(seeds)
     except:
-        participants.loc[0, 'reactions'] = pd.NA   
+        participants.loc[0, 'reactions'] = pd.NA
     arrival_step = participants.stack().explode().drop_duplicates().dropna().reset_index().set_index(0)['level_0']
     participants = participants.join(participants.diff().fillna(participants).add_prefix('new '))
     # generate info for edge lists
@@ -115,32 +121,35 @@ def generate_annotated_bipartite_edgelist(single_result):
     single_result['bipartite_edgelist'] = make_bipartite_edgelist(single_result['edge_pool'])
     # use add_bipartite_edge_context to add context on essentiality of each edge
     single_result = add_bipartite_edge_context(single_result)
-    return(single_result)
+    return (single_result)
 
 
 # generates a bipartite edgelist from expand_from_seed_set's edge_pool output
 def make_bipartite_edgelist(edge_pool: pd.DataFrame):
     df = edge_pool.copy(deep=True)
-    df['reaction'] = df['reaction'].str.replace('A', 'T') # so that max identifies reaction, not compound
-    sub_edges = df.explode('source').drop(columns='target').rename(columns={'reaction':'target'})
-    prod_edges = df.explode('target').drop(columns='source').rename(columns={'reaction':'source'})
+    df['reaction'] = df['reaction'].str.replace('A', 'T')  # so that max identifies reaction, not compound
+    sub_edges = df.explode('source').drop(columns='target').rename(columns={'reaction': 'target'})
+    prod_edges = df.explode('target').drop(columns='source').rename(columns={'reaction': 'source'})
     all_edges = pd.concat([sub_edges, prod_edges], axis=0, ignore_index=True)
-    all_edges['reaction'] = all_edges[['source','target']].max(axis=1)
-    all_edges = all_edges.sort_values(by=['step','reaction','source','target']).reset_index(drop=True).loc[:,all_edges.nunique().sort_values().index]
-    all_edges.update(all_edges[['source','target','reaction']].applymap(lambda x: x.replace('T','A')))  # revert back to original
-    return(all_edges)
+    all_edges['reaction'] = all_edges[['source', 'target']].max(axis=1)
+    all_edges = all_edges.sort_values(by=['step', 'reaction', 'source', 'target']).reset_index(drop=True).loc[:,
+                all_edges.nunique().sort_values().index]
+    all_edges.update(
+        all_edges[['source', 'target', 'reaction']].applymap(lambda x: x.replace('T', 'A')))  # revert back to original
+    return (all_edges)
 
 
 # adds context to each edge regarding its essentiality
 def add_bipartite_edge_context(single_result):
     df = single_result['bipartite_edgelist']
-    df = (df.join(df[['reaction','source','target']].applymap(lambda x: single_result['arrival_step'][x]).add_suffix('_step')))
-    impactful_precursors = df.query('directed').query('(target==reaction & reaction_step>source_step) | (reaction==source & reaction_step==target_step)').index
+    df = (df.join(
+        df[['reaction', 'source', 'target']].applymap(lambda x: single_result['arrival_step'][x]).add_suffix('_step')))
+    impactful_precursors = df.query('directed').query(
+        '(target==reaction & reaction_step>source_step) | (reaction==source & reaction_step==target_step)').index
     immediate_precursors = df.loc[impactful_precursors].query('~(reaction_step-source_step!=1)').index
-    single_result['bipartite_edgelist'] = df.assign(impactful_precursor = df.index.isin(impactful_precursors),
-                                             immediate_precursor = df.index.isin(immediate_precursors))
-    return(single_result)
-
+    single_result['bipartite_edgelist'] = df.assign(impactful_precursor=df.index.isin(impactful_precursors),
+                                                    immediate_precursor=df.index.isin(immediate_precursors))
+    return (single_result)
 
 
 # VARIABLES AND DATASETS
@@ -153,5 +162,6 @@ chiral_labels['elements'] = chiral_labels['formula'].apply(
     lambda x: set([s.strip('+-1234567890') for s in re.split("([A-Z][^A-Z]*)", x) if s]))
 
 # ec_rns: KEGG reaction-enzyme entry linkages. TODO - remove when this is obtained using lets-get-kegg
-ec_rns = pd.read_csv('https://rest.kegg.jp/link/enzyme/reaction', sep='\t', header=None).applymap(lambda x: x.split(':')[1]).groupby(0)[1].apply(list).apply('|'.join)
+ec_rns = pd.read_csv('https://rest.kegg.jp/link/enzyme/reaction', sep='\t', header=None).applymap(
+    lambda x: x.split(':')[1]).groupby(0)[1].apply(list).apply('|'.join)
 seed_candidates = pd.read_csv(f'{data_folder}/SampleSeeds.csv.zip', index_col=0, compression='zip')

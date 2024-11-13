@@ -1,6 +1,7 @@
 import os
-import pandas as pd
+
 import numpy as np
+import pandas as pd
 import scipy.stats as stats
 from tqdm import tqdm
 
@@ -178,7 +179,7 @@ def getRandomSeedSet(kegg_df, size, chirality="both"):
     elif chirality == "achiral":
         sub_df = kegg_df[kegg_df["n_chiral_centers"] == 0]
     else:
-        sub_df = kegg_df  #To ensure remainder of code works
+        sub_df = kegg_df  # To ensure remainder of code works
 
     return sub_df["compound_id"].sample(size).values
 
@@ -215,7 +216,7 @@ def get_luca_percentage(df):
             if cpd in luca_cpds:
                 luca_count += 1
         percent_luca.append((float(luca_count) / len(luca_cpds)) *
-                            100)  #Put into a percentage (0-100) scale
+                            100)  # Put into a percentage (0-100) scale
 
     return percent_luca
 
@@ -227,14 +228,14 @@ def linkArrivalStepHeavyAtoms(arrival_df, kegg_df):
                        left_on="compound_id",
                        right_index=True).dropna()
     kegg_df = kegg_df.rename(columns={"level_0": "arrival"
-                                     })  #Cleaning up merge notation
+                                      })  # Cleaning up merge notation
 
     heavy_atom_counts = np.array(kegg_df["n_heavy_atoms"])
 
     heavy_atom_percentiles = []
     for ha in kegg_df["n_heavy_atoms"].to_list():
-        try:  #Account for possible NaNs
-            #Bins of 20 (10 bins) & 40 (5 bins) heavy atoms
+        try:  # Account for possible NaNs
+            # Bins of 20 (10 bins) & 40 (5 bins) heavy atoms
             if ha <= np.percentile(heavy_atom_counts, 20):
                 heavy_atom_percentiles.append("0 - 20th")
             elif ha <= np.percentile(heavy_atom_counts, 40):
@@ -282,14 +283,14 @@ def degrees_PerRxn(rxnString, cpd_degrees):
 
 
 def get_CpdDegrees(cpd_degrees):
-    #atlas_kegg_processed_merged is the current source of truth (right, @Camerian & @Louie?)
+    # atlas_kegg_processed_merged is the current source of truth (right, @Camerian & @Louie?)
     rxn_df = pd.read_csv(
         "../../lets-get-kegg/Data/atlas_kegg_processed_merged.csv.zip",
         index_col=0,
         compression="zip")
     rxn_df.drop_duplicates(
         subset="reaction", inplace=True
-    )  #TODO: fully check for duplicates (or wait for lets-get-kegg to be fixed)
+    )  # TODO: fully check for duplicates (or wait for lets-get-kegg to be fixed)
 
     rxn_df["reaction"].apply(degrees_PerRxn, args=(cpd_degrees,))
 
@@ -302,11 +303,11 @@ def scatter_hist(x, y, ax, ax_histy, c):
     """
     achiral_color = "#FFC012"
     chiral_color = "#34CCFF"
-    max_size = 100  #Maximum size of scatter points (for readability)
+    max_size = 100  # Maximum size of scatter points (for readability)
 
     ax_histy.tick_params(axis="y", labelleft=False)
 
-    #Plot by chiral/achiral color, and size by degree
+    # Plot by chiral/achiral color, and size by degree
     for i in range(len(x)):
         if y[i] == 0:
             ax.scatter(x[i],
@@ -319,7 +320,7 @@ def scatter_hist(x, y, ax, ax_histy, c):
                        color=chiral_color,
                        s=min(x[i] / 10, max_size))
 
-    #Set bins to middle of chiral center y-values to line up across axes
+    # Set bins to middle of chiral center y-values to line up across axes
     bins = np.arange(-0.5, 11.5, 1)
     cnts, values, bars = ax_histy.hist(np.array(y) - 0.5,
                                        orientation='horizontal',
@@ -327,11 +328,11 @@ def scatter_hist(x, y, ax, ax_histy, c):
                                        bins=bins,
                                        edgecolor="k")
 
-    #Make sure labels are smaller on histogram than scatter plot
+    # Make sure labels are smaller on histogram than scatter plot
     ax_histy.set_xlabel("Count", fontsize=14)
     ax_histy.tick_params(axis='both', which='major', labelsize=14)
 
-    #Change color of histogram bars
+    # Change color of histogram bars
     for i, (cnt, value, bar) in enumerate(zip(cnts, values, bars)):
         if i == 0:
             bar.set_facecolor(achiral_color)
@@ -355,7 +356,7 @@ def make_AUC_dashes(u, label, c, ls, ax):
     yvals = list(u.values())
     xvals = np.linspace(0, 1, num=len(yvals))
 
-    #Calculate AUC using composite travezoidal rule
+    # Calculate AUC using composite travezoidal rule
     area = np.trapz(yvals, dx=xvals[1])
 
     ax.plot(xvals, yvals, label=label, color=c, linestyle=ls, linewidth=4)
@@ -380,8 +381,7 @@ def find_chiral(u, df):
 
 
 def get_chiral_difference(chiral_values, achiral_values, c, l, ax):
-
-    #Step 1: get rank-order percentile values
+    # Step 1: get rank-order percentile values
     m_chiral_percentiles = []
     for i in np.linspace(0, len(chiral_values) - 1, 100):
         m_chiral_percentiles.append(chiral_values[int(i)])
@@ -390,11 +390,11 @@ def get_chiral_difference(chiral_values, achiral_values, c, l, ax):
     for i in np.linspace(0, len(achiral_values) - 1, 100):
         m_achiral_percentiles.append(achiral_values[int(i)])
 
-    #Step 2: find difference
+    # Step 2: find difference
     m_diffs = list(
         np.array(m_chiral_percentiles) - np.array(m_achiral_percentiles))
 
-    #Step 3: plot
+    # Step 3: plot
     label = ax.plot(m_diffs, color=c, linewidth=3, label=l)
 
     return label
@@ -441,7 +441,7 @@ def get_heatmap_array(keggC_df):
     rxn_chiral_count = {}
     heatmap_array = []
 
-    #atlas_kegg_processed_merged is the current source of truth (right, @Camerian & @Louie?)
+    # atlas_kegg_processed_merged is the current source of truth (right, @Camerian & @Louie?)
     rxn_df = pd.read_csv(
         "../../lets-get-kegg/Data/atlas_kegg_processed_merged.csv.zip",
         index_col=0,
@@ -449,9 +449,9 @@ def get_heatmap_array(keggC_df):
 
     print("- Calculating Reaction Chirality -")
     rxn_df[["Reactant Chiral Count", "Product Chiral Count"
-           ]] = rxn_df["reaction"].progress_apply(check_rxn_chirality,
-                                                  args=(keggC_df,
-                                                        rxn_chiral_count))
+            ]] = rxn_df["reaction"].progress_apply(check_rxn_chirality,
+                                                   args=(keggC_df,
+                                                         rxn_chiral_count))
 
     for i in range(5):
         row = []
@@ -484,8 +484,8 @@ def get_chiral_modulations(stepRxn_df, rxn_df):
                                            == 0]
         achiral_conserving.append(
             len(achiral_conserving_df[
-                achiral_conserving_df["Reactant Chiral Count"] ==
-                achiral_conserving_df["Product Chiral Count"]]))
+                    achiral_conserving_df["Reactant Chiral Count"] ==
+                    achiral_conserving_df["Product Chiral Count"]]))
 
     return chiral_modulating, chiral_conserving, achiral_conserving
 
@@ -523,7 +523,7 @@ def get_pathway_data(session, request_sleep=0.4):
         for line in res:
             if line.startswith("cpd"):
                 cpd_path = line.split(
-                    "\t")  #([0] = "cpd:CXXXXX" ; [1] = "path:mapXXXXX")
+                    "\t")  # ([0] = "cpd:CXXXXX" ; [1] = "path:mapXXXXX")
                 pathway_id = int(cpd_path[1].split(":")[1].replace("map", ""))
                 if pathway_id not in pathway_cpd_link:
                     pathway_cpd_link[pathway_id] = [cpd_path[0].split(":")[1]]
@@ -544,10 +544,10 @@ def get_pathway_data(session, request_sleep=0.4):
         res = response.text.split("\n")
         for line in res:
             if line.startswith("map03020"):
-                break  #Stop after Metabolism pathways end ()
+                break  # Stop after Metabolism pathways end ()
             if line.startswith("map"):
                 pathway_name = line.split(
-                    "\t")  #([0] = "mapXXXXX" ; [1] = "<NAME>")
+                    "\t")  # ([0] = "mapXXXXX" ; [1] = "<NAME>")
                 pathway_id = int(pathway_name[0].replace("map", ""))
                 if pathway_id not in pathway_names:
                     pathway_names[pathway_id] = pathway_name[1]
@@ -573,7 +573,7 @@ def get_chiral_percentage_fromList(cpds, keggC_df):
 
 
 def get_pathway_colors(pathway_df):
-    #Hardcoding metabolic pathway subgroup names & colors
+    # Hardcoding metabolic pathway subgroup names & colors
 
     metabolism_groups = {
         "Carbohydrate Metabolism": [
@@ -644,7 +644,7 @@ def get_pathway_colors(pathway_df):
         "#603734", "#d97e43", "#fdc799", "#313a61", "#f5c500"
     ]
 
-    #Assign colors to all metabolic pathways
+    # Assign colors to all metabolic pathways
     pathway_groups = {}
     pathway_group_colors = {}
     pathway_groups_list = []
@@ -672,7 +672,7 @@ def get_pathway_colors(pathway_df):
 
     pathway_df = pathway_df.dropna()
 
-    #Setup for box & whisker plot - needs a 2d array of chiralities
+    # Setup for box & whisker plot - needs a 2d array of chiralities
     chiralities = []
     for group in colors.keys():
         chiralities.append(pathway_df[pathway_df['ID'].isin(
@@ -695,7 +695,7 @@ def get_chiral_fraction_atHeavyAtomCounts(df):
     chiral_fraction = []
     for i in range(1, int(max(df["n_heavy_atoms"]))):
         sub_df = df[df["n_heavy_atoms"] == i]
-        if len(sub_df) >= 10:  #Only do this for heavy atom counts >= 10
+        if len(sub_df) >= 10:  # Only do this for heavy atom counts >= 10
             chiral_fraction.append(
                 sub_df["n_chiral_centers"].astype(bool).sum(axis=0) /
                 float(len(sub_df)))

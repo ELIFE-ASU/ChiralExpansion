@@ -1,11 +1,8 @@
 import warnings
-#warnings.simplefilter(action='ignore', category=FutureWarning) #To ignore future warnings in network expansion code
+
+# warnings.simplefilter(action='ignore', category=FutureWarning) #To ignore future warnings in network expansion code
 warnings.filterwarnings("ignore")
 
-import pandas as pd
-import numpy as np
-from tqdm import tqdm
-import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import matplotlib.ticker as plticker
 import seaborn as sns
@@ -15,7 +12,7 @@ from NetworkExpansion import *
 from utilities import *
 
 ### Global variables & methods (usually overwriting those from NetworkExpansion.py)
-max_generation = 1000  #Arbitrarily large value
+max_generation = 1000  # Arbitrarily large value
 seed_candidates = pd.read_csv('../Data/SampleSeeds.csv.zip',
                               index_col=0,
                               compression='zip')
@@ -25,9 +22,9 @@ keggC_df = pd.read_csv("../../lets-get-kegg/Data/kegg_data_C.csv.zip",
 
 
 def fig1():
-    #GDB data
+    # GDB data
     gdb_df = pd.read_csv("../Data/GDB_output.csv")
-    #Chiral fractions at heavy atom counts
+    # Chiral fractions at heavy atom counts
     chiral_fraction, achiral_fraction = get_chiral_fraction_atHeavyAtomCounts(
         keggC_df)
     gdb_cop, kegg_cop = get_chiral_order_parameters(keggC_df)
@@ -94,7 +91,7 @@ def fig1():
 
     plt.subplots_adjust(wspace=0.5)
 
-    #Axis orientation is important, keeping figure 1 together
+    # Axis orientation is important, keeping figure 1 together
     plt.savefig("../Figures/Fig1.svg", format="svg")
     plt.savefig("../Figures/Fig1.png", format="png")
     plt.close()
@@ -103,7 +100,7 @@ def fig1():
 def fig2(seed_name, random_seed_set_size, n_iter):
     ### Get full seed set & reaction set
     seed_groups = [seed_name]
-    rxn_db = "../../lets-get-kegg/Data/kegg_data_R_processed.csv.zip"  #Default in NetworkExpansion.import_reaction_file
+    rxn_db = "../../lets-get-kegg/Data/kegg_data_R_processed.csv.zip"  # Default in NetworkExpansion.import_reaction_file
     reaction_scope = get_sides(import_reaction_file(rxn_db))
 
     compound_scope = set.union(*reaction_scope.stack())
@@ -173,10 +170,10 @@ def fig2(seed_name, random_seed_set_size, n_iter):
         if chiral_count[i] > 0 and first_chiral_step == 0:
             first_chiral_step = i
         if chiral_count[i] > achiral_count[
-                i] and achiral_chiral_crossover_step == 0:
+            i] and achiral_chiral_crossover_step == 0:
             achiral_chiral_crossover_step = i
 
-    #Read in LUCA compounds & get percentages
+    # Read in LUCA compounds & get percentages
     print("- Calculating LUCA Percentage Per Expansion Step -")
     percent_luca = get_luca_percentage(results[seed_name]["participants"])
 
@@ -187,7 +184,7 @@ def fig2(seed_name, random_seed_set_size, n_iter):
     luca_color = "indigo"
 
     _, ax = plt.subplots(figsize=(10, 8))
-    ax2 = ax.twinx()  #LUCA histogram
+    ax2 = ax.twinx()  # LUCA histogram
 
     ax.plot(summaries["chiral compound count"],
             color=chiral_color,
@@ -237,7 +234,7 @@ def fig2(seed_name, random_seed_set_size, n_iter):
     ax.set_ylabel("Compounds")
     ax.set_xlabel("Expansion Step")
 
-    #ax.legend(prop={"size":14})
+    # ax.legend(prop={"size":14})
 
     ax2.set_ylim([0, 100])
     ax2.bar(np.arange(0, len(percent_luca), 1),
@@ -248,11 +245,11 @@ def fig2(seed_name, random_seed_set_size, n_iter):
 
     ax2.set_ylabel("LUCA Percentage", color=luca_color)
 
-    #Set y-axis tick labels to luca color
+    # Set y-axis tick labels to luca color
     ax2.tick_params(colors=luca_color)
-    #ax2.legend(prop={"size":14})
+    # ax2.legend(prop={"size":14})
 
-    #Complete legend
+    # Complete legend
     lines, labels = ax.get_legend_handles_labels()
     lines2, labels2 = ax2.get_legend_handles_labels()
     lgd = ax.legend(lines + lines2,
@@ -276,20 +273,20 @@ def fig2(seed_name, random_seed_set_size, n_iter):
 
     ax.errorbar(x=np.arange(
         0, len(summaries["achiral avg heavy atoms"][0].to_list()), 1),
-                y=summaries["achiral avg heavy atoms"][0].to_list(),
-                yerr=summaries["achiral std heavy atoms"][0].to_list(),
-                linewidth=3,
-                label="Achiral",
-                color=achiral_color)
+        y=summaries["achiral avg heavy atoms"][0].to_list(),
+        yerr=summaries["achiral std heavy atoms"][0].to_list(),
+        linewidth=3,
+        label="Achiral",
+        color=achiral_color)
 
     ax.errorbar(x=np.arange(
         0, len(summaries["chiral avg heavy atoms"][0].to_list()), 1),
-                y=summaries["chiral avg heavy atoms"][0].to_list(),
-                yerr=summaries["chiral std heavy atoms"][0].to_list(),
-                linewidth=3,
-                label="Chiral",
-                alpha=0.6,
-                color=chiral_color)
+        y=summaries["chiral avg heavy atoms"][0].to_list(),
+        yerr=summaries["chiral std heavy atoms"][0].to_list(),
+        linewidth=3,
+        label="Chiral",
+        alpha=0.6,
+        color=chiral_color)
 
     ax.axvline(x=achiral_chiral_crossover_step,
                color="k",
@@ -397,7 +394,7 @@ def fig2(seed_name, random_seed_set_size, n_iter):
         chiral_avg_percentages_chiral.append(np.mean(percentages))
         chiral_std_percentages_chiral.append(np.std(percentages))
 
-    #Remove extra np.NaN values
+    # Remove extra np.NaN values
     achiral_avg_percentages_chiral = [
         x for x in achiral_avg_percentages_chiral if x == x
     ]
@@ -413,7 +410,7 @@ def fig2(seed_name, random_seed_set_size, n_iter):
 
     ### Figure 2D
     _, ax = plt.subplots(figsize=(10, 8))
-    #Chiral errorbar
+    # Chiral errorbar
     ax.errorbar(x=np.arange(0, len(chiral_avg_percentages_chiral), 1),
                 y=chiral_avg_percentages_chiral,
                 yerr=chiral_std_percentages_chiral,
@@ -423,7 +420,7 @@ def fig2(seed_name, random_seed_set_size, n_iter):
                 markersize=10,
                 label="Chiral")
 
-    #Achiral errorbar
+    # Achiral errorbar
     ax.errorbar(x=np.arange(0, len(achiral_avg_percentages_chiral), 1),
                 y=achiral_avg_percentages_chiral,
                 yerr=achiral_std_percentages_chiral,
@@ -433,7 +430,7 @@ def fig2(seed_name, random_seed_set_size, n_iter):
                 markersize=10,
                 label="Achiral")
 
-    #Original (Figure 2B) percentages
+    # Original (Figure 2B) percentages
     original_chiralPercent = []
     for i in range(len(chiral_count)):
         original_chiralPercent.append(chiral_count[i] /
@@ -464,7 +461,7 @@ def fig2(seed_name, random_seed_set_size, n_iter):
 def fig3(seed_name, crossover_step):
     ### Get full seed set & reaction set
     seed_groups = [seed_name]
-    rxn_db = "../../lets-get-kegg/Data/kegg_data_R_processed.csv.zip"  #Default in NetworkExpansion.import_reaction_file
+    rxn_db = "../../lets-get-kegg/Data/kegg_data_R_processed.csv.zip"  # Default in NetworkExpansion.import_reaction_file
     reaction_scope = get_sides(import_reaction_file(rxn_db))
 
     compound_scope = set.union(*reaction_scope.stack())
@@ -569,7 +566,7 @@ def fig4():
     data_dir = "../Data/"
     df = dict()
     for domain in [
-            "Archaea", "Metagenome", "Bacteria", "Eukarya", "Biosphere", "LUCA"
+        "Archaea", "Metagenome", "Bacteria", "Eukarya", "Biosphere", "LUCA"
     ]:
         df[domain] = pd.read_csv(data_dir +
                                  "species_chirality_in_%s.csv" % domain)
@@ -587,8 +584,8 @@ def fig4():
     for s in kegg:
         kegg_avgs.append(np.mean(s))
 
-    #Find unversalities, and rank-order each
-    #Read in occurence data & create universality percentages
+    # Find unversalities, and rank-order each
+    # Read in occurence data & create universality percentages
 
     num_bacteria = 10434
     num_archaea = 1194
@@ -615,25 +612,25 @@ def fig4():
         reader = csv.reader(f, skipinitialspace=True)
         m_cpd_occurances = dict(reader)
 
-    #Translate occurances into % universality
+    # Translate occurances into % universality
     a_cpd_universality = {}
     b_cpd_universality = {}
     e_cpd_universality = {}
     m_cpd_universality = {}
 
-    #Num archaea: 1194
+    # Num archaea: 1194
     for item in a_cpd_occurances.items():
         a_cpd_universality[item[0]] = float(item[1]) / num_archaea
 
-    #num bacteria = 10434
+    # num bacteria = 10434
     for item in b_cpd_occurances.items():
         b_cpd_universality[item[0]] = float(item[1]) / num_bacteria
 
-    #Num eukarya: 267
+    # Num eukarya: 267
     for item in e_cpd_occurances.items():
         e_cpd_universality[item[0]] = float(item[1]) / num_eukarya
 
-    #Num metagenomes = 6112
+    # Num metagenomes = 6112
     for item in m_cpd_occurances.items():
         m_cpd_universality[item[0]] = float(item[1]) / num_metagenomes
 
@@ -699,7 +696,7 @@ def fig4():
     list_domain = ["Metagenome", "Bacteria", "Archaea", "Eukarya"]
 
     handles = [
-    ]  #Handle array used for legend compatibility with Reaxys sampling
+    ]  # Handle array used for legend compatibility with Reaxys sampling
 
     for domain in list_domain:
         x = df[domain].total_size
@@ -711,7 +708,7 @@ def fig4():
                         color=color_number[domain],
                         alpha=0.8,
                         zorder=2)
-        handles.append(s)  #Adding lines to an array for legend labeling
+        handles.append(s)  # Adding lines to an array for legend labeling
         find_fit(x, y, color_number[domain])
 
     # Add Reaxys averages to scatter plot
@@ -730,20 +727,20 @@ def fig4():
     # Line for biosphere
     x = df["Biosphere"].total_size
     chiral_y = df["Biosphere"].ratio_chiral.values
-    s = ax1.scatter(x, chiral_y, s=100, color="k")  #, label="Biosphere")
+    s = ax1.scatter(x, chiral_y, s=100, color="k")  # , label="Biosphere")
     ax1.annotate("Biosphere", (x - 150, chiral_y + 0.01),
                  color="k",
                  weight='bold',
                  fontsize=16,
                  ha='center',
                  va='center')
-    #handles.append(s)
+    # handles.append(s)
     ax1.axhline(chiral_y, 0, 1, ls='--', color="k", alpha=1, zorder=1)
 
     # Line for Luca
     x = df["LUCA"].total_size
     chiral_y = df["LUCA"].ratio_chiral.values
-    s = ax1.scatter(x, chiral_y, s=100, color="k", zorder=2)  #, label="LUCA")
+    s = ax1.scatter(x, chiral_y, s=100, color="k", zorder=2)  # , label="LUCA")
     ax1.annotate("LUCA", (x - 250, chiral_y + 0.01),
                  color="k",
                  weight='bold',
@@ -751,10 +748,10 @@ def fig4():
                  ha='center',
                  va='center',
                  zorder=2)
-    #handles.append(s)
+    # handles.append(s)
     ax1.axhline(chiral_y, 0, 1, ls='--', color="k", alpha=1, zorder=1)
 
-    #Add Reaxys to Legend
+    # Add Reaxys to Legend
     chnops_patch = plt.Line2D([], [],
                               color=chnops_color,
                               marker="o",
@@ -772,7 +769,7 @@ def fig4():
     # Labels
     font_size = 14
     ax1.set_xlabel("System Size (unique compounds)"
-                  )  #TODO: why isn't this label showing up
+                   )  # TODO: why isn't this label showing up
     ax1.set_ylabel("$\mathbb{C}$")
     ax1.legend(bbox_to_anchor=(1.43, 1.2),
                markerscale=5,
@@ -787,7 +784,7 @@ def fig4():
     ### Inset distribution axes
     ax2 = plt.subplot(gs[0:5, 7:])
 
-    #Graph Reaxys graphs first so they're in the back
+    # Graph Reaxys graphs first so they're in the back
     ax2.hist([x for sub in kegg for x in sub],
              num_bins,
              label="Reaxys:\nKEGG Elements",
@@ -857,7 +854,7 @@ def fig4():
     ax3.set_ylabel("Universality")
     ax3.set_xlabel("Normalized rank-order")
 
-    #Legend
+    # Legend
     handles = []
     chiral_patch = plt.Line2D([], [],
                               color="k",
@@ -889,7 +886,7 @@ def fig4():
                           "Eukarya", ax4)
 
     ax4.grid()
-    #ax4.legend(bbox_to_anchor=(0.7, 2.9), prop={"size":20}, ncol=4)
+    # ax4.legend(bbox_to_anchor=(0.7, 2.9), prop={"size":20}, ncol=4)
 
     ax4.annotate("More Chiral",
                  xy=(40, 0.1),
@@ -936,7 +933,7 @@ def fig5(seed_name, crossover_step, first_chiral_step):
     fig, ax = plt.subplots(figsize=(12, 12))
     im = ax.imshow(heatmap_array)
 
-    #ax.set_yticklabels(["", 0, "", 1, "", 2])
+    # ax.set_yticklabels(["", 0, "", 1, "", 2])
 
     ax.tick_params(
         axis='both',  # changes apply to the x-axis
@@ -972,7 +969,7 @@ def fig5(seed_name, crossover_step, first_chiral_step):
     ### Panel 5B - achiral/chiral modulating &conserving
     ### Get full seed set & reaction set
     seed_groups = [seed_name]
-    rxn_db = "../../lets-get-kegg/Data/kegg_data_R_processed.csv.zip"  #Default in NetworkExpansion.import_reaction_file
+    rxn_db = "../../lets-get-kegg/Data/kegg_data_R_processed.csv.zip"  # Default in NetworkExpansion.import_reaction_file
     reaction_scope = get_sides(import_reaction_file(rxn_db))
 
     compound_scope = set.union(*reaction_scope.stack())
@@ -1060,7 +1057,7 @@ def fig6():
     for pathway in tqdm(pathway_cpd_links.keys()):
         pathway_chiralPercentage[pathway], pathway_size[
             pathway] = get_chiral_percentage_fromList(
-                pathway_cpd_links[pathway], keggC_df)
+            pathway_cpd_links[pathway], keggC_df)
 
     pathway_df = pd.DataFrame(
         [pathway_chiralPercentage, pathway_names,
@@ -1073,16 +1070,16 @@ def fig6():
     })
 
     pathway_df['ID'] = pathway_df.index
-    #Get color setup & information
+    # Get color setup & information
     print("- Getting color schema -")
     pathway_df, chiralities, pathway_group_colors, metabolism_groups, colors, color_list = get_pathway_colors(
         pathway_df)
 
     ### Port over colors & plot individual panels
-    #Label with pathway number
+    # Label with pathway number
     labels = pathway_df['ID'].tolist()
 
-    #Define each angle for plotting
+    # Define each angle for plotting
     angles = np.linspace(0, 2 * np.pi, len(labels), endpoint=False)
     stats = pathway_df['Chirality'].tolist()
 
@@ -1094,7 +1091,7 @@ def fig6():
         labels,
     )
 
-    #Make all angles rotated according to placement on the image
+    # Make all angles rotated according to placement on the image
     angles[np.cos(angles) < 0] = angles[np.cos(angles) < 0] + np.pi
     angles = np.rad2deg(angles)
     for label, angle in zip(ax.get_xticklabels(), angles):
@@ -1123,7 +1120,7 @@ def fig6():
     ax.set_xticklabels([])
     ax.set_yticklabels(["0.2", "0.4", "0.6", "0.8", ""], fontsize=14)
 
-    #label chiral percentage
+    # label chiral percentage
     label_pos = ax.get_rlabel_position()
     ax.text(np.radians(label_pos + 10),
             ax.get_rmax() / 2. + 0.05,
@@ -1155,7 +1152,7 @@ def fig6():
     ax.set_ylabel("$\mathbb{C}$", fontsize=30)
     ax.xaxis.set_ticks([])
 
-    #legend of label colors
+    # legend of label colors
     markers = [
         plt.Line2D([0, 0], [0, 0],
                    color=color,
@@ -1200,7 +1197,7 @@ def fig6():
 
 def main():
     pd.set_option('future.no_silent_downcasting',
-                  True)  #To avoid future warnings
+                  True)  # To avoid future warnings
     # Matplotlib defaults
     font = {"sans-serif": "DejaVu Sans", "size": 22}
     for key, value in font.items():
@@ -1213,7 +1210,7 @@ def main():
     fig1()
 
     print("---- Generating Figure 2 ----")
-    #~Three minutes per 1000 random expansions (depends on chirality & size)
+    # ~Three minutes per 1000 random expansions (depends on chirality & size)
     random_seed_set_size = 10
     n_iter = 1000
     crossover_step, first_chiral_step = fig2(
