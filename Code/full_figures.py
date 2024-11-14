@@ -97,10 +97,10 @@ def fig1():
     plt.close()
 
 
-def fig2(seed_name, random_seed_set_size, n_iter):
+def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     ### Get full seed set & reaction set
     seed_groups = [seed_name]
-    rxn_db = "../../lets-get-kegg/Data/kegg_data_R_processed.csv.zip"  # Default in NetworkExpansion.import_reaction_file
+    #rxn_db = "../../lets-get-kegg/Data/kegg_data_R_processed.csv.zip"  # Default in NetworkExpansion.import_reaction_file
     reaction_scope = get_sides(import_reaction_file(rxn_db))
 
     compound_scope = set.union(*reaction_scope.stack())
@@ -326,52 +326,59 @@ def fig2(seed_name, random_seed_set_size, n_iter):
     randChiral_results = dict()
     random_achiral_seeds = dict()
     random_chiral_seeds = dict()
-    for i in range(n_iter):
-        random_achiral_seeds[f"Random_{i}"] = getRandomSeedSet(
-            keggC_df, random_seed_set_size, chirality="achiral")
-        random_chiral_seeds[f"Random_{i}"] = getRandomSeedSet(
-            keggC_df, random_seed_set_size, chirality="chiral")
+    for random_ss_size in range(min_ss_size, max_ss_size+1):
+        for i in range(n_iter):
+            random_achiral_seeds[f"Random_{random_ss_size}_{i}"] = getRandomSeedSet(
+                keggC_df, random_ss_size, chirality="achiral")
+            random_chiral_seeds[f"Random_{random_ss_size}_{i}"] = getRandomSeedSet(
+                keggC_df, random_ss_size, chirality="chiral")
 
-    print(f"- Expanding {n_iter} Achiral Seed Sets -")
-    for name, seeds in tqdm(random_achiral_seeds.items(), total=n_iter):
+    print(f"- Expanding {n_iter*(max_ss_size-min_ss_size+1)} Achiral Seed Sets -")
+    for name, seeds in tqdm(random_achiral_seeds.items(), total=n_iter*(max_ss_size-min_ss_size+1)):
         randAchiral_results[name] = expand_from_seed_set(
             seeds=seeds, reactions=reaction_scope, max_gen=max_generation)
 
-    print(f"- Expanding {n_iter} Chiral Seed Sets -")
-    for name, seeds in tqdm(random_chiral_seeds.items(), total=n_iter):
+    print(f"- Expanding {n_iter*(max_ss_size-min_ss_size+1)} Chiral Seed Sets -")
+    for name, seeds in tqdm(random_chiral_seeds.items(), total=n_iter*(max_ss_size-min_ss_size+1)):
         randChiral_results[name] = expand_from_seed_set(
             seeds=seeds, reactions=reaction_scope, max_gen=max_generation)
 
     print("- Analyzing & Plotting Random Expansions -")
     achiral_full_chiral_count = list()
     achiral_full_achiral_count = list()
-    result_count = 0
-    for _, result in randAchiral_results.items():
-        seed_name = f"Random_{result_count}"
-        achiral_full_chiral_count.append(
-            getCpdCount(randAchiral_results[seed_name]["cps"],
-                        keggC_df,
-                        ischiral_flag=True)[0].to_list())
-        achiral_full_achiral_count.append(
-            getCpdCount(randAchiral_results[seed_name]["cps"],
-                        keggC_df,
-                        ischiral_flag=False)[0].to_list())
-        result_count += 1
+    for random_ss_size in range(min_ss_size, max_ss_size+1):
+        result_count = 0
+        for _, result in randAchiral_results.items():
+            if result_count >= n_iter:
+                break
+            seed_name = f"Random_{random_ss_size}_{result_count}"
+            achiral_full_chiral_count.append(
+                getCpdCount(randAchiral_results[seed_name]["cps"],
+                            keggC_df,
+                            ischiral_flag=True)[0].to_list())
+            achiral_full_achiral_count.append(
+                getCpdCount(randAchiral_results[seed_name]["cps"],
+                            keggC_df,
+                            ischiral_flag=False)[0].to_list())
+            result_count += 1
 
     chiral_full_chiral_count = list()
     chiral_full_achiral_count = list()
-    result_count = 0
-    for _, result in randChiral_results.items():
-        seed_name = f"Random_{result_count}"
-        chiral_full_chiral_count.append(
-            getCpdCount(randChiral_results[seed_name]["cps"],
-                        keggC_df,
-                        ischiral_flag=True)[0].to_list())
-        chiral_full_achiral_count.append(
-            getCpdCount(randChiral_results[seed_name]["cps"],
-                        keggC_df,
-                        ischiral_flag=False)[0].to_list())
-        result_count += 1
+    for random_ss_size in range(min_ss_size, max_ss_size+1):
+        result_count = 0
+        for _, result in randChiral_results.items():
+            if result_count >= n_iter:
+                break
+            seed_name = f"Random_{random_ss_size}_{result_count}"
+            chiral_full_chiral_count.append(
+                getCpdCount(randChiral_results[seed_name]["cps"],
+                            keggC_df,
+                            ischiral_flag=True)[0].to_list())
+            chiral_full_achiral_count.append(
+                getCpdCount(randChiral_results[seed_name]["cps"],
+                            keggC_df,
+                            ischiral_flag=False)[0].to_list())
+            result_count += 1
 
     achiral_chiralPercentage = []
     chiral_chiralPercentage = []
@@ -471,10 +478,10 @@ def fig2(seed_name, random_seed_set_size, n_iter):
     return achiral_chiral_crossover_step, first_chiral_step
 
 
-def fig3(seed_name, crossover_step):
+def fig3(seed_name, rxn_db, crossover_step):
     ### Get full seed set & reaction set
     seed_groups = [seed_name]
-    rxn_db = "../../lets-get-kegg/Data/kegg_data_R_processed.csv.zip"  # Default in NetworkExpansion.import_reaction_file
+    #rxn_db = "../../lets-get-kegg/Data/kegg_data_R_processed.csv.zip"  # Default in NetworkExpansion.import_reaction_file
     reaction_scope = get_sides(import_reaction_file(rxn_db))
 
     compound_scope = set.union(*reaction_scope.stack())
@@ -943,7 +950,7 @@ def fig4():
     plt.savefig("../Figures/Fig4.png", format="png")
 
 
-def fig5(seed_name, crossover_step, first_chiral_step):
+def fig5(seed_name, rxn_db, crossover_step, first_chiral_step):
     ### Panel 5A - chiral rxn counts
     heatmap_array, rxn_df = get_heatmap_array(keggC_df)
 
@@ -986,7 +993,7 @@ def fig5(seed_name, crossover_step, first_chiral_step):
     ### Panel 5B - achiral/chiral modulating &conserving
     ### Get full seed set & reaction set
     seed_groups = [seed_name]
-    rxn_db = "../../lets-get-kegg/Data/kegg_data_R_processed.csv.zip"  # Default in NetworkExpansion.import_reaction_file
+    #rxn_db = "../../lets-get-kegg/Data/kegg_data_R_processed.csv.zip"  # Default in NetworkExpansion.import_reaction_file
     reaction_scope = get_sides(import_reaction_file(rxn_db))
 
     compound_scope = set.union(*reaction_scope.stack())
@@ -1226,29 +1233,34 @@ def main():
 
     # Seed set
     seed_name = "JM|G24|G17|TW"
+    rxn_db_fp = "../../lets-get-kegg/Data/atlas_kegg_processed_merged_deduped.csv.zip"
 
     print("---- Generating Figure 1 ----")
     fig1()
 
     print("---- Generating Figure 2 ----")
     # ~Three minutes per 1000 random expansions (depends on chirality & size)
-    random_seed_set_size = 10
+    min_ss_size = 2
+    max_ss_size = 10
     n_iter = 1000
     crossover_step, first_chiral_step = fig2(
         seed_name=seed_name,
-        random_seed_set_size=random_seed_set_size,
+        rxn_db=rxn_db_fp,
+        min_ss_size=min_ss_size,
+        max_ss_size=max_ss_size,
         n_iter=n_iter)
 
     print("---- Generating Figure 3 ----")
-    crossover_step = 5
-    fig3(seed_name=seed_name, crossover_step=crossover_step)
+    fig3(seed_name=seed_name, 
+         rxn_db=rxn_db_fp,
+         crossover_step=crossover_step)
 
     print("---- Generating Figure 4 ----")
     fig4()
 
     print("---- Generating Figure 5 ----")
-    first_chiral_step = 1
     fig5(seed_name=seed_name,
+         rxn_db=rxn_db_fp,
          crossover_step=crossover_step,
          first_chiral_step=first_chiral_step)
 
