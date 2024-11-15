@@ -25,7 +25,7 @@ get_sides = lambda x: x[['left', 'right']]
 
 
 # imports a reaction dataframe, removes glycan reactions and reactions for which chiral info is missing
-def import_reaction_file(fpath=rxn_db_dir + 'kegg_data_R_processed.csv.zip'):
+def import_reaction_file(fpath=rxn_db_dir + 'atlas_kegg_processed_merged_deduped.csv.zip'):
     df = pd.read_csv(fpath, index_col=0).drop(columns=['Unnamed: 0', 'Unnamed: 0.1'], errors='ignore')
     if 'id' in df.columns:
         df.set_index('id', inplace=True)
