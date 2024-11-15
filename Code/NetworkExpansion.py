@@ -167,3 +167,11 @@ chiral_labels['elements'] = chiral_labels['formula'].apply(
 ec_rns = pd.read_csv('https://rest.kegg.jp/link/enzyme/reaction', sep='\t', header=None).applymap(
     lambda x: x.split(':')[1]).groupby(0)[1].apply(list).apply('|'.join)
 seed_candidates = pd.read_csv(f'{data_folder}/SampleSeeds.csv.zip', index_col=0, compression='zip')
+
+
+def generate_expansion_summary(result):
+    summary = result['participants'].applymap(len).add_suffix(' count')#.assign(chiral_fraction=results['G|M|T']['chiral_fraction']) #even this could be calculated post-hoc
+    chiral_fraction = result['participants'].filter(like='compounds').applymap(lambda x: chiral_labels.loc[list(x), 'is_chiral'].mean())
+    summary = summary.set_axis(summary.columns.str.replace('_',' ').str.replace('s c', ' c'), axis=1)
+    summary = summary.join(chiral_fraction.rename({'compounds':'chiral fraction', 'new compounds':'new compound chiral fraction'}, axis=1))
+    return(summary)
