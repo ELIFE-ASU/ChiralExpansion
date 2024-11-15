@@ -19,6 +19,8 @@ def make_lists_printable(df):
 def write_expansion_csv(result, filename, destination_dir='Output/'):
     if not os.path.exists(destination_dir):
         os.makedirs(destination_dir)
+    if not destination_dir.endswith('/'):
+        destination_dir += '/'
     expansion_scope = '#' + '|'.join(result['seeds'])
     open(destination_dir + filename + '_expansion.csv', 'w').write(expansion_scope + '\n')
     make_lists_printable(result['edge_pool']).to_csv(destination_dir + filename + '_expansion.csv', sep=',', index=True,
