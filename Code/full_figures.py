@@ -182,13 +182,14 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     # Read in LUCA compounds & get percentages
     print("- Calculating LUCA Percentage Per Expansion Step -")
     percent_luca = get_luca_percentage(results[seed_name]["participants"])
+    del(results)
     full_luca_exp = 0
     for step in range(len(percent_luca)):
         if percent_luca[step] == percent_luca[-1]:
             full_luca_exp = step+1 #Since step starts at 0, add 1 to reflect network expansion algorithm
             break
     print(f"\tFull LUCA Expansion Step: {full_luca_exp}")
-    print(f"\tExpansion Size At First Chiral Compound Appearence: {summaries['compound count'].iloc[full_luca_exp][seed_name]} Compounds, {summaries['reaction count'].iloc[full_luca_exp][seed_name]} Reactions")
+    print(f"\tExpansion Size At Full LUCA Expansion: {summaries['compound count'].iloc[full_luca_exp][seed_name]} Compounds, {summaries['reaction count'].iloc[full_luca_exp][seed_name]} Reactions")
 
     ### Chiral / achiral / LUCA compounds panel (Fig2B)
     # Colors
@@ -219,8 +220,8 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
 
     ax.annotate(
         f"Achiral-to-Chiral\nCrossover\nStep {achiral_chiral_crossover_step}",
-        xy=(achiral_chiral_crossover_step, 2500),
-        xytext=(achiral_chiral_crossover_step + 8, 2850),
+        xy=(achiral_chiral_crossover_step, 5500),
+        xytext=(achiral_chiral_crossover_step + 8, 5850),
         color="k",
         arrowprops={
             "arrowstyle": "simple",
@@ -231,8 +232,8 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
         va='center',
         zorder=3)
     ax.annotate(f"First Chiral\nCompound\nStep {first_chiral_step}",
-                xy=(first_chiral_step, 1750),
-                xytext=(first_chiral_step + 10, 2100),
+                xy=(first_chiral_step, 4750),
+                xytext=(first_chiral_step + 10, 5100),
                 color="k",
                 arrowprops={
                     "arrowstyle": "simple",
@@ -243,7 +244,7 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
                 va='center',
                 zorder=3)
 
-    ax.set_ylim([0, 3100])
+    #ax.set_ylim([0, 3100])
     ax.set_ylabel("Compounds")
     ax.set_xlabel("Expansion Step")
 
@@ -321,159 +322,181 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     plt.savefig("../Figures/Fig2C.png", format="png")
     plt.close()
 
-    ### Get X random seed sets, both chiral & achiral
-    randAchiral_results = dict()
-    randChiral_results = dict()
-    random_achiral_seeds = dict()
-    random_chiral_seeds = dict()
-    for random_ss_size in range(min_ss_size, max_ss_size+1):
-        for i in range(n_iter):
-            random_achiral_seeds[f"Random_{random_ss_size}_{i}"] = getRandomSeedSet(
-                keggC_df, random_ss_size, chirality="achiral")
-            random_chiral_seeds[f"Random_{random_ss_size}_{i}"] = getRandomSeedSet(
-                keggC_df, random_ss_size, chirality="chiral")
+    # ### Get X random seed sets, both chiral & achiral
+    # randAchiral_results = dict()
+    # randChiral_results = dict()
+    # random_achiral_seeds = dict()
+    # random_chiral_seeds = dict()
+    # for random_ss_size in range(min_ss_size, max_ss_size+1):
+    #     for i in range(n_iter):
+    #         random_achiral_seeds[f"Random_{random_ss_size}_{i}"] = getRandomSeedSet(
+    #             keggC_df, random_ss_size, chirality="achiral")
+    #         random_chiral_seeds[f"Random_{random_ss_size}_{i}"] = getRandomSeedSet(
+    #             keggC_df, random_ss_size, chirality="chiral")
 
-    print(f"- Expanding {n_iter*(max_ss_size-min_ss_size+1)} Achiral Seed Sets -")
-    for name, seeds in tqdm(random_achiral_seeds.items(), total=n_iter*(max_ss_size-min_ss_size+1)):
-        randAchiral_results[name] = expand_from_seed_set(
-            seeds=seeds, reactions=reaction_scope, max_gen=max_generation)
+    # print(f"- Expanding {n_iter*(max_ss_size-min_ss_size+1)} Achiral Seed Sets -")
+    # achiral_full_chiral_count = list()
+    # achiral_full_achiral_count = list()
+    # for name, seeds in tqdm(random_achiral_seeds.items(), total=n_iter*(max_ss_size-min_ss_size+1)):
+    #     randAchiral_results = expand_from_seed_set(
+    #         seeds=seeds, reactions=reaction_scope, max_gen=max_generation)
+    #     achiral_full_chiral_count.append(
+    #             getCpdCount(randAchiral_results["cps"],
+    #                         keggC_df,
+    #                         ischiral_flag=True)[0].to_list())
+    #     achiral_full_achiral_count.append(
+    #             getCpdCount(randAchiral_results["cps"],
+    #                         keggC_df,
+    #                         ischiral_flag=False)[0].to_list())
+        
+        
 
-    print(f"- Expanding {n_iter*(max_ss_size-min_ss_size+1)} Chiral Seed Sets -")
-    for name, seeds in tqdm(random_chiral_seeds.items(), total=n_iter*(max_ss_size-min_ss_size+1)):
-        randChiral_results[name] = expand_from_seed_set(
-            seeds=seeds, reactions=reaction_scope, max_gen=max_generation)
+    # print(f"- Expanding {n_iter*(max_ss_size-min_ss_size+1)} Chiral Seed Sets -")
+    # chiral_full_chiral_count = list()
+    # chiral_full_achiral_count = list()
+    # for name, seeds in tqdm(random_chiral_seeds.items(), total=n_iter*(max_ss_size-min_ss_size+1)):
+    #     randChiral_results = expand_from_seed_set(
+    #         seeds=seeds, reactions=reaction_scope, max_gen=max_generation)
+    #     chiral_full_chiral_count.append(
+    #             getCpdCount(randChiral_results["cps"],
+    #                         keggC_df,
+    #                         ischiral_flag=True)[0].to_list())
+    #     chiral_full_achiral_count.append(
+    #             getCpdCount(randChiral_results["cps"],
+    #                         keggC_df,
+    #                         ischiral_flag=False)[0].to_list())
 
-    print("- Analyzing & Plotting Random Expansions -")
-    achiral_full_chiral_count = list()
-    achiral_full_achiral_count = list()
-    for random_ss_size in range(min_ss_size, max_ss_size+1):
-        result_count = 0
-        for _, result in randAchiral_results.items():
-            if result_count >= n_iter:
-                break
-            seed_name = f"Random_{random_ss_size}_{result_count}"
-            achiral_full_chiral_count.append(
-                getCpdCount(randAchiral_results[seed_name]["cps"],
-                            keggC_df,
-                            ischiral_flag=True)[0].to_list())
-            achiral_full_achiral_count.append(
-                getCpdCount(randAchiral_results[seed_name]["cps"],
-                            keggC_df,
-                            ischiral_flag=False)[0].to_list())
-            result_count += 1
+    # # print("- Analyzing & Plotting Random Expansions -")
+    # # achiral_full_chiral_count = list()
+    # # achiral_full_achiral_count = list()
+    # # for random_ss_size in range(min_ss_size, max_ss_size+1):
+    # #     result_count = 0
+    # #     for _, result in randAchiral_results.items():
+    # #         if result_count >= n_iter:
+    # #             break
+    # #         seed_name = f"Random_{random_ss_size}_{result_count}"
+    # #         achiral_full_chiral_count.append(
+    # #             getCpdCount(randAchiral_results[seed_name]["cps"],
+    # #                         keggC_df,
+    # #                         ischiral_flag=True)[0].to_list())
+    # #         achiral_full_achiral_count.append(
+    # #             getCpdCount(randAchiral_results[seed_name]["cps"],
+    # #                         keggC_df,
+    # #                         ischiral_flag=False)[0].to_list())
+    # #         result_count += 1
 
-    chiral_full_chiral_count = list()
-    chiral_full_achiral_count = list()
-    for random_ss_size in range(min_ss_size, max_ss_size+1):
-        result_count = 0
-        for _, result in randChiral_results.items():
-            if result_count >= n_iter:
-                break
-            seed_name = f"Random_{random_ss_size}_{result_count}"
-            chiral_full_chiral_count.append(
-                getCpdCount(randChiral_results[seed_name]["cps"],
-                            keggC_df,
-                            ischiral_flag=True)[0].to_list())
-            chiral_full_achiral_count.append(
-                getCpdCount(randChiral_results[seed_name]["cps"],
-                            keggC_df,
-                            ischiral_flag=False)[0].to_list())
-            result_count += 1
+    # # chiral_full_chiral_count = list()
+    # # chiral_full_achiral_count = list()
+    # # for random_ss_size in range(min_ss_size, max_ss_size+1):
+    # #     result_count = 0
+    # #     for _, result in randChiral_results.items():
+    # #         if result_count >= n_iter:
+    # #             break
+    # #         seed_name = f"Random_{random_ss_size}_{result_count}"
+    # #         chiral_full_chiral_count.append(
+    # #             getCpdCount(randChiral_results[seed_name]["cps"],
+    # #                         keggC_df,
+    # #                         ischiral_flag=True)[0].to_list())
+    # #         chiral_full_achiral_count.append(
+    # #             getCpdCount(randChiral_results[seed_name]["cps"],
+    # #                         keggC_df,
+    # #                         ischiral_flag=False)[0].to_list())
+    # #         result_count += 1
 
-    achiral_chiralPercentage = []
-    chiral_chiralPercentage = []
-    achiral_avg_percentages_chiral = []
-    achiral_std_percentages_chiral = []
-    chiral_avg_percentages_chiral = []
-    chiral_std_percentages_chiral = []
+    # achiral_chiralPercentage = []
+    # chiral_chiralPercentage = []
+    # achiral_avg_percentages_chiral = []
+    # achiral_std_percentages_chiral = []
+    # chiral_avg_percentages_chiral = []
+    # chiral_std_percentages_chiral = []
 
-    for i in range(len(achiral_full_chiral_count)):
-        achiral_chiralPercentage.append(
-            get_ChiralPercentage(np.cumsum(achiral_full_chiral_count[i]),
-                                 np.cumsum(achiral_full_achiral_count[i])))
+    # for i in range(len(achiral_full_chiral_count)):
+    #     achiral_chiralPercentage.append(
+    #         get_ChiralPercentage(np.cumsum(achiral_full_chiral_count[i]),
+    #                              np.cumsum(achiral_full_achiral_count[i])))
 
-    for i in range(len(chiral_full_chiral_count)):
-        chiral_chiralPercentage.append(
-            get_ChiralPercentage(np.cumsum(chiral_full_chiral_count[i]),
-                                 np.cumsum(chiral_full_achiral_count[i])))
+    # for i in range(len(chiral_full_chiral_count)):
+    #     chiral_chiralPercentage.append(
+    #         get_ChiralPercentage(np.cumsum(chiral_full_chiral_count[i]),
+    #                              np.cumsum(chiral_full_achiral_count[i])))
 
-    for i in range(max_generation):
-        percentages = []
-        for result in achiral_chiralPercentage:
-            if len(result) > i:
-                percentages.append(result[i])
+    # for i in range(max_generation):
+    #     percentages = []
+    #     for result in achiral_chiralPercentage:
+    #         if len(result) > i:
+    #             percentages.append(result[i])
 
-        achiral_avg_percentages_chiral.append(np.mean(percentages))
-        achiral_std_percentages_chiral.append(np.std(percentages))
+    #     achiral_avg_percentages_chiral.append(np.mean(percentages))
+    #     achiral_std_percentages_chiral.append(np.std(percentages))
 
-        percentages = []
-        for result in chiral_chiralPercentage:
-            if len(result) > i:
-                percentages.append(result[i])
+    #     percentages = []
+    #     for result in chiral_chiralPercentage:
+    #         if len(result) > i:
+    #             percentages.append(result[i])
 
-        chiral_avg_percentages_chiral.append(np.mean(percentages))
-        chiral_std_percentages_chiral.append(np.std(percentages))
+    #     chiral_avg_percentages_chiral.append(np.mean(percentages))
+    #     chiral_std_percentages_chiral.append(np.std(percentages))
 
-    # Remove extra np.NaN values
-    achiral_avg_percentages_chiral = [
-        x for x in achiral_avg_percentages_chiral if x == x
-    ]
-    achiral_std_percentages_chiral = [
-        x for x in achiral_std_percentages_chiral if x == x
-    ]
-    chiral_avg_percentages_chiral = [
-        x for x in chiral_avg_percentages_chiral if x == x
-    ]
-    chiral_std_percentages_chiral = [
-        x for x in chiral_std_percentages_chiral if x == x
-    ]
+    # # Remove extra np.NaN values
+    # achiral_avg_percentages_chiral = [
+    #     x for x in achiral_avg_percentages_chiral if x == x
+    # ]
+    # achiral_std_percentages_chiral = [
+    #     x for x in achiral_std_percentages_chiral if x == x
+    # ]
+    # chiral_avg_percentages_chiral = [
+    #     x for x in chiral_avg_percentages_chiral if x == x
+    # ]
+    # chiral_std_percentages_chiral = [
+    #     x for x in chiral_std_percentages_chiral if x == x
+    # ]
 
-    ### Figure 2D
-    _, ax = plt.subplots(figsize=(10, 8))
-    # Chiral errorbar
-    ax.errorbar(x=np.arange(0, len(chiral_avg_percentages_chiral), 1),
-                y=chiral_avg_percentages_chiral,
-                yerr=chiral_std_percentages_chiral,
-                color=chiral_color,
-                marker="o",
-                linewidth=3,
-                markersize=10,
-                label="Chiral")
+    # ### Figure 2D
+    # _, ax = plt.subplots(figsize=(10, 8))
+    # # Chiral errorbar
+    # ax.errorbar(x=np.arange(0, len(chiral_avg_percentages_chiral), 1),
+    #             y=chiral_avg_percentages_chiral,
+    #             yerr=chiral_std_percentages_chiral,
+    #             color=chiral_color,
+    #             marker="o",
+    #             linewidth=3,
+    #             markersize=10,
+    #             label="Chiral")
 
-    # Achiral errorbar
-    ax.errorbar(x=np.arange(0, len(achiral_avg_percentages_chiral), 1),
-                y=achiral_avg_percentages_chiral,
-                yerr=achiral_std_percentages_chiral,
-                color=achiral_color,
-                marker="o",
-                linewidth=3,
-                markersize=10,
-                label="Achiral")
+    # # Achiral errorbar
+    # ax.errorbar(x=np.arange(0, len(achiral_avg_percentages_chiral), 1),
+    #             y=achiral_avg_percentages_chiral,
+    #             yerr=achiral_std_percentages_chiral,
+    #             color=achiral_color,
+    #             marker="o",
+    #             linewidth=3,
+    #             markersize=10,
+    #             label="Achiral")
 
-    # Original (Figure 2B) percentages
-    original_chiralPercent = []
-    for i in range(len(chiral_count)):
-        original_chiralPercent.append(chiral_count[i] /
-                                      (chiral_count[i] + achiral_count[i]))
-    ax.plot(original_chiralPercent,
-            "o-",
-            color="k",
-            linewidth=3,
-            zorder=5,
-            label="Original Expansion $\mathbb{C}$")
+    # # Original (Figure 2B) percentages
+    # original_chiralPercent = []
+    # for i in range(len(chiral_count)):
+    #     original_chiralPercent.append(chiral_count[i] /
+    #                                   (chiral_count[i] + achiral_count[i]))
+    # ax.plot(original_chiralPercent,
+    #         "o-",
+    #         color="k",
+    #         linewidth=3,
+    #         zorder=5,
+    #         label="Original Expansion $\mathbb{C}$")
 
-    ax.axvline(x=14, color="k", linestyle="--", alpha=0.9)
-    ax.axvline(x=3, color="k", linestyle=":", alpha=0.5)
+    # ax.axvline(x=14, color="k", linestyle="--", alpha=0.9)
+    # ax.axvline(x=3, color="k", linestyle=":", alpha=0.5)
 
-    ax.set_ylim([0, 1.05])
+    # ax.set_ylim([0, 1.05])
 
-    ax.set_xlabel("Expansion Step")
-    ax.set_ylabel("Chiral Order Parameter $\mathbb{C}$")
-    ax.legend(prop={"size": 18})  # bbox_to_anchor=(1.05,0.60))
+    # ax.set_xlabel("Expansion Step")
+    # ax.set_ylabel("Chiral Order Parameter $\mathbb{C}$")
+    # ax.legend(prop={"size": 18})  # bbox_to_anchor=(1.05,0.60))
 
-    plt.savefig("../Figures/Fig2D.svg", format="svg")
-    plt.savefig("../Figures/Fig2D.png", format="png")
-    plt.close()
+    # plt.savefig("../Figures/Fig2D.svg", format="svg")
+    # plt.savefig("../Figures/Fig2D.png", format="png")
+    # plt.close()
 
     return achiral_chiral_crossover_step, first_chiral_step
 
@@ -508,8 +531,8 @@ def fig3(seed_name, rxn_db, crossover_step):
                       x="arrival",
                       y="n_chiral_centers",
                       hue="heavy atom percentile",
-                      ylim=(-1, 31),
-                      xlim=(-1, 60),
+                      ylim=(-1, 39),
+                      xlim=(-1, 39),
                       s=100,
                       marginal_kws={'common_norm': False})
     h = sns.regplot(x="arrival",
@@ -529,7 +552,7 @@ def fig3(seed_name, rxn_db, crossover_step):
 
     g.figure.set_size_inches((16, 8))
     g.ax_joint.legend(title="Heavy Atom\nPercentiles",
-                      bbox_to_anchor=(0.85, 1),
+                      bbox_to_anchor=(0.75, 1),
                       prop={"size": 12})
 
     plt.savefig("../Figures/Fig3B.png", format="png")
@@ -1040,8 +1063,8 @@ def fig5(seed_name, rxn_db, crossover_step, first_chiral_step):
     ax.axvline(x=crossover_step, color="k", linestyle="--", alpha=0.9)
     ax.axvline(x=first_chiral_step, color="k", linestyle=":", alpha=0.5)
     ax.annotate(f"Achiral-to-Chiral\nCrossover\nStep {crossover_step}",
-                xy=(crossover_step, 4100),
-                xytext=(crossover_step + 8, 4350),
+                xy=(crossover_step, 83000),
+                xytext=(crossover_step + 8, 85000),
                 color="k",
                 arrowprops={
                     "arrowstyle": "simple",
@@ -1052,8 +1075,8 @@ def fig5(seed_name, rxn_db, crossover_step, first_chiral_step):
                 va='center',
                 zorder=3)
     ax.annotate(f"First Chiral\nCompound\nStep {first_chiral_step}",
-                xy=(first_chiral_step, 3300),
-                xytext=(first_chiral_step + 10, 3550),
+                xy=(first_chiral_step, 70000),
+                xytext=(first_chiral_step + 10, 72000),
                 color="k",
                 arrowprops={
                     "arrowstyle": "simple",
