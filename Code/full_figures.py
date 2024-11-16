@@ -8,6 +8,9 @@ import matplotlib.ticker as plticker
 import seaborn as sns
 import pickle
 import csv
+from networkx.algorithms import bipartite
+import netwulf as nw
+
 from NetworkExpansion import *
 from utilities import *
 
@@ -178,6 +181,66 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     print(f"\tFirst Chiral Compound Appearence Step: {first_chiral_step}")
     print(f"\tExpansion Size At First Chiral Compound Appearence: {summaries['compound count'].iloc[first_chiral_step][seed_name]} Compounds, {summaries['reaction count'].iloc[first_chiral_step][seed_name]} Reactions")
     print(f"\tAverage Achiral Heavy Atoms At Crossover Step: {round(summaries['achiral avg heavy atoms'].iloc[achiral_chiral_crossover_step][0], 3)}")
+
+    ### Network figure
+    print("- Generating Network Figure (click 'Post To Python' in browser pop-up window to continue code) -")
+    transition_edge_df = results[seed_name]['bipartite_edgelist'].query('step <= @achiral_chiral_crossover_step').copy(deep=True)
+    networks = {i: nx.from_pandas_edgelist(transition_edge_df[transition_edge_df[i]], 
+            source='source', target='target', edge_attr=True, create_using=nx.DiGraph())
+            for i in ['directed']}
+    compound_nodes = {i: set(j.nodes()).difference(reaction_scope.index) for i,j in networks.items()}
+    networks_uni = {i: bipartite.projected_graph(networks[i], nodes=compound_nodes[i]) for i in networks.keys()}
+
+    attributes = pd.read_csv("../Data/kegg_data_C.csv.zip",
+                       index_col=1,
+                       compression="zip")
+    attributes.drop(labels=["smiles", "Unnamed: 0", "formula", "molecular_weight", "n_heavy_atoms"], axis=1, inplace=True)
+    attributes["is_chiral"] = attributes['n_chiral_centers'].map(lambda x: x > 0)
+    attributes['is_chiral_color'] = attributes['is_chiral'].map({True: '#34CCFF', False: '#FFC012'}).fillna("#FFFFFF")
+
+    steps = []
+    for index, _ in attributes.iterrows():
+        step = 0
+        step_found = False
+        for new_cpds in results[seed_name]["participants"]["new compounds"]:
+            if index in new_cpds:
+                steps.append(step)
+                step_found = True
+            step += 1
+            if step > achiral_chiral_crossover_step:
+                break
+        if not step_found:
+            steps.append(np.nan)
+        
+    attributes['gen'] = steps
+    attributes.dropna(inplace=True)
+    gen_color = 'Greys'
+    attributes['gen_color'] = colorize_Series(attributes['gen'], cmap=gen_color).tolist()
+
+    size_nodes_by = 'degree'
+    max_node_size = 25
+
+    G = networks_uni['directed'].copy()
+    node_sizes = pd.Series({i:(np.log2(j+2))**1.5 for i,j in G.degree()})
+    nx.set_node_attributes(G, node_sizes, 'size')
+    nx.set_node_attributes(G, attributes['is_chiral_color'], 'group')
+
+    fig = plt.figure(figsize=(12,12), layout='constrained')
+    stylized_network, config = nw.visualize(G, config={'node_label_color': '#000000', 'node_gravity': 0.0, 
+                                    'link_alpha': 0.002, 'link_color': '#000000', 'zoom': 0.62, 'node_charge': -65,
+                                    'scale_node_size_by_strength': False, 'node_size_variation': 1,
+                                    'node_size': max_node_size, 'link_distance':23, 'node_stroke_width': 2})
+    fig, ax = nw.draw_netwulf(stylized_network)
+    a = stylized_network.copy()
+    a['nodeStrokeWidth'] = 0.0
+    for i in list(range(len(a['nodes']))):
+        a['nodes'][i]['radius'] = a['nodes'][i]['radius'] * 0.4
+        a['nodes'][i]['color'] = attributes['gen_color'].loc[a['nodes'][i]['id']]
+    nw.draw_netwulf(a, fig=fig, ax=ax, draw_links=False)
+
+    plt.savefig("../Figures/Fig2A.svg", format="svg")
+    plt.savefig("../Figures/Fig2A.png", format="png")
+    plt.close()
 
     # Read in LUCA compounds & get percentages
     print("- Calculating LUCA Percentage Per Expansion Step -")
