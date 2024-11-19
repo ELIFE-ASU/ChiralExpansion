@@ -10,6 +10,8 @@ import pickle
 import csv
 from networkx.algorithms import bipartite
 import netwulf as nw
+from netgraph import get_multipartite_layout
+
 
 from NetworkExpansion import *
 from utilities import *
@@ -184,10 +186,12 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
 
     ### Network figure
     print("- Generating Network Figure (click 'Post To Python' in browser pop-up window to continue code) -")
-    transition_edge_df = results[seed_name]['bipartite_edgelist'].query('step <= @achiral_chiral_crossover_step').copy(deep=True)
+    result_network = generate_annotated_bipartite_edgelist(results[seed_name])
+    #summary_network = generate_expansion_summary(result_network)
+    transition_edge_df = result_network['bipartite_edgelist'].query('step <= @achiral_chiral_crossover_step').copy(deep=True)
     networks = {i: nx.from_pandas_edgelist(transition_edge_df[transition_edge_df[i]], 
             source='source', target='target', edge_attr=True, create_using=nx.DiGraph())
-            for i in ['directed']}
+            for i in ['impactful_precursor','immediate_precursor','directed']}
     compound_nodes = {i: set(j.nodes()).difference(reaction_scope.index) for i,j in networks.items()}
     networks_uni = {i: bipartite.projected_graph(networks[i], nodes=compound_nodes[i]) for i in networks.keys()}
 
@@ -227,16 +231,16 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
 
     fig = plt.figure(figsize=(12,12), layout='constrained')
     stylized_network, config = nw.visualize(G, config={'node_label_color': '#000000', 'node_gravity': 0.0, 
-                                    'link_alpha': 0.002, 'link_color': '#000000', 'zoom': 0.62, 'node_charge': -65,
-                                    'scale_node_size_by_strength': False, 'node_size_variation': 1,
-                                    'node_size': max_node_size, 'link_distance':23, 'node_stroke_width': 2})
+                                'link_alpha': 0.005, 'link_color': '#000000', 'zoom': 0.60, 'node_charge': -100,
+                                'scale_node_size_by_strength': False, 'node_size_variation': 1,
+                                'node_size': max_node_size, 'link_distance':25, 'node_stroke_width': 2})
     fig, ax = nw.draw_netwulf(stylized_network)
+
     a = stylized_network.copy()
     a['nodeStrokeWidth'] = 0.0
     for i in list(range(len(a['nodes']))):
         a['nodes'][i]['radius'] = a['nodes'][i]['radius'] * 0.4
         a['nodes'][i]['color'] = attributes['gen_color'].loc[a['nodes'][i]['id']]
-    nw.draw_netwulf(a, fig=fig, ax=ax, draw_links=False)
 
     plt.savefig("../Figures/Fig2A.svg", format="svg")
     plt.savefig("../Figures/Fig2A.png", format="png")
@@ -561,10 +565,41 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     # plt.savefig("../Figures/Fig2D.png", format="png")
     # plt.close()
 
-    return achiral_chiral_crossover_step, first_chiral_step
+    return achiral_chiral_crossover_step, first_chiral_step, attributes, networks_uni
 
 
-def fig3(seed_name, rxn_db, crossover_step):
+def fig3(seed_name, rxn_db, crossover_step, attributes, networks_uni):
+    ### Network figure
+    show = 'impactful_precursor'
+    rotate = False
+
+    G1 = networks_uni[show] #using impactful_precursor from network generation
+
+    #Remove G nodes that are not in attributes df
+    nodes_to_keep = attributes.index.to_list()
+    nodes_to_remove = [n for n in nodes_to_keep if n not in G1.nodes()]
+    G1.remove_nodes_from(nodes_to_remove)
+
+    nx.set_node_attributes(G1, attributes['is_chiral_color'], 'is_chiral_color')
+    layers = [list(i) for i in attributes.loc[list(G1.nodes())].groupby(by='gen').groups.values()][:-1]
+    pos = get_multipartite_layout(edges=list(G1.edges), layers=layers, reduce_edge_crossings=True)
+    #for i in layers[-1]: del pos[i] # remove last layer
+    for n in pos.keys(): pos[n][0] = (pos[n][0]+0.2)**2 # spread out later gens to reduce extreme angles 
+    if rotate: pos = {i:j[::-1] for i,j in pos.items()}
+
+    fig, ax = plt.subplots(figsize=(15,15), layout='constrained')
+    nx.draw_networkx(G1.subgraph(pos.keys()), pos=pos, ax=ax, edge_color=[0.5,0.5,0.5,0.5],
+                    node_color=list(gna(G1.subgraph(pos.keys()), 'is_chiral_color').values()),  
+                    edgecolors='k', width=0.03, arrows=False,
+                    linewidths=0.2, node_size=100, node_shape='s', alpha=0.99,
+                    with_labels=False)
+
+    plt.legend(loc='lower left', borderpad=8, frameon=False, handles=[plt.Line2D([0], [0], marker='s', color='w', markeredgecolor='k', markeredgewidth=0.2, markerfacecolor='#34CCFF', markersize=20, label='Chiral'),
+                        plt.Line2D([0], [0], marker='s', color='w', markerfacecolor='#FFC012', markeredgecolor='k', markeredgewidth=0.2, markersize=20, label='Achiral')], prop={'size': 20})
+    plt.savefig("../Figures/Fig3A.png", format="png")
+    plt.savefig("../Figures/Fig3A.svg", format="svg")
+    plt.close()
+
     ### Get full seed set & reaction set
     seed_groups = [seed_name]
     #rxn_db = "../../lets-get-kegg/Data/kegg_data_R_processed.csv.zip"  # Default in NetworkExpansion.import_reaction_file
@@ -1329,7 +1364,7 @@ def main():
     min_ss_size = 2
     max_ss_size = 10
     n_iter = 1000
-    crossover_step, first_chiral_step = fig2(
+    crossover_step, first_chiral_step, attributes, networks_uni = fig2(
         seed_name=seed_name,
         rxn_db=rxn_db_fp,
         min_ss_size=min_ss_size,
@@ -1339,7 +1374,9 @@ def main():
     print("---- Generating Figure 3 ----")
     fig3(seed_name=seed_name, 
          rxn_db=rxn_db_fp,
-         crossover_step=crossover_step)
+         crossover_step=crossover_step,
+         attributes=attributes,
+         networks_uni=networks_uni)
 
     print("---- Generating Figure 4 ----")
     fig4()
