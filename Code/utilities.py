@@ -15,8 +15,6 @@ import json
 
 import matplotlib.pyplot as plt
 import rdkit.Chem
-import rdkit.Chem
-import rdkit.Chem.rdMolDescriptors
 import rdkit.Chem.rdMolDescriptors
 from rdkit import RDLogger
 from rdkit.Chem import AllChem as Chem
@@ -29,6 +27,18 @@ plt.rcParams['axes.linewidth'] = 2.0
 
 
 def n_plot(xlab, ylab, xs=14, ys=14):
+    """
+    Configure the plot with specified x and y labels, and customize tick parameters.
+
+    Parameters:
+    xlab (str): The label for the x-axis.
+    ylab (str): The label for the y-axis.
+    xs (int, optional): Font size for the x-axis label. Defaults to 14.
+    ys (int, optional): Font size for the y-axis label. Defaults to 14.
+
+    Returns:
+    None
+    """
     plt.minorticks_on()
     plt.tick_params(axis='both',
                     which='major',
@@ -50,11 +60,21 @@ def n_plot(xlab, ylab, xs=14, ys=14):
 
 
 def embed_mol(mol, f_3d=False):
+    """
+    Embed a molecule with optional 3D embedding.
+
+    Parameters:
+    mol (rdkit.Chem.Mol): The molecule to be embedded.
+    f_3d (bool, optional): If True, embed the molecule in 3D. Defaults to False.
+
+    Returns:
+    rdkit.Chem.Mol: The embedded molecule.
+    """
     # Sanitise the molecule
     Chem.SanitizeMol(mol, catchErrors=True)
     # Update the properties
     mol.UpdatePropertyCache()
-    # kekulize the molecule
+    # Kekulize the molecule
     Chem.Kekulize(mol)
     # Add hydrogens
     mol = rdkit.Chem.AddHs(mol)
@@ -65,6 +85,15 @@ def embed_mol(mol, f_3d=False):
 
 
 def standardize_mol(mol):
+    """
+    Standardize the given molecule and embed it.
+
+    Parameters:
+    mol (rdkit.Chem.Mol): The molecule to be standardized and embedded.
+
+    Returns:
+    rdkit.Chem.Mol: The standardized and embedded molecule.
+    """
     # Standardize the molecule
     nrm = rdMolStandardize.Normalizer()
     nrm.normalizeInPlace(mol)
@@ -74,6 +103,15 @@ def standardize_mol(mol):
 
 
 def list_folders(target):
+    """
+    List all folders in the specified directory.
+
+    Parameters:
+    target (str): The path to the directory.
+
+    Returns:
+    list: A list of folder names in the specified directory.
+    """
     return [
         f for f in os.listdir(target) if os.path.isdir(os.path.join(target, f))
     ]
@@ -101,6 +139,15 @@ def file_list_all(mypath=None):
 
 
 def get_chirality(mol_obj_series):
+    """
+    Determine the chirality of molecules in a given series.
+
+    Parameters:
+    mol_obj_series (pandas.Series): A series where the index is compound IDs and the values are RDKit molecule objects.
+
+    Returns:
+    dict: A dictionary where the keys are compound IDs and the values are the number of chiral centers in each molecule.
+    """
     chirality_dict = {}
     for cpd, mol in mol_obj_series.items():
         try:
@@ -115,6 +162,15 @@ def get_chirality(mol_obj_series):
 
 
 def get_heavy_atoms(mol_obj_series):
+    """
+    Get the number of heavy atoms for each molecule in the given series.
+
+    Parameters:
+    mol_obj_series (pandas.Series): A series where the index is compound IDs and the values are RDKit molecule objects.
+
+    Returns:
+    dict: A dictionary where the keys are compound IDs and the values are the number of heavy atoms in each molecule.
+    """
     heavy_dict = {}
     for cpd, mol in mol_obj_series.items():
         try:
@@ -126,7 +182,15 @@ def get_heavy_atoms(mol_obj_series):
 
 def getCpdCount(cpd_df, kegg_df, ischiral_flag):
     """
-    Given a dataframe of compounds, return the number of compounds that are chiral or achiral (depending on state of ischiral_flag)
+    Given a dataframe of compounds, return the number of compounds that are chiral or achiral (depending on the state of ischiral_flag).
+
+    Parameters:
+    cpd_df (pandas.DataFrame): DataFrame containing compound data.
+    kegg_df (pandas.DataFrame): DataFrame containing KEGG compound data.
+    ischiral_flag (bool): Flag indicating whether to count chiral (True) or achiral (False) compounds.
+
+    Returns:
+    pandas.DataFrame: DataFrame containing the count of chiral or achiral compounds for each column in cpd_df.
     """
     count = list()
     for i in range(len(cpd_df.columns)):
@@ -142,8 +206,17 @@ def getCpdCount(cpd_df, kegg_df, ischiral_flag):
 
 def getHeavyAtoms_perGen_fromKegg(cpd_df, kegg_df, ischiral_flag, calc):
     """
-    Given a dataframe of compounds, return the either the average of standard deviation (dependant on calc value) of heavy atoms 
-    from either chiral or achiral compounds (dependant on ischiral_flag)
+    Given a dataframe of compounds, return either the average or standard deviation (depending on the calc value) of heavy atoms
+    from either chiral or achiral compounds (depending on ischiral_flag).
+
+    Parameters:
+    cpd_df (pandas.DataFrame): DataFrame containing compound data.
+    kegg_df (pandas.DataFrame): DataFrame containing KEGG compound data.
+    ischiral_flag (bool): Flag indicating whether to consider chiral (True) or achiral (False) compounds.
+    calc (str): Calculation type, either "mean" for average or "std" for standard deviation.
+
+    Returns:
+    pandas.DataFrame: DataFrame containing the calculated values of heavy atoms for each column in cpd_df.
     """
     heavy_atoms = list()
     for i in range(len(cpd_df.columns)):
@@ -170,8 +243,15 @@ def getHeavyAtoms_perGen_fromKegg(cpd_df, kegg_df, ischiral_flag, calc):
 
 def getRandomSeedSet(kegg_df, size, chirality="both"):
     """
-    Return a seed set of a given size that is ready to be thrown into the network expansion algorithm
-    Chirality options: "both" (default), "chiral", "achiral"
+    Return a seed set of a given size that is ready to be thrown into the network expansion algorithm.
+
+    Parameters:
+    kegg_df (pandas.DataFrame): DataFrame containing KEGG compound data.
+    size (int): The size of the seed set to be returned.
+    chirality (str, optional): Chirality options, either "both" (default), "chiral", or "achiral".
+
+    Returns:
+    numpy.ndarray: An array of compound IDs representing the seed set.
     """
 
     if chirality == "chiral":
@@ -185,11 +265,15 @@ def getRandomSeedSet(kegg_df, size, chirality="both"):
 
 
 def get_ChiralPercentage(cum_chiral, cum_achiral):
-    """ Get percentage chiral at a specific location
+    """
+    Get percentage chiral at a specific location.
 
-    Args:
-        cum_chiral (list): cumulative sum of chiral compounds over generations
-        cum_achiral (list): cumulative sum of achiral compounds over generations
+    Parameters:
+    cum_chiral (list): Cumulative sum of chiral compounds over generations.
+    cum_achiral (list): Cumulative sum of achiral compounds over generations.
+
+    Returns:
+    list: A list of chiral percentages at each location.
     """
     chiral_percent = []
     for i in range(len(cum_chiral)):
@@ -201,8 +285,14 @@ def get_ChiralPercentage(cum_chiral, cum_achiral):
 
 def get_luca_percentage(df):
     """
-    Given a dataframe with sets of compounds per network expansion step, calculate the percentage of compounds 
-    that show up in LUCA compounds
+    Given a dataframe with sets of compounds per network expansion step, calculate the percentage of compounds
+    that show up in LUCA compounds.
+
+    Parameters:
+    df (pandas.DataFrame): DataFrame containing sets of compounds per network expansion step.
+
+    Returns:
+    list: A list of percentages representing the proportion of LUCA compounds at each network expansion step.
     """
     fpath = "../Data/Luca_ec_compound_unique_list_clean.json"
     with open(fpath) as f:
@@ -215,20 +305,28 @@ def get_luca_percentage(df):
         for cpd in row["compounds"]:
             if cpd in luca_cpds:
                 luca_count += 1
-        percent_luca.append((float(luca_count) / len(luca_cpds)) *
-                            100)  # Put into a percentage (0-100) scale
+        percent_luca.append((float(luca_count) / len(luca_cpds)) * 100)  # Put into a percentage (0-100) scale
 
     return percent_luca
 
 
 def linkArrivalStepHeavyAtoms(arrival_df, kegg_df):
+    """
+    Link arrival steps with heavy atom counts and categorize them into percentiles.
+
+    Parameters:
+    arrival_df (pandas.DataFrame): DataFrame containing arrival step information.
+    kegg_df (pandas.DataFrame): DataFrame containing KEGG compound data.
+
+    Returns:
+    pandas.DataFrame: Updated DataFrame with heavy atom percentiles.
+    """
     kegg_df = pd.merge(kegg_df,
                        arrival_df,
                        how="left",
                        left_on="compound_id",
                        right_index=True).dropna()
-    kegg_df = kegg_df.rename(columns={"level_0": "arrival"
-                                      })  # Cleaning up merge notation
+    kegg_df = kegg_df.rename(columns={"level_0": "arrival"})  # Cleaning up merge notation
 
     heavy_atom_counts = np.array(kegg_df["n_heavy_atoms"])
 
@@ -256,6 +354,16 @@ def linkArrivalStepHeavyAtoms(arrival_df, kegg_df):
 
 
 def degrees_PerRxn(rxnString, cpd_degrees):
+    """
+    Calculate the degree of each compound in a reaction and update the compound degrees dictionary.
+
+    Parameters:
+    rxnString (str): A string representing the reaction in the format "reactants <=> products".
+    cpd_degrees (dict): A dictionary where the keys are compound IDs and the values are their degrees.
+
+    Returns:
+    None
+    """
     rxn = rxnString.split("<=>")
     reactants = rxn[0]
     products = rxn[1]
@@ -283,6 +391,15 @@ def degrees_PerRxn(rxnString, cpd_degrees):
 
 
 def get_CpdDegrees(cpd_degrees):
+    """
+    Calculate the degrees of compounds based on reactions and update the compound degrees dictionary.
+
+    Parameters:
+    cpd_degrees (dict): A dictionary where the keys are compound IDs and the values are their degrees.
+
+    Returns:
+    dict: Updated dictionary with the degrees of compounds.
+    """
     # atlas_kegg_processed_merged is the current source of truth (right, @Camerian & @Louie?)
     rxn_df = pd.read_csv(
         "../../lets-get-kegg/Data/atlas_kegg_processed_merged.csv.zip",
@@ -298,8 +415,18 @@ def get_CpdDegrees(cpd_degrees):
 
 
 def scatter_hist(x, y, ax, ax_histy, c):
-    """ 
-    Scatter plot analysis for Figure 3C
+    """
+    Scatter plot analysis for Figure 3C.
+
+    Parameters:
+    x (list or numpy.ndarray): Data for the x-axis.
+    y (list or numpy.ndarray): Data for the y-axis.
+    ax (matplotlib.axes.Axes): The main axes for the scatter plot.
+    ax_histy (matplotlib.axes.Axes): The axes for the histogram.
+    c (str): Color for the histogram bars.
+
+    Returns:
+    None
     """
     achiral_color = "#FFC012"
     chiral_color = "#34CCFF"
@@ -339,8 +466,18 @@ def scatter_hist(x, y, ax, ax_histy, c):
         else:
             bar.set_facecolor(chiral_color)
 
-
 def find_fit(X, Y, color):
+    """
+    Perform linear regression on the given data and plot the fit line with confidence interval.
+
+    Parameters:
+    X (list or numpy.ndarray): Data for the x-axis.
+    Y (list or numpy.ndarray): Data for the y-axis.
+    color (str): Color for the fit line and confidence interval.
+
+    Returns:
+    None
+    """
     slope, intercept, r_value, p_value, std_err = stats.linregress(X, Y)
     # print('Slope: {:.6f}'.format(slope),'Intercept: {:.6f}'.format(intercept),'R-squared: {:.6f}'.format(r_value**2),'Std_err: {:.6f}'.format(std_err))
     x_dummy = np.linspace(start=0, stop=8000, num=100)
@@ -353,10 +490,23 @@ def find_fit(X, Y, color):
 
 
 def make_AUC_dashes(u, label, c, ls, ax):
+    """
+    Plot the AUC (Area Under the Curve) dashes for the given data.
+
+    Parameters:
+    u (dict): A dictionary where the keys are x-values and the values are y-values.
+    label (str): The label for the plot.
+    c (str): The color for the plot line.
+    ls (str): The linestyle for the plot line.
+    ax (matplotlib.axes.Axes): The axes on which to plot.
+
+    Returns:
+    list: A list of y-values used in the plot.
+    """
     yvals = list(u.values())
     xvals = np.linspace(0, 1, num=len(yvals))
 
-    # Calculate AUC using composite travezoidal rule
+    # Calculate AUC using composite trapezoidal rule
     area = np.trapz(yvals, dx=xvals[1])
 
     ax.plot(xvals, yvals, label=label, color=c, linestyle=ls, linewidth=4)
@@ -367,6 +517,16 @@ def make_AUC_dashes(u, label, c, ls, ax):
 
 
 def find_chiral(u, df):
+    """
+    Categorize compounds into chiral and achiral based on the number of chiral centers.
+
+    Parameters:
+    u (dict): A dictionary where the keys are compound IDs and the values are some associated data.
+    df (pandas.DataFrame): DataFrame containing compound data, including 'compound_id' and 'n_chiral_centers' columns.
+
+    Returns:
+    tuple: Two dictionaries, one for chiral compounds and one for achiral compounds.
+    """
     achiral = {}
     chiral = {}
 
@@ -381,6 +541,19 @@ def find_chiral(u, df):
 
 
 def get_chiral_difference(chiral_values, achiral_values, c, l, ax):
+    """
+    Calculate the difference between chiral and achiral values and plot the result.
+
+    Parameters:
+    chiral_values (list or numpy.ndarray): List of chiral values.
+    achiral_values (list or numpy.ndarray): List of achiral values.
+    c (str): Color for the plot line.
+    l (str): Label for the plot line.
+    ax (matplotlib.axes.Axes): The axes on which to plot.
+
+    Returns:
+    list: The label of the plot line.
+    """
     # Step 1: get rank-order percentile values
     m_chiral_percentiles = []
     for i in np.linspace(0, len(chiral_values) - 1, 100):
@@ -401,6 +574,17 @@ def get_chiral_difference(chiral_values, achiral_values, c, l, ax):
 
 
 def check_rxn_chirality(rxnString, keggC_df, rxn_chiral_count):
+    """
+    Check the chirality of reactants and products in a reaction and update the chiral count.
+
+    Parameters:
+    rxnString (str): A string representing the reaction in the format "reactants <=> products".
+    keggC_df (pandas.DataFrame): DataFrame containing KEGG compound data, including 'n_chiral_centers' column.
+    rxn_chiral_count (dict): Dictionary to store the count of reactions based on their chiral counts.
+
+    Returns:
+    pandas.Series: A series with the counts of chiral reactants and products.
+    """
     rxn = rxnString.split("<=>")
     reactants = rxn[0]
     products = rxn[1]
@@ -437,6 +621,15 @@ def check_rxn_chirality(rxnString, keggC_df, rxn_chiral_count):
 
 
 def get_heatmap_array(keggC_df):
+    """
+    Generate a heatmap array based on the chirality of reactions.
+
+    Parameters:
+    keggC_df (pandas.DataFrame): DataFrame containing KEGG compound data, including 'compound_id' and 'n_chiral_centers' columns.
+
+    Returns:
+    tuple: A tuple containing the heatmap array and the updated reaction DataFrame.
+    """
     keggC_df = keggC_df.set_index("compound_id")
     rxn_chiral_count = {}
     heatmap_array = []
@@ -467,6 +660,16 @@ def get_heatmap_array(keggC_df):
 
 
 def get_chiral_modulations(stepRxn_df, rxn_df):
+    """
+    Calculate the number of chiral-modulating, chiral-conserving, and achiral-conserving reactions.
+
+    Parameters:
+    stepRxn_df (pandas.DataFrame): DataFrame containing step reaction data, with each row representing a step and a column 'reactions' containing reaction IDs.
+    rxn_df (pandas.DataFrame): DataFrame containing reaction data, including 'id', 'Reactant Chiral Count', and 'Product Chiral Count' columns.
+
+    Returns:
+    tuple: Three lists containing the counts of chiral-modulating, chiral-conserving, and achiral-conserving reactions for each step.
+    """
     chiral_modulating = []
     chiral_conserving = []
     achiral_conserving = []
@@ -491,8 +694,11 @@ def get_chiral_modulations(stepRxn_df, rxn_df):
 
 
 def prepare_session():
-    """ 
-    Set up KEGG RestAPI session (from lets-get-kegg)
+    """
+    Set up KEGG RestAPI session (from lets-get-kegg).
+
+    Returns:
+    requests.Session: A configured session with retry logic for KEGG RestAPI.
     """
     # Make the session
     s = Session()
@@ -509,8 +715,17 @@ def prepare_session():
 
 
 def get_pathway_data(session, request_sleep=0.4):
-    """ 
-    Heavily modified version of get_data from lets-get-kegg, pings kegg for pathway information
+    """
+    Retrieve KEGG pathway information, including pathway-compound links and pathway names.
+
+    Parameters:
+    session (requests.Session): A configured session for making requests to the KEGG RestAPI.
+    request_sleep (float, optional): Time to sleep between requests to avoid overloading the server. Defaults to 0.4 seconds.
+
+    Returns:
+    tuple: A tuple containing two dictionaries:
+        - pathway_cpd_link (dict): A dictionary where keys are pathway IDs and values are lists of compound IDs.
+        - pathway_names (dict): A dictionary where keys are pathway IDs and values are pathway names.
     """
     ### Get compounds belonging to each pathway
     print("- Getting KEGG pathway-compound links -")
@@ -537,6 +752,7 @@ def get_pathway_data(session, request_sleep=0.4):
             flush=True)
         return False
 
+    ### Get pathway names
     print("- Getting KEGG pathway names -")
     response = session.get(f"https://rest.kegg.jp/list/pathway", timeout=10.0)
     pathway_names = dict()
@@ -562,7 +778,16 @@ def get_pathway_data(session, request_sleep=0.4):
 
 def get_chiral_percentage_fromList(cpds, keggC_df):
     """
-    Given a list of KEGG compound IDs, find the chiral percentage
+    Given a list of KEGG compound IDs, find the chiral percentage.
+
+    Parameters:
+    cpds (list): A list of KEGG compound IDs.
+    keggC_df (pandas.DataFrame): DataFrame containing KEGG compound data, including 'compound_id' and 'n_chiral_centers' columns.
+
+    Returns:
+    tuple: A tuple containing:
+        - float: The percentage of chiral compounds.
+        - int: The total number of compounds in the subset.
     """
     sub_df = keggC_df[keggC_df["compound_id"].isin(cpds)]
     if len(sub_df):
@@ -573,8 +798,22 @@ def get_chiral_percentage_fromList(cpds, keggC_df):
 
 
 def get_pathway_colors(pathway_df):
-    # Hardcoding metabolic pathway subgroup names & colors
+    """
+    Assign colors to metabolic pathways and categorize them into groups.
 
+    Parameters:
+    pathway_df (pandas.DataFrame): DataFrame containing pathway information, including 'ID' and 'Chirality' columns.
+
+    Returns:
+    tuple: A tuple containing:
+        - pandas.DataFrame: Updated DataFrame with pathway groups, keys, and colors.
+        - list: A 2D list of chiralities for each metabolic pathway group.
+        - dict: A dictionary mapping pathway IDs to their group colors.
+        - dict: A dictionary mapping pathway group names to their pathway IDs.
+        - dict: A dictionary mapping pathway group names to their colors.
+        - list: A list of colors for the pathway groups.
+    """
+    # Hardcoding metabolic pathway subgroup names & colors
     metabolism_groups = {
         "Carbohydrate Metabolism": [
             10, 20, 30, 40, 51, 52, 53, 500, 520, 620, 630, 640, 650, 660, 562
@@ -680,8 +919,17 @@ def get_pathway_colors(pathway_df):
 
     return pathway_df, chiralities, pathway_group_colors, metabolism_groups, colors, color_list
 
-
 def set_box_color(bp, color):
+    """
+    Set the color of various elements in a box plot.
+
+    Parameters:
+    bp (dict): A dictionary containing the box plot elements.
+    color (str): The color to set for the box plot elements.
+
+    Returns:
+    None
+    """
     plt.setp(bp['boxes'], color=color)
     plt.setp(bp['whiskers'], color=color)
     plt.setp(bp['caps'], color=color)
@@ -689,8 +937,16 @@ def set_box_color(bp, color):
 
 
 def get_chiral_fraction_atHeavyAtomCounts(df):
-    """ 
-    Chiral fractions at increasing heavy atom counts
+    """
+    Calculate chiral fractions at increasing heavy atom counts.
+
+    Parameters:
+    df (pandas.DataFrame): DataFrame containing compound data, including 'n_heavy_atoms' and 'n_chiral_centers' columns.
+
+    Returns:
+    tuple: A tuple containing:
+        - list: Chiral fractions at each heavy atom count.
+        - list: Achiral fractions at each heavy atom count.
     """
     chiral_fraction = []
     for i in range(1, int(max(df["n_heavy_atoms"]))):
@@ -714,15 +970,24 @@ def get_chiral_fraction_atHeavyAtomCounts(df):
 
 def get_chiral_order_parameters(keggC_df):
     """
-    Get chiral order parameters (cop) for GDB  & KEGG
+    Get chiral order parameters (cop) for GDB and KEGG.
+
+    Parameters:
+    keggC_df (pandas.DataFrame): DataFrame containing KEGG compound data, including 'n_heavy_atoms' and 'n_chiral_centers' columns.
+
+    Returns:
+    tuple: A tuple containing:
+        - list: Chiral order parameters for GDB.
+        - list: Chiral order parameters for KEGG.
     """
     gdb_counts_df = pd.read_csv("../Data/GDB_raw_counts.csv")
     gdb_cop = []
     for _, row in gdb_counts_df.iterrows():
         gdb_cop.append(row["count_chiral"] /
                        (row["count_achiral"] + row["count_chiral"]))
-        
-    print(f"- GDB Compound Totals:\n\tAchiral: {gdb_counts_df['count_achiral'].sum()}\n\tChiral: {gdb_counts_df['count_chiral'].sum()}")
+
+    print(
+        f"- GDB Compound Totals:\n\tAchiral: {gdb_counts_df['count_achiral'].sum()}\n\tChiral: {gdb_counts_df['count_chiral'].sum()}")
 
     kegg_cop = []
     for i in range(17):
