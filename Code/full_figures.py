@@ -176,8 +176,10 @@ def fig2(seed_name, random_seed_set_size, n_iter):
     print("- Chirality Statistics -")
     print(f"\tAchiral To Chiral Crossover Step: {achiral_chiral_crossover_step}")
     print(f"\tFirst Chiral Compound Appearence Step: {first_chiral_step}")
-    print(f"\tExpansion Size At First Chiral Compound Appearence: {summaries['compound count'].iloc[first_chiral_step][seed_name]} Compounds, {summaries['reaction count'].iloc[first_chiral_step][seed_name]} Reactions")
-    print(f"\tAverage Achiral Heavy Atoms At Crossover Step: {round(summaries['achiral avg heavy atoms'].iloc[achiral_chiral_crossover_step][0], 3)}")
+    print(
+        f"\tExpansion Size At First Chiral Compound Appearence: {summaries['compound count'].iloc[first_chiral_step][seed_name]} Compounds, {summaries['reaction count'].iloc[first_chiral_step][seed_name]} Reactions")
+    print(
+        f"\tAverage Achiral Heavy Atoms At Crossover Step: {round(summaries['achiral avg heavy atoms'].iloc[achiral_chiral_crossover_step][0], 3)}")
 
     # Read in LUCA compounds & get percentages
     print("- Calculating LUCA Percentage Per Expansion Step -")
@@ -185,10 +187,11 @@ def fig2(seed_name, random_seed_set_size, n_iter):
     full_luca_exp = 0
     for step in range(len(percent_luca)):
         if percent_luca[step] == percent_luca[-1]:
-            full_luca_exp = step+1 #Since step starts at 0, add 1 to reflect network expansion algorithm
+            full_luca_exp = step + 1  # Since step starts at 0, add 1 to reflect network expansion algorithm
             break
     print(f"\tFull LUCA Expansion Step: {full_luca_exp}")
-    print(f"\tExpansion Size At First Chiral Compound Appearence: {summaries['compound count'].iloc[full_luca_exp][seed_name]} Compounds, {summaries['reaction count'].iloc[full_luca_exp][seed_name]} Reactions")
+    print(
+        f"\tExpansion Size At First Chiral Compound Appearence: {summaries['compound count'].iloc[full_luca_exp][seed_name]} Compounds, {summaries['reaction count'].iloc[full_luca_exp][seed_name]} Reactions")
 
     ### Chiral / achiral / LUCA compounds panel (Fig2B)
     # Colors
@@ -511,8 +514,9 @@ def fig3(seed_name, crossover_step):
                     ax=g.ax_joint,
                     scatter=False,
                     color="k")
-    #Last line in h is the regression line
-    slope, intercept, r_value, p_value, std_err = stats.linregress(x=h.get_lines()[-1].get_xdata(),y=h.get_lines()[-1].get_ydata())
+    # Last line in h is the regression line
+    slope, intercept, r_value, p_value, std_err = stats.linregress(x=h.get_lines()[-1].get_xdata(),
+                                                                   y=h.get_lines()[-1].get_ydata())
     print(f"- Regression Slope: {round(slope, 3)}, Intercept: {round(intercept, 3)}")
     g.ax_joint.axvline(x=crossover_step,
                        color="k",
@@ -1008,9 +1012,12 @@ def fig5(seed_name, crossover_step, first_chiral_step):
     chiral_modulating, chiral_conserving, achiral_conserving = get_chiral_modulations(
         results[name]["participants"], rxn_df)
     total_rxns = chiral_modulating[-1] + chiral_conserving[-1] + achiral_conserving[-1]
-    print(f"- Total Chiral Modulating Reactions: {chiral_modulating[-1]}, {round((chiral_modulating[-1] / total_rxns)*100, 3)}% -")
-    print(f"- Total Chiral Conserving Reactions: {chiral_conserving[-1]}, {round((chiral_conserving[-1] / total_rxns)*100, 3)}% -")
-    print(f"- Total Achiral Conserving Reactions: {achiral_conserving[-1]}, {round((achiral_conserving[-1] / total_rxns)*100, 3)}% -")
+    print(
+        f"- Total Chiral Modulating Reactions: {chiral_modulating[-1]}, {round((chiral_modulating[-1] / total_rxns) * 100, 3)}% -")
+    print(
+        f"- Total Chiral Conserving Reactions: {chiral_conserving[-1]}, {round((chiral_conserving[-1] / total_rxns) * 100, 3)}% -")
+    print(
+        f"- Total Achiral Conserving Reactions: {achiral_conserving[-1]}, {round((achiral_conserving[-1] / total_rxns) * 100, 3)}% -")
 
     fig, ax = plt.subplots(figsize=(12, 12))
 

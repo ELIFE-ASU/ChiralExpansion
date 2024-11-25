@@ -3,21 +3,63 @@ import re
 import pandas as pd
 
 
-# Load the compound and reaction files
 def load_files(compound_file, reaction_file):
+    """
+    Load the compound and reaction files.
+
+    Parameters:
+    compound_file (str): The path to the compound file.
+    reaction_file (str): The path to the reaction file.
+
+    Returns:
+    pandas.DataFrame: DataFrame containing compound data.
+    pandas.DataFrame: DataFrame containing reaction data.
+    """
     kegg_data_C = pd.read_csv(compound_file)
     kegg_data_R = pd.read_csv(reaction_file)
     return kegg_data_C, kegg_data_R
 
 
-# Create a dictionary from kegg_data_C for quick lookup of compound chiral centers
 def create_compound_dict(kegg_data_C):
+    """
+    Create a dictionary from the KEGG compound data for quick lookup of compound chiral centers.
+
+    Parameters:
+    kegg_data_C (pandas.DataFrame): DataFrame containing KEGG compound data with 'compound_id' and 'n_chiral_centers' columns.
+
+    Returns:
+    dict: A dictionary with compound IDs as keys and the number of chiral centers as values.
+    """
     return kegg_data_C.set_index('compound_id')['n_chiral_centers'].to_dict()
 
 
-# Function to parse reactions and extract compounds with their stoichiometry
 def parse_reaction_for_stoichiometry(reaction_str):
+    """
+    Parse a reaction string to extract reactants and products with their stoichiometry.
+
+    Parameters:
+    reaction_str (str): The reaction string in the format 'reactants <=> products'.
+
+    Returns:
+    tuple: A tuple containing:
+        - reactants (list): A list of tuples with reactant compound IDs and their stoichiometry.
+        - products (list): A list of tuples with product compound IDs and their stoichiometry.
+        - reactant_stoichiometries (list): A list of stoichiometries for reactants as strings.
+        - product_stoichiometries (list): A list of stoichiometries for products as strings.
+    """
+
     def parse_compounds(compound_str):
+        """
+        Parse a compound string to extract individual compounds and their stoichiometry.
+
+        Parameters:
+        compound_str (str): The compound string containing compounds separated by '+'.
+
+        Returns:
+        tuple: A tuple containing:
+            - parsed_compounds (list): A list of tuples with compound IDs and their stoichiometry.
+            - stoichiometries (list): A list of stoichiometries as strings.
+        """
         compounds = compound_str.split('+')
         parsed_compounds = []
         stoichiometries = []
@@ -43,8 +85,20 @@ def parse_reaction_for_stoichiometry(reaction_str):
     return reactants, products, reactant_stoichiometries, product_stoichiometries
 
 
-# Function to label reaction type based on chiral centers
 def label_reaction(reactants_chiral, products_chiral):
+    """
+    Label the reaction type based on the number of chiral centers in reactants and products.
+
+    Parameters:
+    reactants_chiral (int): The number of chiral centers in the reactants.
+    products_chiral (int): The number of chiral centers in the products.
+
+    Returns:
+    str: A string indicating the type of reaction:
+        - "achiral conserving" if both reactants and products have zero chiral centers.
+        - "chiral conserving" if the number of chiral centers in reactants and products are equal.
+        - "chiral modulating" if the number of chiral centers in reactants and products are different.
+    """
     if reactants_chiral == 0 and products_chiral == 0:
         return "achiral conserving"
     elif reactants_chiral == products_chiral:
@@ -53,8 +107,19 @@ def label_reaction(reactants_chiral, products_chiral):
         return "chiral modulating"
 
 
-# Function to calculate chiral centers with error handling
 def calculate_chiral_centers_with_error_handling(compounds, compound_chiral_dict):
+    """
+    Calculate the total number of chiral centers for a list of compounds, with error handling for missing compounds.
+
+    Parameters:
+    compounds (list): A list of tuples where each tuple contains a compound ID and its stoichiometry.
+    compound_chiral_dict (dict): A dictionary with compound IDs as keys and the number of chiral centers as values.
+
+    Returns:
+    tuple: A tuple containing:
+        - total_chiral_centers (int): The total number of chiral centers.
+        - missing_compounds (list): A list of compound IDs that are missing from the dictionary.
+    """
     total_chiral_centers = 0
     missing_compounds = []
     for compound_id, stoichiometry in compounds:
@@ -67,8 +132,18 @@ def calculate_chiral_centers_with_error_handling(compounds, compound_chiral_dict
     return total_chiral_centers, missing_compounds
 
 
-# Function to calculate the fraction of chiral compounds
 def calculate_fraction_chiral(reactants, products, compound_chiral_dict):
+    """
+    Calculate the fraction of chiral compounds in the given reactants and products.
+
+    Parameters:
+    reactants (list): A list of tuples where each tuple contains a compound ID and its stoichiometry.
+    products (list): A list of tuples where each tuple contains a compound ID and its stoichiometry.
+    compound_chiral_dict (dict): A dictionary with compound IDs as keys and the number of chiral centers as values.
+
+    Returns:
+    float: The fraction of chiral compounds.
+    """
     total_chiral_compounds = 0
     total_compounds = 0
 
@@ -84,8 +159,17 @@ def calculate_fraction_chiral(reactants, products, compound_chiral_dict):
     return total_chiral_compounds / total_compounds
 
 
-# Main function to process reactions
 def process_reactions(kegg_data_R, compound_chiral_dict):
+    """
+    Process the reactions to label them based on chiral centers and calculate additional data.
+
+    Parameters:
+    kegg_data_R (pandas.DataFrame): DataFrame containing reaction data.
+    compound_chiral_dict (dict): A dictionary with compound IDs as keys and the number of chiral centers as values.
+
+    Returns:
+    pandas.DataFrame: DataFrame with added columns for reaction labels, fraction of chiral compounds, stoichiometry, and notes.
+    """
     reaction_labels = []
     additional_data = []
     stoichiometry_column = []
@@ -144,8 +228,14 @@ def process_reactions(kegg_data_R, compound_chiral_dict):
     return kegg_data_R
 
 
-# Save processed data to CSV
 def save_to_csv(kegg_data_R, output_file):
+    """
+    Save the processed reaction data to a CSV file.
+
+    Parameters:
+    kegg_data_R (pandas.DataFrame): DataFrame containing the processed reaction data.
+    output_file (str): The path to the output CSV file.
+    """
     kegg_data_R.to_csv(output_file, index=False)
 
 
