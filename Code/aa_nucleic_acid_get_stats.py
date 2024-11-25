@@ -5,6 +5,15 @@ import pandas as pd
 
 
 def get_heavy_atoms(formula):
+    """
+    Calculate the number of heavy atoms in a chemical formula.
+
+    Parameters:
+    formula (str): The chemical formula as a string.
+
+    Returns:
+    int: The total number of heavy atoms (excluding hydrogen) in the formula.
+    """
     atoms = chemparse.parse_formula(formula)
     atoms.pop("H", None)  # Remove hydrogen atoms if present
     return sum(atoms.values())  # Sum of remaining atoms
