@@ -3,3 +3,4 @@
 *.pyc
 Output/**
 Archived/**
+Data/JGI*
