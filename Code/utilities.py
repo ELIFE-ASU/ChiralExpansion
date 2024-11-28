@@ -142,6 +142,16 @@ def getCpdCount(cpd_df, kegg_df, ischiral_flag):
 
     return pd.DataFrame(count)
 
+def getRxnCount(rxn_df):
+    """
+    Given a dataframe of compounds, return the number of compounds that are chiral or achiral (depending on state of ischiral_flag)
+    """
+    count = list()
+    print(rxn_df)
+
+    #return pd.DataFrame(count)
+    return 0
+
 
 def getHeavyAtoms_perGen_fromKegg(cpd_df, kegg_df, ischiral_flag, calc):
     """
