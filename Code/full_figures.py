@@ -12,7 +12,6 @@ from networkx.algorithms import bipartite
 import netwulf as nw
 from netgraph import get_multipartite_layout
 
-
 from NetworkExpansion import *
 from utilities import *
 
@@ -180,24 +179,28 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     print("- Chirality Statistics -")
     print(f"\tAchiral To Chiral Crossover Step: {achiral_chiral_crossover_step}")
     print(f"\tFirst Chiral Compound Appearence Step: {first_chiral_step}")
-    print(f"\tExpansion Size At First Chiral Compound Appearence: {summaries['compound count'].iloc[first_chiral_step][seed_name]} Compounds, {summaries['reaction count'].iloc[first_chiral_step][seed_name]} Reactions")
-    print(f"\tAverage Achiral Heavy Atoms At Crossover Step: {round(summaries['achiral avg heavy atoms'].iloc[achiral_chiral_crossover_step][0], 3)}")
+    print(
+        f"\tExpansion Size At First Chiral Compound Appearence: {summaries['compound count'].iloc[first_chiral_step][seed_name]} Compounds, {summaries['reaction count'].iloc[first_chiral_step][seed_name]} Reactions")
+    print(
+        f"\tAverage Achiral Heavy Atoms At Crossover Step: {round(summaries['achiral avg heavy atoms'].iloc[achiral_chiral_crossover_step][0], 3)}")
 
     ### Network figure
     print("- Generating Network Figure (click 'Post To Python' in browser pop-up window to continue code) -")
     result_network = generate_annotated_bipartite_edgelist(results[seed_name])
-    #summary_network = generate_expansion_summary(result_network)
-    transition_edge_df = result_network['bipartite_edgelist'].query('step <= @achiral_chiral_crossover_step').copy(deep=True)
-    networks = {i: nx.from_pandas_edgelist(transition_edge_df[transition_edge_df[i]], 
-            source='source', target='target', edge_attr=True, create_using=nx.DiGraph())
-            for i in ['impactful_precursor','immediate_precursor','directed']}
-    compound_nodes = {i: set(j.nodes()).difference(reaction_scope.index) for i,j in networks.items()}
+    # summary_network = generate_expansion_summary(result_network)
+    transition_edge_df = result_network['bipartite_edgelist'].query('step <= @achiral_chiral_crossover_step').copy(
+        deep=True)
+    networks = {i: nx.from_pandas_edgelist(transition_edge_df[transition_edge_df[i]],
+                                           source='source', target='target', edge_attr=True, create_using=nx.DiGraph())
+                for i in ['impactful_precursor', 'immediate_precursor', 'directed']}
+    compound_nodes = {i: set(j.nodes()).difference(reaction_scope.index) for i, j in networks.items()}
     networks_uni = {i: bipartite.projected_graph(networks[i], nodes=compound_nodes[i]) for i in networks.keys()}
 
     attributes = pd.read_csv("../Data/kegg_data_C.csv.zip",
-                       index_col=1,
-                       compression="zip")
-    attributes.drop(labels=["smiles", "Unnamed: 0", "formula", "molecular_weight", "n_heavy_atoms"], axis=1, inplace=True)
+                             index_col=1,
+                             compression="zip")
+    attributes.drop(labels=["smiles", "Unnamed: 0", "formula", "molecular_weight", "n_heavy_atoms"], axis=1,
+                    inplace=True)
     attributes["is_chiral"] = attributes['n_chiral_centers'].map(lambda x: x > 0)
     attributes['is_chiral_color'] = attributes['is_chiral'].map({True: '#34CCFF', False: '#FFC012'}).fillna("#FFFFFF")
 
@@ -214,7 +217,7 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
                 break
         if not step_found:
             steps.append(np.nan)
-        
+
     attributes['gen'] = steps
     attributes.dropna(inplace=True)
     gen_color = 'Greys'
@@ -224,15 +227,17 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     max_node_size = 25
 
     G = networks_uni['directed'].copy()
-    node_sizes = pd.Series({i:(np.log2(j+2))**1.5 for i,j in G.degree()})
+    node_sizes = pd.Series({i: (np.log2(j + 2)) ** 1.5 for i, j in G.degree()})
     nx.set_node_attributes(G, node_sizes, 'size')
     nx.set_node_attributes(G, attributes['is_chiral_color'], 'group')
 
-    fig = plt.figure(figsize=(12,12), layout='constrained')
-    stylized_network, config = nw.visualize(G, config={'node_label_color': '#000000', 'node_gravity': 0.0, 
-                                'link_alpha': 0.005, 'link_color': '#000000', 'zoom': 0.60, 'node_charge': -100,
-                                'scale_node_size_by_strength': False, 'node_size_variation': 1,
-                                'node_size': max_node_size, 'link_distance':25, 'node_stroke_width': 2})
+    fig = plt.figure(figsize=(12, 12), layout='constrained')
+    stylized_network, config = nw.visualize(G, config={'node_label_color': '#000000', 'node_gravity': 0.0,
+                                                       'link_alpha': 0.005, 'link_color': '#000000', 'zoom': 0.60,
+                                                       'node_charge': -100,
+                                                       'scale_node_size_by_strength': False, 'node_size_variation': 1,
+                                                       'node_size': max_node_size, 'link_distance': 25,
+                                                       'node_stroke_width': 2})
     fig, ax = nw.draw_netwulf(stylized_network)
 
     a = stylized_network.copy()
@@ -248,14 +253,15 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     # Read in LUCA compounds & get percentages
     print("- Calculating LUCA Percentage Per Expansion Step -")
     percent_luca = get_luca_percentage(results[seed_name]["participants"])
-    del(results)
+    del (results)
     full_luca_exp = 0
     for step in range(len(percent_luca)):
         if percent_luca[step] == percent_luca[-1]:
-            full_luca_exp = step+1 #Since step starts at 0, add 1 to reflect network expansion algorithm
+            full_luca_exp = step + 1  # Since step starts at 0, add 1 to reflect network expansion algorithm
             break
     print(f"\tFull LUCA Expansion Step: {full_luca_exp}")
-    print(f"\tExpansion Size At Full LUCA Expansion: {summaries['compound count'].iloc[full_luca_exp][seed_name]} Compounds, {summaries['reaction count'].iloc[full_luca_exp][seed_name]} Reactions")
+    print(
+        f"\tExpansion Size At Full LUCA Expansion: {summaries['compound count'].iloc[full_luca_exp][seed_name]} Compounds, {summaries['reaction count'].iloc[full_luca_exp][seed_name]} Reactions")
 
     ### Chiral / achiral / LUCA compounds panel (Fig2B)
     # Colors
@@ -310,7 +316,7 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
                 va='center',
                 zorder=3)
 
-    #ax.set_ylim([0, 3100])
+    # ax.set_ylim([0, 3100])
     ax.set_ylabel("Compounds")
     ax.set_xlabel("Expansion Step")
 
@@ -414,8 +420,6 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     #             getCpdCount(randAchiral_results["cps"],
     #                         keggC_df,
     #                         ischiral_flag=False)[0].to_list())
-        
-        
 
     # print(f"- Expanding {n_iter*(max_ss_size-min_ss_size+1)} Chiral Seed Sets -")
     # chiral_full_chiral_count = list()
@@ -572,9 +576,9 @@ def fig3(seed_name, rxn_db, crossover_step, attributes, networks_uni):
     show = 'impactful_precursor'
     rotate = False
 
-    G1 = networks_uni[show] #using impactful_precursor from network generation
+    G1 = networks_uni[show]  # using impactful_precursor from network generation
 
-    #Remove G nodes that are not in attributes df
+    # Remove G nodes that are not in attributes df
     nodes_to_keep = attributes.index.to_list()
     nodes_to_remove = [n for n in nodes_to_keep if n not in G1.nodes()]
     G1.remove_nodes_from(nodes_to_remove)
@@ -582,26 +586,29 @@ def fig3(seed_name, rxn_db, crossover_step, attributes, networks_uni):
     nx.set_node_attributes(G1, attributes['is_chiral_color'], 'is_chiral_color')
     layers = [list(i) for i in attributes.loc[list(G1.nodes())].groupby(by='gen').groups.values()][:-1]
     pos = get_multipartite_layout(edges=list(G1.edges), layers=layers, reduce_edge_crossings=True)
-    #for i in layers[-1]: del pos[i] # remove last layer
-    for n in pos.keys(): pos[n][0] = (pos[n][0]+0.2)**2 # spread out later gens to reduce extreme angles 
-    if rotate: pos = {i:j[::-1] for i,j in pos.items()}
+    # for i in layers[-1]: del pos[i] # remove last layer
+    for n in pos.keys(): pos[n][0] = (pos[n][0] + 0.2) ** 2  # spread out later gens to reduce extreme angles
+    if rotate: pos = {i: j[::-1] for i, j in pos.items()}
 
-    fig, ax = plt.subplots(figsize=(15,15), layout='constrained')
-    nx.draw_networkx(G1.subgraph(pos.keys()), pos=pos, ax=ax, edge_color=[0.5,0.5,0.5,0.5],
-                    node_color=list(gna(G1.subgraph(pos.keys()), 'is_chiral_color').values()),  
-                    edgecolors='k', width=0.03, arrows=False,
-                    linewidths=0.2, node_size=100, node_shape='s', alpha=0.99,
-                    with_labels=False)
+    fig, ax = plt.subplots(figsize=(15, 15), layout='constrained')
+    nx.draw_networkx(G1.subgraph(pos.keys()), pos=pos, ax=ax, edge_color=[0.5, 0.5, 0.5, 0.5],
+                     node_color=list(gna(G1.subgraph(pos.keys()), 'is_chiral_color').values()),
+                     edgecolors='k', width=0.03, arrows=False,
+                     linewidths=0.2, node_size=100, node_shape='s', alpha=0.99,
+                     with_labels=False)
 
-    plt.legend(loc='lower left', borderpad=8, frameon=False, handles=[plt.Line2D([0], [0], marker='s', color='w', markeredgecolor='k', markeredgewidth=0.2, markerfacecolor='#34CCFF', markersize=20, label='Chiral'),
-                        plt.Line2D([0], [0], marker='s', color='w', markerfacecolor='#FFC012', markeredgecolor='k', markeredgewidth=0.2, markersize=20, label='Achiral')], prop={'size': 20})
+    plt.legend(loc='lower left', borderpad=8, frameon=False, handles=[
+        plt.Line2D([0], [0], marker='s', color='w', markeredgecolor='k', markeredgewidth=0.2, markerfacecolor='#34CCFF',
+                   markersize=20, label='Chiral'),
+        plt.Line2D([0], [0], marker='s', color='w', markerfacecolor='#FFC012', markeredgecolor='k', markeredgewidth=0.2,
+                   markersize=20, label='Achiral')], prop={'size': 20})
     plt.savefig("../Figures/Fig3A.png", format="png")
     plt.savefig("../Figures/Fig3A.svg", format="svg")
     plt.close()
 
     ### Get full seed set & reaction set
     seed_groups = [seed_name]
-    #rxn_db = "../../lets-get-kegg/Data/kegg_data_R_processed.csv.zip"  # Default in NetworkExpansion.import_reaction_file
+    # rxn_db = "../../lets-get-kegg/Data/kegg_data_R_processed.csv.zip"  # Default in NetworkExpansion.import_reaction_file
     reaction_scope = get_sides(import_reaction_file(rxn_db))
 
     compound_scope = set.union(*reaction_scope.stack())
@@ -638,8 +645,9 @@ def fig3(seed_name, rxn_db, crossover_step, attributes, networks_uni):
                     ax=g.ax_joint,
                     scatter=False,
                     color="k")
-    #Last line in h is the regression line
-    slope, intercept, r_value, p_value, std_err = stats.linregress(x=h.get_lines()[-1].get_xdata(),y=h.get_lines()[-1].get_ydata())
+    # Last line in h is the regression line
+    slope, intercept, r_value, p_value, std_err = stats.linregress(x=h.get_lines()[-1].get_xdata(),
+                                                                   y=h.get_lines()[-1].get_ydata())
     print(f"- Regression Slope: {round(slope, 3)}, Intercept: {round(intercept, 3)}")
     g.ax_joint.axvline(x=crossover_step,
                        color="k",
@@ -1113,7 +1121,7 @@ def fig5(seed_name, rxn_db, crossover_step, first_chiral_step):
     ### Panel 5B - achiral/chiral modulating &conserving
     ### Get full seed set & reaction set
     seed_groups = [seed_name]
-    #rxn_db = "../../lets-get-kegg/Data/kegg_data_R_processed.csv.zip"  # Default in NetworkExpansion.import_reaction_file
+    # rxn_db = "../../lets-get-kegg/Data/kegg_data_R_processed.csv.zip"  # Default in NetworkExpansion.import_reaction_file
     reaction_scope = get_sides(import_reaction_file(rxn_db))
 
     compound_scope = set.union(*reaction_scope.stack())
@@ -1135,9 +1143,12 @@ def fig5(seed_name, rxn_db, crossover_step, first_chiral_step):
     chiral_modulating, chiral_conserving, achiral_conserving = get_chiral_modulations(
         results[name]["participants"], rxn_df)
     total_rxns = chiral_modulating[-1] + chiral_conserving[-1] + achiral_conserving[-1]
-    print(f"- Total Chiral Modulating Reactions: {chiral_modulating[-1]}, {round((chiral_modulating[-1] / total_rxns)*100, 3)}% -")
-    print(f"- Total Chiral Conserving Reactions: {chiral_conserving[-1]}, {round((chiral_conserving[-1] / total_rxns)*100, 3)}% -")
-    print(f"- Total Achiral Conserving Reactions: {achiral_conserving[-1]}, {round((achiral_conserving[-1] / total_rxns)*100, 3)}% -")
+    print(
+        f"- Total Chiral Modulating Reactions: {chiral_modulating[-1]}, {round((chiral_modulating[-1] / total_rxns) * 100, 3)}% -")
+    print(
+        f"- Total Chiral Conserving Reactions: {chiral_conserving[-1]}, {round((chiral_conserving[-1] / total_rxns) * 100, 3)}% -")
+    print(
+        f"- Total Achiral Conserving Reactions: {achiral_conserving[-1]}, {round((achiral_conserving[-1] / total_rxns) * 100, 3)}% -")
 
     fig, ax = plt.subplots(figsize=(12, 12))
 
@@ -1371,7 +1382,7 @@ def main():
         n_iter=n_iter)
 
     print("---- Generating Figure 3 ----")
-    fig3(seed_name=seed_name, 
+    fig3(seed_name=seed_name,
          rxn_db=rxn_db_fp,
          crossover_step=crossover_step,
          attributes=attributes,
