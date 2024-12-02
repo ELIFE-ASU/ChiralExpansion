@@ -1,28 +1,26 @@
+import json
+import math
 import os
+import time
 
+import matplotlib
+import matplotlib.pyplot as plt
+import networkx as nx
 import numpy as np
 import pandas as pd
+import rdkit.Chem
+import rdkit.Chem
+import rdkit.Chem.rdMolDescriptors
+import rdkit.Chem.rdMolDescriptors
 import scipy.stats as stats
-from tqdm import tqdm
-
-from requests import Session
-from requests.adapters import HTTPAdapter
-from urllib3.util import Retry
-import time
-import math
-import json
-import networkx as nx
-
-import matplotlib.pyplot as plt
 from matplotlib.colors import Normalize, to_hex, BoundaryNorm
-import matplotlib
-import rdkit.Chem
-import rdkit.Chem
-import rdkit.Chem.rdMolDescriptors
-import rdkit.Chem.rdMolDescriptors
 from rdkit import RDLogger
 from rdkit.Chem import AllChem as Chem
 from rdkit.Chem.MolStandardize import rdMolStandardize
+from requests import Session
+from requests.adapters import HTTPAdapter
+from tqdm import tqdm
+from urllib3.util import Retry
 
 tqdm.pandas()
 lg = RDLogger.logger()
@@ -142,6 +140,7 @@ def getCpdCount(cpd_df, kegg_df, ischiral_flag):
 
     return pd.DataFrame(count)
 
+
 def getRxnCount(rxn_df):
     """
     Given a dataframe of compounds, return the number of compounds that are chiral or achiral (depending on state of ischiral_flag)
@@ -149,7 +148,7 @@ def getRxnCount(rxn_df):
     count = list()
     print(rxn_df)
 
-    #return pd.DataFrame(count)
+    # return pd.DataFrame(count)
     return 0
 
 
@@ -734,8 +733,9 @@ def get_chiral_order_parameters(keggC_df):
     for _, row in gdb_counts_df.iterrows():
         gdb_cop.append(row["count_chiral"] /
                        (row["count_achiral"] + row["count_chiral"]))
-        
-    print(f"- GDB Compound Totals:\n\tAchiral: {gdb_counts_df['count_achiral'].sum()}\n\tChiral: {gdb_counts_df['count_chiral'].sum()}")
+
+    print(
+        f"- GDB Compound Totals:\n\tAchiral: {gdb_counts_df['count_achiral'].sum()}\n\tChiral: {gdb_counts_df['count_chiral'].sum()}")
 
     kegg_cop = []
     for i in range(17):
@@ -748,21 +748,28 @@ def get_chiral_order_parameters(keggC_df):
 
     return gdb_cop, kegg_cop
 
+
 def gna(G, attr): return nx.get_node_attributes(G, attr)
+
 
 def colorize_Series(S, cmap='cet_CET_C6s'):
     # S should be list-like, or a dict, or a series.... of numbers.
     color_map = matplotlib.colormaps[cmap]
-    def float_norm(x): return(Normalize(vmin=x.min(), vmax=x.max()))
-    def boundary_norm(x): return(BoundaryNorm(boundaries=list(range(x.min(), x.max()+1, 1)), ncolors=color_map.N))
-    if type(S)!=pd.Series:
+
+    def float_norm(x):
+        return (Normalize(vmin=x.min(), vmax=x.max()))
+
+    def boundary_norm(x):
+        return (BoundaryNorm(boundaries=list(range(x.min(), x.max() + 1, 1)), ncolors=color_map.N))
+
+    if type(S) != pd.Series:
         S = pd.Series(S)
-    if S.dtype==pd.Float64Dtype():
+    if S.dtype == pd.Float64Dtype():
         c_ser = pd.Series(map(tuple, color_map(float_norm(S)(list(S.values)))), index=S.index)
-    elif S.dtype==pd.Int64Dtype():
+    elif S.dtype == pd.Int64Dtype():
         c_ser = pd.Series(map(tuple, color_map(boundary_norm(S)(list(S.values)))), index=S.index)
     else:
-        S = pd.Series(S.factorize()[0])/(pd.Series(S.factorize()[0]).max())
+        S = pd.Series(S.factorize()[0]) / (pd.Series(S.factorize()[0]).max())
         c_ser = pd.Series(map(tuple, color_map(float_norm(S)(list(S.values)))), index=S.index)
         c_ser = c_ser.apply(to_hex)
-    return(c_ser)
+    return (c_ser)
