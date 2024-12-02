@@ -551,8 +551,8 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     #         zorder=5,
     #         label="Original Expansion $\mathbb{C}$")
 
-    # ax.axvline(x=14, color="k", linestyle="--", alpha=0.9)
-    # ax.axvline(x=3, color="k", linestyle=":", alpha=0.5)
+    # ax.axvline(x=achiral_chiral_crossover_step, color="k", linestyle="--", alpha=0.9)
+    # ax.axvline(x=first_chiral_step, color="k", linestyle=":", alpha=0.5)
 
     # ax.set_ylim([0, 1.05])
 
