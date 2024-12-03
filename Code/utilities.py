@@ -1,25 +1,26 @@
+import json
+import math
 import os
+import time
 
+import matplotlib
+import matplotlib.pyplot as plt
+import networkx as nx
 import numpy as np
 import pandas as pd
-import scipy.stats as stats
-from tqdm import tqdm
-
-tqdm.pandas()
-from requests import Session
-from requests.adapters import HTTPAdapter
-from urllib3.util import Retry
-import time
-import math
-import json
-
-import matplotlib.pyplot as plt
 import rdkit.Chem
 import rdkit.Chem.rdMolDescriptors
+import scipy.stats as stats
+from matplotlib.colors import Normalize, to_hex, BoundaryNorm
 from rdkit import RDLogger
 from rdkit.Chem import AllChem as Chem
 from rdkit.Chem.MolStandardize import rdMolStandardize
+from requests import Session
+from requests.adapters import HTTPAdapter
+from tqdm import tqdm
+from urllib3.util import Retry
 
+tqdm.pandas()
 lg = RDLogger.logger()
 lg.setLevel(RDLogger.CRITICAL)
 
@@ -202,6 +203,17 @@ def getCpdCount(cpd_df, kegg_df, ischiral_flag):
             count.append(len(sub_df[sub_df["n_chiral_centers"] == 0]))
 
     return pd.DataFrame(count)
+
+
+def getRxnCount(rxn_df):
+    """
+    Given a dataframe of compounds, return the number of compounds that are chiral or achiral (depending on state of ischiral_flag)
+    """
+    count = list()
+    print(rxn_df)
+
+    # return pd.DataFrame(count)
+    return 0
 
 
 def getHeavyAtoms_perGen_fromKegg(cpd_df, kegg_df, ischiral_flag, calc):
@@ -999,3 +1011,29 @@ def get_chiral_order_parameters(keggC_df):
     print(f"- KEGG Compound Size = {len(keggC_df)} -")
 
     return gdb_cop, kegg_cop
+
+
+def gna(G, attr): return nx.get_node_attributes(G, attr)
+
+
+def colorize_Series(S, cmap='cet_CET_C6s'):
+    # S should be list-like, or a dict, or a series.... of numbers.
+    color_map = matplotlib.colormaps[cmap]
+
+    def float_norm(x):
+        return (Normalize(vmin=x.min(), vmax=x.max()))
+
+    def boundary_norm(x):
+        return (BoundaryNorm(boundaries=list(range(x.min(), x.max() + 1, 1)), ncolors=color_map.N))
+
+    if type(S) != pd.Series:
+        S = pd.Series(S)
+    if S.dtype == pd.Float64Dtype():
+        c_ser = pd.Series(map(tuple, color_map(float_norm(S)(list(S.values)))), index=S.index)
+    elif S.dtype == pd.Int64Dtype():
+        c_ser = pd.Series(map(tuple, color_map(boundary_norm(S)(list(S.values)))), index=S.index)
+    else:
+        S = pd.Series(S.factorize()[0]) / (pd.Series(S.factorize()[0]).max())
+        c_ser = pd.Series(map(tuple, color_map(float_norm(S)(list(S.values)))), index=S.index)
+        c_ser = c_ser.apply(to_hex)
+    return (c_ser)

@@ -8,6 +8,10 @@ import matplotlib.ticker as plticker
 import seaborn as sns
 import pickle
 import csv
+from networkx.algorithms import bipartite
+import netwulf as nw
+from netgraph import get_multipartite_layout
+
 from NetworkExpansion import *
 from utilities import *
 
@@ -97,10 +101,9 @@ def fig1():
     plt.close()
 
 
-def fig2(seed_name, random_seed_set_size, n_iter):
+def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     ### Get full seed set & reaction set
     seed_groups = [seed_name]
-    rxn_db = "../../lets-get-kegg/Data/kegg_data_R_processed.csv.zip"  # Default in NetworkExpansion.import_reaction_file
     reaction_scope = get_sides(import_reaction_file(rxn_db))
 
     compound_scope = set.union(*reaction_scope.stack())
@@ -181,17 +184,85 @@ def fig2(seed_name, random_seed_set_size, n_iter):
     print(
         f"\tAverage Achiral Heavy Atoms At Crossover Step: {round(summaries['achiral avg heavy atoms'].iloc[achiral_chiral_crossover_step][0], 3)}")
 
+    ### Network figure
+    print("- Generating Network Figure (click 'Post To Python' in browser pop-up window to continue code) -")
+    result_network = generate_annotated_bipartite_edgelist(results[seed_name])
+    # summary_network = generate_expansion_summary(result_network)
+    transition_edge_df = result_network['bipartite_edgelist'].query('step <= @achiral_chiral_crossover_step').copy(
+        deep=True)
+    networks = {i: nx.from_pandas_edgelist(transition_edge_df[transition_edge_df[i]],
+                                           source='source', target='target', edge_attr=True, create_using=nx.DiGraph())
+                for i in ['impactful_precursor', 'immediate_precursor', 'directed']}
+    compound_nodes = {i: set(j.nodes()).difference(reaction_scope.index) for i, j in networks.items()}
+    networks_uni = {i: bipartite.projected_graph(networks[i], nodes=compound_nodes[i]) for i in networks.keys()}
+
+    attributes = pd.read_csv("../Data/kegg_data_C.csv.zip",
+                             index_col=1,
+                             compression="zip")
+    attributes.drop(labels=["smiles", "Unnamed: 0", "formula", "molecular_weight", "n_heavy_atoms"], axis=1,
+                    inplace=True)
+    attributes["is_chiral"] = attributes['n_chiral_centers'].map(lambda x: x > 0)
+    attributes['is_chiral_color'] = attributes['is_chiral'].map({True: '#34CCFF', False: '#FFC012'}).fillna("#FFFFFF")
+
+    steps = []
+    for index, _ in attributes.iterrows():
+        step = 0
+        step_found = False
+        for new_cpds in results[seed_name]["participants"]["new compounds"]:
+            if index in new_cpds:
+                steps.append(step)
+                step_found = True
+            step += 1
+            if step > achiral_chiral_crossover_step:
+                break
+        if not step_found:
+            steps.append(np.nan)
+
+    attributes['gen'] = steps
+    attributes.dropna(inplace=True)
+    gen_color = 'Greys'
+    attributes['gen_color'] = colorize_Series(attributes['gen'], cmap=gen_color).tolist()
+
+    size_nodes_by = 'degree'
+    max_node_size = 25
+
+    G = networks_uni['directed'].copy()
+    node_sizes = pd.Series({i: (np.log2(j + 2)) ** 1.5 for i, j in G.degree()})
+    nx.set_node_attributes(G, node_sizes, 'size')
+    nx.set_node_attributes(G, attributes['is_chiral_color'], 'group')
+
+    fig = plt.figure(figsize=(12, 12), layout='constrained')
+    stylized_network, config = nw.visualize(G, config={'node_label_color': '#000000', 'node_gravity': 0.0,
+                                                       'link_alpha': 0.005, 'link_color': '#000000', 'zoom': 0.60,
+                                                       'node_charge': -100,
+                                                       'scale_node_size_by_strength': False, 'node_size_variation': 1,
+                                                       'node_size': max_node_size, 'link_distance': 25,
+                                                       'node_stroke_width': 2})
+    fig, ax = nw.draw_netwulf(stylized_network)
+
+    a = stylized_network.copy()
+    a['nodeStrokeWidth'] = 0.0
+    for i in list(range(len(a['nodes']))):
+        a['nodes'][i]['radius'] = a['nodes'][i]['radius'] * 0.4
+        a['nodes'][i]['color'] = attributes['gen_color'].loc[a['nodes'][i]['id']]
+
+    plt.savefig("../Figures/Fig2A.svg", format="svg")
+    plt.savefig("../Figures/Fig2A.png", format="png")
+    plt.close()
+
     # Read in LUCA compounds & get percentages
     print("- Calculating LUCA Percentage Per Expansion Step -")
     percent_luca = get_luca_percentage(results[seed_name]["participants"])
+    del (results)
     full_luca_exp = 0
     for step in range(len(percent_luca)):
         if percent_luca[step] == percent_luca[-1]:
             full_luca_exp = step + 1  # Since step starts at 0, add 1 to reflect network expansion algorithm
+            full_luca_exp = step + 1  # Since step starts at 0, add 1 to reflect network expansion algorithm
             break
     print(f"\tFull LUCA Expansion Step: {full_luca_exp}")
     print(
-        f"\tExpansion Size At First Chiral Compound Appearence: {summaries['compound count'].iloc[full_luca_exp][seed_name]} Compounds, {summaries['reaction count'].iloc[full_luca_exp][seed_name]} Reactions")
+        f"\tExpansion Size At Full LUCA Expansion: {summaries['compound count'].iloc[full_luca_exp][seed_name]} Compounds, {summaries['reaction count'].iloc[full_luca_exp][seed_name]} Reactions")
 
     ### Chiral / achiral / LUCA compounds panel (Fig2B)
     # Colors
@@ -222,8 +293,8 @@ def fig2(seed_name, random_seed_set_size, n_iter):
 
     ax.annotate(
         f"Achiral-to-Chiral\nCrossover\nStep {achiral_chiral_crossover_step}",
-        xy=(achiral_chiral_crossover_step, 2500),
-        xytext=(achiral_chiral_crossover_step + 8, 2850),
+        xy=(achiral_chiral_crossover_step, 5500),
+        xytext=(achiral_chiral_crossover_step + 8, 5850),
         color="k",
         arrowprops={
             "arrowstyle": "simple",
@@ -234,8 +305,8 @@ def fig2(seed_name, random_seed_set_size, n_iter):
         va='center',
         zorder=3)
     ax.annotate(f"First Chiral\nCompound\nStep {first_chiral_step}",
-                xy=(first_chiral_step, 1750),
-                xytext=(first_chiral_step + 10, 2100),
+                xy=(first_chiral_step, 4750),
+                xytext=(first_chiral_step + 10, 5100),
                 color="k",
                 arrowprops={
                     "arrowstyle": "simple",
@@ -246,7 +317,7 @@ def fig2(seed_name, random_seed_set_size, n_iter):
                 va='center',
                 zorder=3)
 
-    ax.set_ylim([0, 3100])
+    # ax.set_ylim([0, 3100])
     ax.set_ylabel("Compounds")
     ax.set_xlabel("Expansion Step")
 
@@ -324,160 +395,221 @@ def fig2(seed_name, random_seed_set_size, n_iter):
     plt.savefig("../Figures/Fig2C.png", format="png")
     plt.close()
 
-    ### Get X random seed sets, both chiral & achiral
-    randAchiral_results = dict()
-    randChiral_results = dict()
-    random_achiral_seeds = dict()
-    random_chiral_seeds = dict()
-    for i in range(n_iter):
-        random_achiral_seeds[f"Random_{i}"] = getRandomSeedSet(
-            keggC_df, random_seed_set_size, chirality="achiral")
-        random_chiral_seeds[f"Random_{i}"] = getRandomSeedSet(
-            keggC_df, random_seed_set_size, chirality="chiral")
+    # ### Get X random seed sets, both chiral & achiral
+    # randAchiral_results = dict()
+    # randChiral_results = dict()
+    # random_achiral_seeds = dict()
+    # random_chiral_seeds = dict()
+    # for random_ss_size in range(min_ss_size, max_ss_size+1):
+    #     for i in range(n_iter):
+    #         random_achiral_seeds[f"Random_{random_ss_size}_{i}"] = getRandomSeedSet(
+    #             keggC_df, random_ss_size, chirality="achiral")
+    #         random_chiral_seeds[f"Random_{random_ss_size}_{i}"] = getRandomSeedSet(
+    #             keggC_df, random_ss_size, chirality="chiral")
 
-    print(f"- Expanding {n_iter} Achiral Seed Sets -")
-    for name, seeds in tqdm(random_achiral_seeds.items(), total=n_iter):
-        randAchiral_results[name] = expand_from_seed_set(
-            seeds=seeds, reactions=reaction_scope, max_gen=max_generation)
+    # print(f"- Expanding {n_iter*(max_ss_size-min_ss_size+1)} Achiral Seed Sets -")
+    # achiral_full_chiral_count = list()
+    # achiral_full_achiral_count = list()
+    # for name, seeds in tqdm(random_achiral_seeds.items(), total=n_iter*(max_ss_size-min_ss_size+1)):
+    #     randAchiral_results = expand_from_seed_set(
+    #         seeds=seeds, reactions=reaction_scope, max_gen=max_generation)
+    #     achiral_full_chiral_count.append(
+    #             getCpdCount(randAchiral_results["cps"],
+    #                         keggC_df,
+    #                         ischiral_flag=True)[0].to_list())
+    #     achiral_full_achiral_count.append(
+    #             getCpdCount(randAchiral_results["cps"],
+    #                         keggC_df,
+    #                         ischiral_flag=False)[0].to_list())
 
-    print(f"- Expanding {n_iter} Chiral Seed Sets -")
-    for name, seeds in tqdm(random_chiral_seeds.items(), total=n_iter):
-        randChiral_results[name] = expand_from_seed_set(
-            seeds=seeds, reactions=reaction_scope, max_gen=max_generation)
+    # print(f"- Expanding {n_iter*(max_ss_size-min_ss_size+1)} Chiral Seed Sets -")
+    # chiral_full_chiral_count = list()
+    # chiral_full_achiral_count = list()
+    # for name, seeds in tqdm(random_chiral_seeds.items(), total=n_iter*(max_ss_size-min_ss_size+1)):
+    #     randChiral_results = expand_from_seed_set(
+    #         seeds=seeds, reactions=reaction_scope, max_gen=max_generation)
+    #     chiral_full_chiral_count.append(
+    #             getCpdCount(randChiral_results["cps"],
+    #                         keggC_df,
+    #                         ischiral_flag=True)[0].to_list())
+    #     chiral_full_achiral_count.append(
+    #             getCpdCount(randChiral_results["cps"],
+    #                         keggC_df,
+    #                         ischiral_flag=False)[0].to_list())
 
-    print("- Analyzing & Plotting Random Expansions -")
-    achiral_full_chiral_count = list()
-    achiral_full_achiral_count = list()
-    result_count = 0
-    for _, result in randAchiral_results.items():
-        seed_name = f"Random_{result_count}"
-        achiral_full_chiral_count.append(
-            getCpdCount(randAchiral_results[seed_name]["cps"],
-                        keggC_df,
-                        ischiral_flag=True)[0].to_list())
-        achiral_full_achiral_count.append(
-            getCpdCount(randAchiral_results[seed_name]["cps"],
-                        keggC_df,
-                        ischiral_flag=False)[0].to_list())
-        result_count += 1
+    # # print("- Analyzing & Plotting Random Expansions -")
+    # # achiral_full_chiral_count = list()
+    # # achiral_full_achiral_count = list()
+    # # for random_ss_size in range(min_ss_size, max_ss_size+1):
+    # #     result_count = 0
+    # #     for _, result in randAchiral_results.items():
+    # #         if result_count >= n_iter:
+    # #             break
+    # #         seed_name = f"Random_{random_ss_size}_{result_count}"
+    # #         achiral_full_chiral_count.append(
+    # #             getCpdCount(randAchiral_results[seed_name]["cps"],
+    # #                         keggC_df,
+    # #                         ischiral_flag=True)[0].to_list())
+    # #         achiral_full_achiral_count.append(
+    # #             getCpdCount(randAchiral_results[seed_name]["cps"],
+    # #                         keggC_df,
+    # #                         ischiral_flag=False)[0].to_list())
+    # #         result_count += 1
 
-    chiral_full_chiral_count = list()
-    chiral_full_achiral_count = list()
-    result_count = 0
-    for _, result in randChiral_results.items():
-        seed_name = f"Random_{result_count}"
-        chiral_full_chiral_count.append(
-            getCpdCount(randChiral_results[seed_name]["cps"],
-                        keggC_df,
-                        ischiral_flag=True)[0].to_list())
-        chiral_full_achiral_count.append(
-            getCpdCount(randChiral_results[seed_name]["cps"],
-                        keggC_df,
-                        ischiral_flag=False)[0].to_list())
-        result_count += 1
+    # # chiral_full_chiral_count = list()
+    # # chiral_full_achiral_count = list()
+    # # for random_ss_size in range(min_ss_size, max_ss_size+1):
+    # #     result_count = 0
+    # #     for _, result in randChiral_results.items():
+    # #         if result_count >= n_iter:
+    # #             break
+    # #         seed_name = f"Random_{random_ss_size}_{result_count}"
+    # #         chiral_full_chiral_count.append(
+    # #             getCpdCount(randChiral_results[seed_name]["cps"],
+    # #                         keggC_df,
+    # #                         ischiral_flag=True)[0].to_list())
+    # #         chiral_full_achiral_count.append(
+    # #             getCpdCount(randChiral_results[seed_name]["cps"],
+    # #                         keggC_df,
+    # #                         ischiral_flag=False)[0].to_list())
+    # #         result_count += 1
 
-    achiral_chiralPercentage = []
-    chiral_chiralPercentage = []
-    achiral_avg_percentages_chiral = []
-    achiral_std_percentages_chiral = []
-    chiral_avg_percentages_chiral = []
-    chiral_std_percentages_chiral = []
+    # achiral_chiralPercentage = []
+    # chiral_chiralPercentage = []
+    # achiral_avg_percentages_chiral = []
+    # achiral_std_percentages_chiral = []
+    # chiral_avg_percentages_chiral = []
+    # chiral_std_percentages_chiral = []
 
-    for i in range(len(achiral_full_chiral_count)):
-        achiral_chiralPercentage.append(
-            get_ChiralPercentage(np.cumsum(achiral_full_chiral_count[i]),
-                                 np.cumsum(achiral_full_achiral_count[i])))
+    # for i in range(len(achiral_full_chiral_count)):
+    #     achiral_chiralPercentage.append(
+    #         get_ChiralPercentage(np.cumsum(achiral_full_chiral_count[i]),
+    #                              np.cumsum(achiral_full_achiral_count[i])))
 
-    for i in range(len(chiral_full_chiral_count)):
-        chiral_chiralPercentage.append(
-            get_ChiralPercentage(np.cumsum(chiral_full_chiral_count[i]),
-                                 np.cumsum(chiral_full_achiral_count[i])))
+    # for i in range(len(chiral_full_chiral_count)):
+    #     chiral_chiralPercentage.append(
+    #         get_ChiralPercentage(np.cumsum(chiral_full_chiral_count[i]),
+    #                              np.cumsum(chiral_full_achiral_count[i])))
 
-    for i in range(max_generation):
-        percentages = []
-        for result in achiral_chiralPercentage:
-            if len(result) > i:
-                percentages.append(result[i])
+    # for i in range(max_generation):
+    #     percentages = []
+    #     for result in achiral_chiralPercentage:
+    #         if len(result) > i:
+    #             percentages.append(result[i])
 
-        achiral_avg_percentages_chiral.append(np.mean(percentages))
-        achiral_std_percentages_chiral.append(np.std(percentages))
+    #     achiral_avg_percentages_chiral.append(np.mean(percentages))
+    #     achiral_std_percentages_chiral.append(np.std(percentages))
 
-        percentages = []
-        for result in chiral_chiralPercentage:
-            if len(result) > i:
-                percentages.append(result[i])
+    #     percentages = []
+    #     for result in chiral_chiralPercentage:
+    #         if len(result) > i:
+    #             percentages.append(result[i])
 
-        chiral_avg_percentages_chiral.append(np.mean(percentages))
-        chiral_std_percentages_chiral.append(np.std(percentages))
+    #     chiral_avg_percentages_chiral.append(np.mean(percentages))
+    #     chiral_std_percentages_chiral.append(np.std(percentages))
 
-    # Remove extra np.NaN values
-    achiral_avg_percentages_chiral = [
-        x for x in achiral_avg_percentages_chiral if x == x
-    ]
-    achiral_std_percentages_chiral = [
-        x for x in achiral_std_percentages_chiral if x == x
-    ]
-    chiral_avg_percentages_chiral = [
-        x for x in chiral_avg_percentages_chiral if x == x
-    ]
-    chiral_std_percentages_chiral = [
-        x for x in chiral_std_percentages_chiral if x == x
-    ]
+    # # Remove extra np.NaN values
+    # achiral_avg_percentages_chiral = [
+    #     x for x in achiral_avg_percentages_chiral if x == x
+    # ]
+    # achiral_std_percentages_chiral = [
+    #     x for x in achiral_std_percentages_chiral if x == x
+    # ]
+    # chiral_avg_percentages_chiral = [
+    #     x for x in chiral_avg_percentages_chiral if x == x
+    # ]
+    # chiral_std_percentages_chiral = [
+    #     x for x in chiral_std_percentages_chiral if x == x
+    # ]
 
-    ### Figure 2D
-    _, ax = plt.subplots(figsize=(10, 8))
-    # Chiral errorbar
-    ax.errorbar(x=np.arange(0, len(chiral_avg_percentages_chiral), 1),
-                y=chiral_avg_percentages_chiral,
-                yerr=chiral_std_percentages_chiral,
-                color=chiral_color,
-                marker="o",
-                linewidth=3,
-                markersize=10,
-                label="Chiral")
+    # ### Figure 2D
+    # _, ax = plt.subplots(figsize=(10, 8))
+    # # Chiral errorbar
+    # ax.errorbar(x=np.arange(0, len(chiral_avg_percentages_chiral), 1),
+    #             y=chiral_avg_percentages_chiral,
+    #             yerr=chiral_std_percentages_chiral,
+    #             color=chiral_color,
+    #             marker="o",
+    #             linewidth=3,
+    #             markersize=10,
+    #             label="Chiral")
 
-    # Achiral errorbar
-    ax.errorbar(x=np.arange(0, len(achiral_avg_percentages_chiral), 1),
-                y=achiral_avg_percentages_chiral,
-                yerr=achiral_std_percentages_chiral,
-                color=achiral_color,
-                marker="o",
-                linewidth=3,
-                markersize=10,
-                label="Achiral")
+    # # Achiral errorbar
+    # ax.errorbar(x=np.arange(0, len(achiral_avg_percentages_chiral), 1),
+    #             y=achiral_avg_percentages_chiral,
+    #             yerr=achiral_std_percentages_chiral,
+    #             color=achiral_color,
+    #             marker="o",
+    #             linewidth=3,
+    #             markersize=10,
+    #             label="Achiral")
 
-    # Original (Figure 2B) percentages
-    original_chiralPercent = []
-    for i in range(len(chiral_count)):
-        original_chiralPercent.append(chiral_count[i] /
-                                      (chiral_count[i] + achiral_count[i]))
-    ax.plot(original_chiralPercent,
-            "o-",
-            color="k",
-            linewidth=3,
-            zorder=5,
-            label="Original Expansion $\mathbb{C}$")
+    # # Original (Figure 2B) percentages
+    # original_chiralPercent = []
+    # for i in range(len(chiral_count)):
+    #     original_chiralPercent.append(chiral_count[i] /
+    #                                   (chiral_count[i] + achiral_count[i]))
+    # ax.plot(original_chiralPercent,
+    #         "o-",
+    #         color="k",
+    #         linewidth=3,
+    #         zorder=5,
+    #         label="Original Expansion $\mathbb{C}$")
 
-    ax.axvline(x=14, color="k", linestyle="--", alpha=0.9)
-    ax.axvline(x=3, color="k", linestyle=":", alpha=0.5)
+    # ax.axvline(x=achiral_chiral_crossover_step, color="k", linestyle="--", alpha=0.9)
+    # ax.axvline(x=first_chiral_step, color="k", linestyle=":", alpha=0.5)
 
-    ax.set_ylim([0, 1.05])
+    # ax.set_ylim([0, 1.05])
 
-    ax.set_xlabel("Expansion Step")
-    ax.set_ylabel("Chiral Order Parameter $\mathbb{C}$")
-    ax.legend(prop={"size": 18})  # bbox_to_anchor=(1.05,0.60))
+    # ax.set_xlabel("Expansion Step")
+    # ax.set_ylabel("Chiral Order Parameter $\mathbb{C}$")
+    # ax.legend(prop={"size": 18})  # bbox_to_anchor=(1.05,0.60))
 
-    plt.savefig("../Figures/Fig2D.svg", format="svg")
-    plt.savefig("../Figures/Fig2D.png", format="png")
+    # plt.savefig("../Figures/Fig2D.svg", format="svg")
+    # plt.savefig("../Figures/Fig2D.png", format="png")
+    # plt.close()
+
+    return achiral_chiral_crossover_step, first_chiral_step, attributes, networks_uni
+
+
+def fig3(seed_name, rxn_db, crossover_step, attributes, networks_uni):
+    ### Network figure
+    show = 'impactful_precursor'
+    rotate = False
+
+    G1 = networks_uni[show]  # using impactful_precursor from network generation
+
+    # Remove G nodes that are not in attributes df
+    nodes_to_keep = attributes.index.to_list()
+    nodes_to_remove = [n for n in nodes_to_keep if n not in G1.nodes()]
+    G1.remove_nodes_from(nodes_to_remove)
+
+    nx.set_node_attributes(G1, attributes['is_chiral_color'], 'is_chiral_color')
+    layers = [list(i) for i in attributes.loc[list(G1.nodes())].groupby(by='gen').groups.values()][:-1]
+    pos = get_multipartite_layout(edges=list(G1.edges), layers=layers, reduce_edge_crossings=True)
+    # for i in layers[-1]: del pos[i] # remove last layer
+    for n in pos.keys(): pos[n][0] = (pos[n][0] + 0.2) ** 2  # spread out later gens to reduce extreme angles
+    if rotate: pos = {i: j[::-1] for i, j in pos.items()}
+
+    fig, ax = plt.subplots(figsize=(15, 15), layout='constrained')
+    nx.draw_networkx(G1.subgraph(pos.keys()), pos=pos, ax=ax, edge_color=[0.5, 0.5, 0.5, 0.5],
+                     node_color=list(gna(G1.subgraph(pos.keys()), 'is_chiral_color').values()),
+                     edgecolors='k', width=0.03, arrows=False,
+                     linewidths=0.2, node_size=100, node_shape='s', alpha=0.99,
+                     with_labels=False)
+
+    plt.legend(loc='lower left', borderpad=8, frameon=False, handles=[
+        plt.Line2D([0], [0], marker='s', color='w', markeredgecolor='k', markeredgewidth=0.2, markerfacecolor='#34CCFF',
+                   markersize=20, label='Chiral'),
+        plt.Line2D([0], [0], marker='s', color='w', markerfacecolor='#FFC012', markeredgecolor='k', markeredgewidth=0.2,
+                   markersize=20, label='Achiral')], prop={'size': 20})
+    plt.savefig("../Figures/Fig3A.png", format="png")
+    plt.savefig("../Figures/Fig3A.svg", format="svg")
     plt.close()
 
-    return achiral_chiral_crossover_step, first_chiral_step
-
-
-def fig3(seed_name, crossover_step):
     ### Get full seed set & reaction set
     seed_groups = [seed_name]
-    rxn_db = "../../lets-get-kegg/Data/kegg_data_R_processed.csv.zip"  # Default in NetworkExpansion.import_reaction_file
+    # rxn_db = "../../lets-get-kegg/Data/kegg_data_R_processed.csv.zip"  # Default in NetworkExpansion.import_reaction_file
     reaction_scope = get_sides(import_reaction_file(rxn_db))
 
     compound_scope = set.union(*reaction_scope.stack())
@@ -504,8 +636,8 @@ def fig3(seed_name, crossover_step):
                       x="arrival",
                       y="n_chiral_centers",
                       hue="heavy atom percentile",
-                      ylim=(-1, 31),
-                      xlim=(-1, 60),
+                      ylim=(-1, 39),
+                      xlim=(-1, 39),
                       s=100,
                       marginal_kws={'common_norm': False})
     h = sns.regplot(x="arrival",
@@ -526,7 +658,7 @@ def fig3(seed_name, crossover_step):
 
     g.figure.set_size_inches((16, 8))
     g.ax_joint.legend(title="Heavy Atom\nPercentiles",
-                      bbox_to_anchor=(0.85, 1),
+                      bbox_to_anchor=(0.75, 1),
                       prop={"size": 12})
 
     plt.savefig("../Figures/Fig3B.png", format="png")
@@ -947,7 +1079,7 @@ def fig4():
     plt.savefig("../Figures/Fig4.png", format="png")
 
 
-def fig5(seed_name, crossover_step, first_chiral_step):
+def fig5(seed_name, rxn_db, crossover_step, first_chiral_step):
     ### Panel 5A - chiral rxn counts
     heatmap_array, rxn_df = get_heatmap_array(keggC_df)
 
@@ -990,7 +1122,7 @@ def fig5(seed_name, crossover_step, first_chiral_step):
     ### Panel 5B - achiral/chiral modulating &conserving
     ### Get full seed set & reaction set
     seed_groups = [seed_name]
-    rxn_db = "../../lets-get-kegg/Data/kegg_data_R_processed.csv.zip"  # Default in NetworkExpansion.import_reaction_file
+    # rxn_db = "../../lets-get-kegg/Data/kegg_data_R_processed.csv.zip"  # Default in NetworkExpansion.import_reaction_file
     reaction_scope = get_sides(import_reaction_file(rxn_db))
 
     compound_scope = set.union(*reaction_scope.stack())
@@ -1040,8 +1172,8 @@ def fig5(seed_name, crossover_step, first_chiral_step):
     ax.axvline(x=crossover_step, color="k", linestyle="--", alpha=0.9)
     ax.axvline(x=first_chiral_step, color="k", linestyle=":", alpha=0.5)
     ax.annotate(f"Achiral-to-Chiral\nCrossover\nStep {crossover_step}",
-                xy=(crossover_step, 4100),
-                xytext=(crossover_step + 8, 4350),
+                xy=(crossover_step, 83000),
+                xytext=(crossover_step + 8, 85000),
                 color="k",
                 arrowprops={
                     "arrowstyle": "simple",
@@ -1052,8 +1184,8 @@ def fig5(seed_name, crossover_step, first_chiral_step):
                 va='center',
                 zorder=3)
     ax.annotate(f"First Chiral\nCompound\nStep {first_chiral_step}",
-                xy=(first_chiral_step, 3300),
-                xytext=(first_chiral_step + 10, 3550),
+                xy=(first_chiral_step, 70000),
+                xytext=(first_chiral_step + 10, 72000),
                 color="k",
                 arrowprops={
                     "arrowstyle": "simple",
@@ -1233,29 +1365,36 @@ def main():
 
     # Seed set
     seed_name = "JM|G24|G17|TW"
+    rxn_db_fp = "../../lets-get-kegg/Data/atlas_kegg_processed_merged_deduped.csv.zip"
 
     print("---- Generating Figure 1 ----")
     fig1()
 
     print("---- Generating Figure 2 ----")
     # ~Three minutes per 1000 random expansions (depends on chirality & size)
-    random_seed_set_size = 10
+    min_ss_size = 2
+    max_ss_size = 10
     n_iter = 1000
-    crossover_step, first_chiral_step = fig2(
+    crossover_step, first_chiral_step, attributes, networks_uni = fig2(
         seed_name=seed_name,
-        random_seed_set_size=random_seed_set_size,
+        rxn_db=rxn_db_fp,
+        min_ss_size=min_ss_size,
+        max_ss_size=max_ss_size,
         n_iter=n_iter)
 
     print("---- Generating Figure 3 ----")
-    crossover_step = 5
-    fig3(seed_name=seed_name, crossover_step=crossover_step)
+    fig3(seed_name=seed_name,
+         rxn_db=rxn_db_fp,
+         crossover_step=crossover_step,
+         attributes=attributes,
+         networks_uni=networks_uni)
 
     print("---- Generating Figure 4 ----")
     fig4()
 
     print("---- Generating Figure 5 ----")
-    first_chiral_step = 1
     fig5(seed_name=seed_name,
+         rxn_db=rxn_db_fp,
          crossover_step=crossover_step,
          first_chiral_step=first_chiral_step)
 
