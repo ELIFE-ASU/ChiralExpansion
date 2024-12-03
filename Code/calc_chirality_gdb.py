@@ -17,19 +17,34 @@ lg.setLevel(RDLogger.CRITICAL)
 
 
 def analyze_data(fname):
-    # read the data
+    """
+    Analyze the data from a CSV file to determine the chirality of molecules.
+
+    Parameters:
+    fname (str): The path to the CSV file containing the data.
+
+    Returns:
+    tuple: A tuple containing two DataFrames:
+        - final_df: DataFrame with the number of heavy atoms and the fraction of chiral and achiral molecules.
+        - raw_df: DataFrame with the raw counts of chiral and achiral molecules.
+    """
+    # Read the data
     all_data = pd.read_csv(fname, index_col=0)
     all_data["nA"] = all_data["nA"].astype(int) + 1
+
     # Determine the chirality and split the data
     all_data["chiral"] = all_data["nStero"].map(lambda x: x > 0)
     chiral_data = all_data[all_data["chiral"] is True]
     achiral_data = all_data[all_data["chiral"] is False]
+
     # Reorganize to get the information we need
     chiral_counts = chiral_data.groupby("nA").count().unstack()["SMILES"]
     achiral_counts = achiral_data.groupby("nA").count().unstack()["SMILES"]
-    # Make new df out of these series
+
+    # Make new DataFrames out of these series
     achiral_df = pd.DataFrame(achiral_counts, columns=["count"])
     chiral_df = pd.DataFrame(chiral_counts, columns=["count"])
+
     # Recombine the data to get the averages as a function of nA
     merged_df = pd.merge(achiral_df, chiral_df, on='nA', how='outer', suffixes=('_achiral', '_chiral'))
     merged_df.fillna(0, inplace=True)
@@ -39,10 +54,22 @@ def analyze_data(fname):
     merged_df['fraction_achiral'] = merged_df['count_achiral'] / merged_df['total']
     merged_df['fraction_chiral'] = merged_df['count_chiral'] / merged_df['total']
     final_df = merged_df[['nA', 'fraction_achiral', 'fraction_chiral']]
+
     return final_df, raw_df
 
 
 def plot_chiral(in_data, xs=14, ys=14):
+    """
+    Plot the fraction of chiral and achiral molecules as a function of the number of heavy atoms.
+
+    Parameters:
+    in_data (str): The path to the input data file.
+    xs (int, optional): Font size for the x-axis label. Default is 14.
+    ys (int, optional): Font size for the y-axis label. Default is 14.
+
+    Returns:
+    None
+    """
     xlab = "Number of heavy atoms"
     ylab = "Fraction of Chiral Molecules"
     ave_data, raw_data = analyze_data(in_data)
@@ -66,6 +93,16 @@ def plot_chiral(in_data, xs=14, ys=14):
 
 
 def load_data(i, in_data):
+    """
+    Load data from a list of files based on a specified index.
+
+    Parameters:
+    i (int): The index to match the file names.
+    in_data (list): List of file paths to load data from.
+
+    Returns:
+    numpy.ndarray: An array of data loaded from the matching file.
+    """
     data = np.empty(0, dtype=str)
     for ii, file in enumerate([os.path.basename(f).split(".")[0] for f in in_data]):
         if file == str(i) and os.stat(in_data[ii]).st_size > 0:
@@ -74,10 +111,28 @@ def load_data(i, in_data):
 
 
 def count_atoms(smiles):
+    """
+    Count the number of heavy atoms in a SMILES string.
+
+    Parameters:
+    smiles (str): The SMILES representation of the molecule.
+
+    Returns:
+    int: The number of heavy atoms (excluding hydrogen) in the molecule.
+    """
     return len(re.findall(r'(?<!\[)C|N|O|F|P|S|Cl|Br|I|B|(?<=\[)([^\]]+)(?=\])', smiles))
 
-
 def write_data_by_mass(in_data, output_data):
+    """
+    Write data to files based on the number of heavy atoms in SMILES strings.
+
+    Parameters:
+    in_data (str): Path to the input file containing SMILES strings.
+    output_data (str): Path to the output directory where the data will be saved.
+
+    Returns:
+    None
+    """
     # make the output directory
     if not os.path.exists(output_data):
         os.makedirs(output_data)
@@ -185,6 +240,19 @@ def write_data_by_mass(in_data, output_data):
 
 
 def merge_mass_data(in_data_1, in_data_2, in_data_3, out_data, f_debug=True):
+    """
+    Merge data from three directories based on the number of heavy atoms and save the combined data.
+
+    Parameters:
+    in_data_1 (str): Path to the first directory containing data files.
+    in_data_2 (str): Path to the second directory containing data files.
+    in_data_3 (str): Path to the third directory containing data files.
+    out_data (str): Path to the output directory where merged data will be saved.
+    f_debug (bool, optional): Flag to enable debug mode, which limits processing to files with N <= 6 heavy atoms. Default is True.
+
+    Returns:
+    None
+    """
     # Get all the files
     in_data_1 = ut.file_list_all(in_data_1)
     in_data_2 = ut.file_list_all(in_data_2)
@@ -224,10 +292,29 @@ def merge_mass_data(in_data_1, in_data_2, in_data_3, out_data, f_debug=True):
 
 
 def pick_n_random(data, n_pick=1000):
+    """
+    Randomly select a specified number of elements from an array.
+
+    Parameters:
+    data (numpy.ndarray): The array from which to select elements.
+    n_pick (int, optional): The number of elements to pick. Default is 1000.
+
+    Returns:
+    numpy.ndarray: An array of randomly selected elements.
+    """
     return np.random.choice(data, min(n_pick, len(data)), replace=False)
 
 
 def get_chirality(mol):
+    """
+    Get the number of chiral centers in a molecule.
+
+    Parameters:
+    mol (rdkit.Chem.Mol): The molecule for which to determine the number of chiral centers.
+
+    Returns:
+    int: The number of chiral centers in the molecule.
+    """
     return len(rdkit.Chem.FindMolChiralCenters(mol,
                                                useLegacyImplementation=False,
                                                includeUnassigned=True,
@@ -235,6 +322,17 @@ def get_chirality(mol):
 
 
 def load_by_mass(in_data, out_data, n_pick=1000):
+    """
+    Load data from a list of files, randomly select a specified number of molecules, and save the chirality data.
+
+    Parameters:
+    in_data (str): Path to the directory containing input data files.
+    out_data (str): Path to the output file where the data will be saved.
+    n_pick (int, optional): The number of molecules to randomly select from each file. Default is 1000.
+
+    Returns:
+    None
+    """
     # Get all the files
     in_data = ut.file_list_all(in_data)
     if len(in_data) == 0:

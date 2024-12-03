@@ -25,7 +25,7 @@ get_sides = lambda x: x[['left', 'right']]
 
 
 # imports a reaction dataframe, removes glycan reactions and reactions for which chiral info is missing
-def import_reaction_file(fpath=rxn_db_dir + 'kegg_data_R_processed.csv.zip'):
+def import_reaction_file(fpath=rxn_db_dir + 'atlas_kegg_processed_merged_deduped.csv.zip'):
     df = pd.read_csv(fpath, index_col=0).drop(columns=['Unnamed: 0', 'Unnamed: 0.1'], errors='ignore')
     if 'id' in df.columns:
         df.set_index('id', inplace=True)
@@ -43,6 +43,16 @@ def import_reaction_file(fpath=rxn_db_dir + 'kegg_data_R_processed.csv.zip'):
 # turns a boolean DataFrame into a series of lists; entry shows which rows are true for a given column, i.e.,
 # which reactions are enabled.
 def get_rn_sets(rndf: pd.DataFrame):
+    """
+    Turns a boolean DataFrame into a series of sets; each entry shows which rows are true for a given column, i.e.,
+    which reactions are enabled.
+
+    Parameters:
+    rndf (pandas.DataFrame): A boolean DataFrame where True indicates the presence of a reaction.
+
+    Returns:
+    pandas.Series: A series where each element is a set of indices (rows) that are True for the corresponding column.
+    """
     return rndf[rndf].apply(lambda x: set(x.dropna().index))
 
 
@@ -98,34 +108,65 @@ def expand_from_seed_set(seeds, reactions: pd.DataFrame, max_gen: int):
     edge_pool[['source', 'target']] = pd.concat([a, b], axis=0)
     edge_pool.drop(columns=['left', 'right'], inplace=True)
     edge_pool.reset_index(drop=False, names='reaction', inplace=True)
-    return (
-        {'rns': rns, 'cps': cps, 'participants': participants, 'reaction_pool': list(reaction_pool.index),
-         'seeds': seeds, 'arrival_step': arrival_step,
-         'chiral_fraction': chiral_fraction, 'edge_pool': edge_pool})
+    del rns
+    del cps
+    return {'participants': participants, 'reaction_pool': list(reaction_pool.index),
+            'seeds': seeds, 'arrival_step': arrival_step,
+            'chiral_fraction': chiral_fraction, 'edge_pool': edge_pool}
 
 
 # identifies what compounds and reactions in the database are reachable from at least one seed compound
 def define_reachable_components(seeds, reactions: pd.DataFrame):
+    """
+    Identifies what compounds and reactions in the database are reachable from at least one seed compound.
+
+    Parameters:
+    seeds (list): List of seed compounds from which to start the reachability analysis.
+    reactions (pandas.DataFrame): DataFrame containing reaction data with compound information.
+
+    Returns:
+    dict: A dictionary containing:
+        - 'reachable_compounds' (list): List of reachable compounds.
+        - 'reachable_reactions' (list): List of reachable reactions.
+    """
     bipartite_edges = reactions.applymap(list).stack().groupby(level=0).sum().explode().reset_index()
     bipartite_graph = nx.from_pandas_edgelist(bipartite_edges, source='id', target=0, create_using=nx.Graph)
     accessible_nodes = set.union(*[nx.node_connected_component(bipartite_graph, i) for i in seeds])
     del bipartite_graph
     del bipartite_edges
-    return ({'reachable_compounds': [i for i in accessible_nodes if i.startswith('C')],
-             'reachable_reactions': [i for i in accessible_nodes if i.startswith('R') or i.startswith('A')]})
+    return {'reachable_compounds': [i for i in accessible_nodes if i.startswith('C')],
+            'reachable_reactions': [i for i in accessible_nodes if i.startswith('R') or i.startswith('A')]}
 
 
-# generates an annotated bipartite edgelist 
+
 def generate_annotated_bipartite_edgelist(single_result):
+    """
+    Generate an annotated bipartite edgelist.
+
+    Parameters:
+    single_result (dict): A dictionary containing the edge pool and other related data.
+
+    Returns:
+    dict: The updated dictionary with the bipartite edgelist and additional context on the essentiality of each edge.
+    """
     # use make_bipartite_edgelist to generate prelim edgelist
     single_result['bipartite_edgelist'] = make_bipartite_edgelist(single_result['edge_pool'])
     # use add_bipartite_edge_context to add context on essentiality of each edge
     single_result = add_bipartite_edge_context(single_result)
-    return (single_result)
+    return single_result
 
 
-# generates a bipartite edgelist from expand_from_seed_set's edge_pool output
+
 def make_bipartite_edgelist(edge_pool: pd.DataFrame):
+    """
+    Generate a bipartite edgelist from the edge pool.
+
+    Parameters:
+    edge_pool (pandas.DataFrame): DataFrame containing the edge pool with reaction, source, and target information.
+
+    Returns:
+    pandas.DataFrame: A DataFrame representing the bipartite edgelist with annotated source, target, and reaction columns.
+    """
     df = edge_pool.copy(deep=True)
     df['reaction'] = df['reaction'].str.replace('A', 'T')  # so that max identifies reaction, not compound
     sub_edges = df.explode('source').drop(columns='target').rename(columns={'reaction': 'target'})
@@ -136,11 +177,19 @@ def make_bipartite_edgelist(edge_pool: pd.DataFrame):
                 all_edges.nunique().sort_values().index]
     all_edges.update(
         all_edges[['source', 'target', 'reaction']].applymap(lambda x: x.replace('T', 'A')))  # revert back to original
-    return (all_edges)
+    return all_edges
 
 
-# adds context to each edge regarding its essentiality
 def add_bipartite_edge_context(single_result):
+    """
+    Adds context to each edge in the bipartite edgelist regarding its essentially.
+
+    Parameters:
+    single_result (dict): A dictionary containing the bipartite edgelist and other related data.
+
+    Returns:
+    dict: The updated dictionary with additional context on the essentially of each edge.
+    """
     df = single_result['bipartite_edgelist']
     df = (df.join(
         df[['reaction', 'source', 'target']].applymap(lambda x: single_result['arrival_step'][x]).add_suffix('_step')))
@@ -149,7 +198,7 @@ def add_bipartite_edge_context(single_result):
     immediate_precursors = df.loc[impactful_precursors].query('~(reaction_step-source_step!=1)').index
     single_result['bipartite_edgelist'] = df.assign(impactful_precursor=df.index.isin(impactful_precursors),
                                                     immediate_precursor=df.index.isin(immediate_precursors))
-    return (single_result)
+    return single_result
 
 
 # VARIABLES AND DATASETS
@@ -165,3 +214,15 @@ chiral_labels['elements'] = chiral_labels['formula'].apply(
 ec_rns = pd.read_csv('https://rest.kegg.jp/link/enzyme/reaction', sep='\t', header=None).applymap(
     lambda x: x.split(':')[1]).groupby(0)[1].apply(list).apply('|'.join)
 seed_candidates = pd.read_csv(f'{data_folder}/SampleSeeds.csv.zip', index_col=0, compression='zip')
+
+
+def generate_expansion_summary(result):
+    summary = result['participants'].applymap(len).add_suffix(
+        ' count')  # .assign(chiral_fraction=results['G|M|T']['chiral_fraction']) #even this could be calculated post-hoc
+    chiral_fraction = result['participants'].filter(like='compounds').applymap(
+        lambda x: chiral_labels.loc[list(x), 'is_chiral'].mean())
+    summary = summary.set_axis(summary.columns.str.replace('_', ' ').str.replace('s c', ' c'), axis=1)
+    summary = summary.join(
+        chiral_fraction.rename({'compounds': 'chiral fraction', 'new compounds': 'new compound chiral fraction'},
+                               axis=1))
+    return (summary)

@@ -258,6 +258,7 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     for step in range(len(percent_luca)):
         if percent_luca[step] == percent_luca[-1]:
             full_luca_exp = step + 1  # Since step starts at 0, add 1 to reflect network expansion algorithm
+            full_luca_exp = step + 1  # Since step starts at 0, add 1 to reflect network expansion algorithm
             break
     print(f"\tFull LUCA Expansion Step: {full_luca_exp}")
     print(

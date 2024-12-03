@@ -11,14 +11,47 @@ plt.rcParams.update({'font.size': 22})
 
 
 def linlaw(x, a, b):
+    """
+    Linear function.
+
+    Parameters:
+    x (float or array-like): The input value(s).
+    a (float): The slope of the line.
+    b (float): The y-intercept of the line.
+
+    Returns:
+    float or array-like: The result of the linear function a * x + b.
+    """
     return a * x + b
 
 
 def powerlaw(x, a, b, c):
+    """
+    Power law function.
+
+    Parameters:
+    x (float or array-like): The input value(s).
+    a (float): The exponent of the power law.
+    b (float): The coefficient of the power law.
+    c (float): The constant term added to the power law.
+
+    Returns:
+    float or array-like: The result of the power law function b * x ** a + c.
+    """
     return b * x ** a + c
 
 
 def curve_fit_log_linear(xdata, ydata):
+    """
+    Perform a linear fit on the logarithm of the x data and return the fit parameters and fitted y data.
+
+    Parameters:
+    xdata (array-like): The input x data.
+    ydata (array-like): The input y data.
+
+    Returns:
+    tuple: A tuple containing the optimal values for the parameters (popt_log), the estimated covariance of popt_log (pcov_log), and the fitted y data (ydatafit).
+    """
     xdata_log = np.log10(xdata)
     # Fit linear
     popt_log, pcov_log = curve_fit(linlaw, xdata_log, ydata)
@@ -28,6 +61,16 @@ def curve_fit_log_linear(xdata, ydata):
 
 
 def curve_fit_log_log(xdata, ydata):
+    """
+    Perform a linear fit on the logarithm of both the x and y data and return the fit parameters and fitted y data.
+
+    Parameters:
+    xdata (array-like): The input x data.
+    ydata (array-like): The input y data.
+
+    Returns:
+    tuple: A tuple containing the optimal values for the parameters (popt_log), the estimated covariance of popt_log (pcov_log), and the fitted y data (ydatafit).
+    """
     xdata_log = np.log10(xdata)
     ydata_log = np.log10(ydata)
     # Fit linear
@@ -38,6 +81,17 @@ def curve_fit_log_log(xdata, ydata):
 
 
 def find_fit(X, Y, color):
+    """
+    Perform a linear regression on the given data and plot the fit line with confidence interval.
+
+    Parameters:
+    X (array-like): The input x data.
+    Y (array-like): The input y data.
+    color (str): The color to use for the plot.
+
+    Returns:
+    None
+    """
     slope, intercept, r_value, p_value, std_err = stats.linregress(X, Y)
     print('Slope: {:.6f}'.format(slope), 'Intercept: {:.6f}'.format(intercept),
           'R-squared: {:.6f}'.format(r_value ** 2), 'Std_err: {:.6f}'.format(std_err))
@@ -48,6 +102,17 @@ def find_fit(X, Y, color):
 
 
 def find_powerlaw_fit(x, y, color):
+    """
+    Perform a power law fit on the given data and plot the fit line.
+
+    Parameters:
+    x (float or array-like): The input x data.
+    y (float or array-like): The input y data.
+    color (str): The color to use for the plot.
+
+    Returns:
+    None
+    """
     if x == 0:
         x = 0.000001
     if y == 0:
@@ -63,6 +128,17 @@ def find_powerlaw_fit(x, y, color):
 
 
 def plot_reaxys_violin(kegg, chnops, mws):
+    """
+    Plot a violin plot comparing the chirality of compounds in KEGG and CHNOPS datasets.
+
+    Parameters:
+    kegg (array-like): The KEGG dataset containing chirality data.
+    chnops (array-like): The CHNOPS dataset containing chirality data.
+    mws (array-like): The molecular weights corresponding to the datasets.
+
+    Returns:
+    None
+    """
     chnops_color = "#477C7D"
     kegg_color = "#AA0E35"
 
@@ -127,6 +203,18 @@ def plot_reaxys_violin(kegg, chnops, mws):
 
 
 def plot_ratio_chiral_compounds(df, mws, chnops, kegg):
+    """
+    Plot the ratio of chiral compounds for different domains and Reaxys datasets.
+
+    Parameters:
+    df (dict): A dictionary containing dataframes for different domains.
+    mws (array-like): An array of molecular weights corresponding to the datasets.
+    chnops (array-like): The CHNOPS dataset containing chirality data.
+    kegg (array-like): The KEGG dataset containing chirality data.
+
+    Returns:
+    None
+    """
     # Get means of Reaxys data
     chnops_avgs = [np.mean(s) for s in chnops]
     kegg_avgs = [np.mean(s) for s in kegg]
@@ -257,6 +345,18 @@ def plot_ratio_chiral_compounds(df, mws, chnops, kegg):
 
 
 def plot_ratio_achiral_compounds(df, mws, chnops_achiral, kegg_achiral):
+    """
+    Plot the ratio of achiral compounds for different domains and Reaxys datasets.
+
+    Parameters:
+    df (dict): A dictionary containing dataframes for different domains.
+    mws (array-like): An array of molecular weights corresponding to the datasets.
+    chnops_achiral (array-like): The CHNOPS dataset containing achirality data.
+    kegg_achiral (array-like): The KEGG dataset containing achirality data.
+
+    Returns:
+    None
+    """
     chnops_avgs = [np.mean(s) for s in chnops_achiral]
     kegg_avgs = [np.mean(s) for s in kegg_achiral]
 
@@ -337,6 +437,17 @@ def plot_ratio_achiral_compounds(df, mws, chnops_achiral, kegg_achiral):
 
 
 def plot_histogram_ratio_chiral_compounds(df, chnops, kegg):
+    """
+    Plot a histogram of the ratio of chiral compounds for different domains and Reaxys datasets.
+
+    Parameters:
+    df (dict): A dictionary containing dataframes for different domains.
+    chnops (array-like): The CHNOPS dataset containing chirality data.
+    kegg (array-like): The KEGG dataset containing chirality data.
+
+    Returns:
+    None
+    """
     chnops_color = "dimgrey"
     kegg_color = "darkgrey"
 
@@ -414,6 +525,17 @@ def plot_histogram_ratio_chiral_compounds(df, chnops, kegg):
 
 
 def plot_histogram_ratio_achiral_compounds(df, chnops_achiral, kegg_achiral):
+    """
+    Plot a histogram of the ratio of achiral compounds for different domains and Reaxys datasets.
+
+    Parameters:
+    df (dict): A dictionary containing dataframes for different domains.
+    chnops_achiral (array-like): The CHNOPS dataset containing achirality data.
+    kegg_achiral (array-like): The KEGG dataset containing achirality data.
+
+    Returns:
+    None
+    """
     chnops_color = "dimgrey"
     kegg_color = "darkgrey"
     num_bins = 100
