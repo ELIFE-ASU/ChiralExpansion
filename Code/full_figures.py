@@ -192,7 +192,7 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
         f"\tAverage Achiral Heavy Atoms At Crossover Step: {round(summaries['achiral avg heavy atoms'].iloc[achiral_chiral_crossover_step][0], 3)}")
 
     ### Network figure
-    print("- Generating Network Figure (click 'Post To Python' in browser pop-up window to continue code) -")
+    print("- Generating Network Figure -")
     result_network = generate_annotated_bipartite_edgelist(results[seed_name])
     # summary_network = generate_expansion_summary(result_network)
     transition_edge_df = result_network['bipartite_edgelist'].query('step <= @achiral_chiral_crossover_step').copy(
@@ -227,34 +227,46 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
 
     attributes['gen'] = steps
     attributes.dropna(inplace=True)
+    attributes.sort_values(by='gen', inplace=True)
     gen_color = 'Greys'
     attributes['gen_color'] = colorize_Series(attributes['gen'], cmap=gen_color).tolist()
 
-    size_nodes_by = 'degree'
-    max_node_size = 25
+    ### Network figure
+    show = 'impactful_precursor'
+    rotate = False
 
-    G = networks_uni['directed'].copy()
-    node_sizes = pd.Series({i: (np.log2(j + 2)) ** 1.5 for i, j in G.degree()})
-    nx.set_node_attributes(G, node_sizes, 'size')
-    nx.set_node_attributes(G, attributes['is_chiral_color'], 'group')
+    G1 = networks_uni[show]  # using impactful_precursor from network generation
 
-    fig = plt.figure(figsize=(12, 12), layout='constrained')
-    stylized_network, config = nw.visualize(G, config={'node_label_color': '#000000', 'node_gravity': 0.0,
-                                                       'link_alpha': 0.005, 'link_color': '#000000', 'zoom': 0.60,
-                                                       'node_charge': -100,
-                                                       'scale_node_size_by_strength': False, 'node_size_variation': 1,
-                                                       'node_size': max_node_size, 'link_distance': 25,
-                                                       'node_stroke_width': 2})
-    fig, ax = nw.draw_netwulf(stylized_network)
+    # Remove G nodes that are not in attributes df
+    nodes_to_keep = attributes.index.to_list()
+    nodes_to_remove = [n for n in nodes_to_keep if n not in G1.nodes()]
+    G1.remove_nodes_from(nodes_to_remove)
 
-    a = stylized_network.copy()
-    a['nodeStrokeWidth'] = 0.0
-    for i in list(range(len(a['nodes']))):
-        a['nodes'][i]['radius'] = a['nodes'][i]['radius'] * 0.4
-        a['nodes'][i]['color'] = attributes['gen_color'].loc[a['nodes'][i]['id']]
+    nx.set_node_attributes(G1, attributes['is_chiral_color'], 'is_chiral_color')
+    layers = [list(i) for i in attributes.loc[list(G1.nodes())].groupby(by='gen').groups.values()][:-1]
+    pos = get_multipartite_layout(edges=list(G1.edges), layers=layers, reduce_edge_crossings=True)
+    # for i in layers[-1]: del pos[i] # remove last layer
+    for n in pos.keys(): pos[n][0] = (pos[n][0] + 0.2) ** 2  # spread out later gens to reduce extreme angles
+    if rotate: pos = {i: j[::-1] for i, j in pos.items()}
 
-    plt.savefig("../Figures/Fig2A.svg", format="svg")
+    fig, ax = plt.subplots(figsize=(15, 15), layout='constrained')
+    ax.axis("off")
+    nx.draw_networkx(G1.subgraph(pos.keys()), pos=pos, ax=ax, edge_color=[0.5, 0.5, 0.5, 0.5],
+                     node_color=list(gna(G1.subgraph(pos.keys()), 'is_chiral_color').values()),
+                     edgecolors='k', width=0.03, arrows=False,
+                     linewidths=0.2, node_size=100, node_shape='s', alpha=0.99,
+                     with_labels=False)
+
+    plt.legend(loc='lower left', borderpad=8, frameon=False, handles=[
+        plt.Line2D([0], [0], marker='s', color='w', markeredgecolor='k', markeredgewidth=0.2, markerfacecolor='#34CCFF',
+                   markersize=20, label='Chiral'),
+        plt.Line2D([0], [0], marker='s', color='w', markerfacecolor='#FFC012', markeredgecolor='k', markeredgewidth=0.2,
+                   markersize=20, label='Achiral')], prop={'size': 20})
+    
+    ax.annotate("A", xy=(1.31,1), color="k", weight="bold", annotation_clip=False)
+
     plt.savefig("../Figures/Fig2A.png", format="png")
+    plt.savefig("../Figures/Fig2A.svg", format="svg")
     plt.close()
 
     # Read in LUCA compounds & get percentages
@@ -329,8 +341,6 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     ax.set_xlabel("Expansion Step")
     ax.annotate("B", xy=(-2,6300), color="k", weight="bold", annotation_clip=False)
 
-    # ax.legend(prop={"size":14})
-
     ax2.set_ylim([0, 100])
     ax2.bar(np.arange(0, len(percent_luca), 1),
             percent_luca,
@@ -342,7 +352,6 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
 
     # Set y-axis tick labels to luca color
     ax2.tick_params(colors=luca_color)
-    # ax2.legend(prop={"size":14})
 
     # Complete legend
     lines, labels = ax.get_legend_handles_labels()
@@ -389,7 +398,7 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
                linestyle="--")
     ax.axhspan(
         6, 13, alpha=0.5, color='grey',
-        label="Modeled Crossover")  ### TODO: depends on Fig 1 (check this?)
+        label="Modeled Crossover") 
     ax.axvline(x=first_chiral_step, color="k", alpha=0.5, linestyle=":")
 
     ax.set_ylim([0, 55])
@@ -546,43 +555,44 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
 
 
 def fig3(seed_name, rxn_db, crossover_step, attributes, networks_uni):
-    ### Network figure
-    show = 'impactful_precursor'
-    rotate = False
+    print("- Generating Network Figure (click 'Post To Python' in browser pop-up window to continue code) -")
+    size_nodes_by = 'degree'
+    max_node_size = 25
 
-    G1 = networks_uni[show]  # using impactful_precursor from network generation
+    G = networks_uni['directed'].copy()
+    node_sizes = pd.Series({i: (np.log2(j + 2)) ** 1.5 for i, j in G.degree()})
+    nx.set_node_attributes(G, node_sizes, 'size')
+    nx.set_node_attributes(G, attributes['is_chiral_color'], 'group')
 
-    # Remove G nodes that are not in attributes df
-    nodes_to_keep = attributes.index.to_list()
-    nodes_to_remove = [n for n in nodes_to_keep if n not in G1.nodes()]
-    G1.remove_nodes_from(nodes_to_remove)
+    fig = plt.figure(figsize=(12, 12), layout='constrained')
+    stylized_network, config = nw.visualize(G, config={'node_label_color': '#000000', 'node_gravity': 0.4,
+                                                       'link_alpha': 0.01, 'link_color': '#000000', 'zoom': 0.70,
+                                                       'node_charge': -100,
+                                                       'scale_node_size_by_strength': True, 'node_size_variation': 0.5,
+                                                       'node_size': max_node_size, 'link_distance': 25,
+                                                       'node_stroke_width': 2})
+    fig, ax = nw.draw_netwulf(stylized_network)
 
-    nx.set_node_attributes(G1, attributes['is_chiral_color'], 'is_chiral_color')
-    layers = [list(i) for i in attributes.loc[list(G1.nodes())].groupby(by='gen').groups.values()][:-1]
-    pos = get_multipartite_layout(edges=list(G1.edges), layers=layers, reduce_edge_crossings=True)
-    # for i in layers[-1]: del pos[i] # remove last layer
-    for n in pos.keys(): pos[n][0] = (pos[n][0] + 0.2) ** 2  # spread out later gens to reduce extreme angles
-    if rotate: pos = {i: j[::-1] for i, j in pos.items()}
+    a = stylized_network.copy()
+    a['nodeStrokeWidth'] = 0.0
+    for i in list(range(len(a['nodes']))):
+        a['nodes'][i]['radius'] = a['nodes'][i]['radius'] * 0.4
+        a['nodes'][i]['color'] = attributes['gen_color'].loc[a['nodes'][i]['id']]
 
-    fig, ax = plt.subplots(figsize=(15, 15), layout='constrained')
-    nx.draw_networkx(G1.subgraph(pos.keys()), pos=pos, ax=ax, edge_color=[0.5, 0.5, 0.5, 0.5],
-                     node_color=list(gna(G1.subgraph(pos.keys()), 'is_chiral_color').values()),
-                     edgecolors='k', width=0.03, arrows=False,
-                     linewidths=0.2, node_size=100, node_shape='s', alpha=0.99,
-                     with_labels=False)
+    nw.draw_netwulf(a, fig=fig, ax=ax, draw_links=False)
 
-    plt.legend(loc='lower left', borderpad=8, frameon=False, handles=[
-        plt.Line2D([0], [0], marker='s', color='w', markeredgecolor='k', markeredgewidth=0.2, markerfacecolor='#34CCFF',
-                   markersize=20, label='Chiral'),
-        plt.Line2D([0], [0], marker='s', color='w', markerfacecolor='#FFC012', markeredgecolor='k', markeredgewidth=0.2,
-                   markersize=20, label='Achiral')], prop={'size': 20})
-    plt.savefig("../Figures/Fig3A.png", format="png")
+    nodes = pd.DataFrame(a['nodes'])
+    gens_shown = pd.DataFrame({'gen': nodes['id'].map(attributes['gen']), 'color': nodes['color']}).drop_duplicates().sort_values(by='gen').set_index('gen')['color']
+    handles = [plt.Line2D([0], [0], marker='o', color='w', markeredgecolor='k', markeredgewidth=0, markerfacecolor=j, markersize=10, label=str(i)) for i,j in gens_shown.items()]
+    plt.legend(loc='lower left', frameon=False, handles=handles, handletextpad=0.01, title='GEN', prop={"size":10})
+    plt.annotate("A", xy=(25,600), color="k", weight="bold", annotation_clip=False)
+
     plt.savefig("../Figures/Fig3A.svg", format="svg")
+    plt.savefig("../Figures/Fig3A.png", format="png")
     plt.close()
 
     ### Get full seed set & reaction set
     seed_groups = [seed_name]
-    # rxn_db = "../../lets-get-kegg/Data/kegg_data_R_processed.csv.zip"  # Default in NetworkExpansion.import_reaction_file
     reaction_scope = get_sides(import_reaction_file(rxn_db))
 
     compound_scope = set.union(*reaction_scope.stack())
@@ -841,12 +851,8 @@ def fig4():
 
     # Add Reaxys averages to scatter plot
     ax1.scatter(mws, chnops_avgs, color=chnops_color, s=15, zorder=2)
-    # ax1.annotate("Reaxys CHNOPS", (6000, 0.575), color=chnops_color, weight='bold',
-    #             fontsize=16, ha='center', va='center')
 
     ax1.scatter(mws, kegg_avgs, color=kegg_color, s=15, zorder=2)
-    # ax1.annotate("Reaxys KEGG", (6000, 0.55), color=kegg_color, weight='bold',
-    #             fontsize=16, ha='center', va='center')
 
     # Add scaling fits (fit a polyfit line to averages)
     find_fit(mws, chnops_avgs, chnops_color)
@@ -876,7 +882,6 @@ def fig4():
                  ha='center',
                  va='center',
                  zorder=2)
-    # handles.append(s)
     ax1.axhline(chiral_y, 0, 1, ls='--', color="k", alpha=1, zorder=1)
 
     # Add Reaxys to Legend
@@ -1015,7 +1020,6 @@ def fig4():
                           "Eukarya", ax4)
 
     ax4.grid()
-    # ax4.legend(bbox_to_anchor=(0.7, 2.9), prop={"size":20}, ncol=4)
 
     ax4.annotate("More Chiral",
                  xy=(40, 0.1),
@@ -1100,7 +1104,6 @@ def fig5(seed_name, rxn_db, crossover_step, first_chiral_step):
     ### Panel 5B - achiral/chiral modulating &conserving
     ### Get full seed set & reaction set
     seed_groups = [seed_name]
-    # rxn_db = "../../lets-get-kegg/Data/kegg_data_R_processed.csv.zip"  # Default in NetworkExpansion.import_reaction_file
     reaction_scope = get_sides(import_reaction_file(rxn_db))
 
     compound_scope = set.union(*reaction_scope.stack())
@@ -1184,7 +1187,6 @@ def fig5(seed_name, rxn_db, crossover_step, first_chiral_step):
     plt.close()
 
 
-def fig6():
     ### Get pathway names & cpd lists from KEGG (see slack for API calls)
     session = prepare_session()
     pathway_cpd_links, pathway_names = get_pathway_data(session=session)
@@ -1279,8 +1281,8 @@ def fig6():
             fontsize=22,
             weight="bold")
 
-    plt.savefig("../Figures/Fig6A.svg", format="svg")
-    plt.savefig("../Figures/Fig6A.png", format="png")
+    plt.savefig("../Figures/Fig5C.svg", format="svg")
+    plt.savefig("../Figures/Fig5C.png", format="png")
     plt.close()
 
     ### Boxplot of pathway chirality distribution per metabolic group
@@ -1319,8 +1321,8 @@ def fig6():
     ax.annotate("B", xy=(-1,1.06), color="k", weight="bold", annotation_clip=False)
     plt.tight_layout()
 
-    plt.savefig("../Figures/Fig6B.svg", format="svg")
-    plt.savefig("../Figures/Fig6B.png", format="png")
+    plt.savefig("../Figures/Fig5D.svg", format="svg")
+    plt.savefig("../Figures/Fig5D.png", format="png")
     plt.close()
 
     ### Pathway size by chirality
@@ -1340,8 +1342,8 @@ def fig6():
     ax.set_ylim(-.05, 1.05)
     ax.annotate("C", xy=(-6,1.07), color="k", weight="bold", annotation_clip=False)
 
-    plt.savefig("../Figures/Fig6C.svg", format="svg")
-    plt.savefig("../Figures/Fig6C.png", format="png")
+    plt.savefig("../Figures/Fig5E.svg", format="svg")
+    plt.savefig("../Figures/Fig5E.png", format="png")
     plt.close()
 
 
@@ -1387,9 +1389,6 @@ def main():
          rxn_db=rxn_db_fp,
          crossover_step=crossover_step,
          first_chiral_step=first_chiral_step)
-
-    print("---- Generating Figure 6 ----")
-    fig6()
 
 
 if __name__ == "__main__":
