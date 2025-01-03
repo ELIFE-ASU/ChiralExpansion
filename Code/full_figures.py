@@ -194,14 +194,20 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     ### Network figure
     print("- Generating Network Figure -")
     result_network = generate_annotated_bipartite_edgelist(results[seed_name])
+    # print(result_network)
+    # print(result_network.columns)
+    # print()
     # summary_network = generate_expansion_summary(result_network)
     transition_edge_df = result_network['bipartite_edgelist'].query('step <= @achiral_chiral_crossover_step').copy(
         deep=True)
+    print(transition_edge_df)
+    print(transition_edge_df.columns)
     networks = {i: nx.from_pandas_edgelist(transition_edge_df[transition_edge_df[i]],
                                            source='source', target='target', edge_attr=True, create_using=nx.DiGraph())
                 for i in ['impactful_precursor', 'immediate_precursor', 'directed']}
     compound_nodes = {i: set(j.nodes()).difference(reaction_scope.index) for i, j in networks.items()}
     networks_uni = {i: bipartite.projected_graph(networks[i], nodes=compound_nodes[i]) for i in networks.keys()}
+    print(networks_uni["impactful_precursor"])
 
     attributes = pd.read_csv("../Data/kegg_data_C.csv.zip",
                              index_col=1,
@@ -240,6 +246,7 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     # Remove G nodes that are not in attributes df
     nodes_to_keep = attributes.index.to_list()
     nodes_to_remove = [n for n in nodes_to_keep if n not in G1.nodes()]
+    print(f"\tFiltering  network to remove {len(nodes_to_remove)} nodes, as they are not in KEGG...")
     G1.remove_nodes_from(nodes_to_remove)
 
     nx.set_node_attributes(G1, attributes['is_chiral_color'], 'is_chiral_color')
@@ -560,17 +567,40 @@ def fig3(seed_name, rxn_db, crossover_step, attributes, networks_uni):
     max_node_size = 25
 
     G = networks_uni['directed'].copy()
+
+    deg = G.degree()
+    nodes_to_remove = [n[0] for n in deg if n[1] < 50]
+    print(f"\tFiltering network to remove {len(nodes_to_remove)} nodes due to degree...")
+    G.remove_nodes_from(nodes_to_remove)
+
     node_sizes = pd.Series({i: (np.log2(j + 2)) ** 1.5 for i, j in G.degree()})
     nx.set_node_attributes(G, node_sizes, 'size')
     nx.set_node_attributes(G, attributes['is_chiral_color'], 'group')
 
     fig = plt.figure(figsize=(12, 12), layout='constrained')
-    stylized_network, config = nw.visualize(G, config={'node_label_color': '#000000', 'node_gravity': 0.4,
-                                                       'link_alpha': 0.01, 'link_color': '#000000', 'zoom': 0.70,
-                                                       'node_charge': -100,
-                                                       'scale_node_size_by_strength': True, 'node_size_variation': 0.5,
-                                                       'node_size': max_node_size, 'link_distance': 25,
-                                                       'node_stroke_width': 2})
+    stylized_network, config = nw.visualize(G, config={"zoom": 1.08,
+                                                        "node_charge": -100,
+                                                        "node_gravity": 0.4,
+                                                        "link_distance": 0,
+                                                        "link_distance_variation": 0,
+                                                        "node_collision": True,
+                                                        "wiggle_nodes": False,
+                                                        "freeze_nodes": False,
+                                                        "node_fill_color": "#79aaa0",
+                                                        "node_stroke_color": "#555555",
+                                                        "node_label_color": "#000000",
+                                                        "node_size": 25,
+                                                        "node_stroke_width": 2,
+                                                        "node_size_variation": 0.75,
+                                                        "display_node_labels": False,
+                                                        "scale_node_size_by_strength": True,
+                                                        "link_color": "#000000",
+                                                        "link_width": 2,
+                                                        "link_alpha": 0.01,
+                                                        "link_width_variation": 0.5,
+                                                        "display_singleton_nodes": True,
+                                                        "min_link_weight_percentile": 0,
+                                                        "max_link_weight_percentile": 1})
     fig, ax = nw.draw_netwulf(stylized_network)
 
     a = stylized_network.copy()

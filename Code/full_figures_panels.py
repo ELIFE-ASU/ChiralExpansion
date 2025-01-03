@@ -586,12 +586,29 @@ def fig3(seed_name, rxn_db, crossover_step, attributes, networks_uni):
     fig = plt.figure(figsize=(12,12), layout="constrained")
 
     # #fig = plt.figure(figsize=(12, 12), layout='constrained')
-    stylized_network, config = nw.visualize(G, config={'node_label_color': '#000000', 'node_gravity': 0.4,
-                                                       'link_alpha': 0.01, 'link_color': '#000000', 'zoom': 0.70,
-                                                       'node_charge': -100,
-                                                       'scale_node_size_by_strength': True, 'node_size_variation': 0.5,
-                                                       'node_size': max_node_size, 'link_distance': 25,
-                                                       'node_stroke_width': 2})
+    stylized_network, config = nw.visualize(G, config={"zoom": 1.08,
+                                                        "node_charge": -100,
+                                                        "node_gravity": 0.4,
+                                                        "link_distance": 0,
+                                                        "link_distance_variation": 0,
+                                                        "node_collision": True,
+                                                        "wiggle_nodes": False,
+                                                        "freeze_nodes": False,
+                                                        "node_fill_color": "#79aaa0",
+                                                        "node_stroke_color": "#555555",
+                                                        "node_label_color": "#000000",
+                                                        "node_size": 25,
+                                                        "node_stroke_width": 2,
+                                                        "node_size_variation": 0.75,
+                                                        "display_node_labels": False,
+                                                        "scale_node_size_by_strength": True,
+                                                        "link_color": "#000000",
+                                                        "link_width": 2,
+                                                        "link_alpha": 0.01,
+                                                        "link_width_variation": 0.5,
+                                                        "display_singleton_nodes": True,
+                                                        "min_link_weight_percentile": 0,
+                                                        "max_link_weight_percentile": 1})
     
     fig, ax = nw.draw_netwulf(stylized_network)
     
