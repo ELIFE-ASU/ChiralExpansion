@@ -38,7 +38,7 @@ def fig1():
     achiral_color = "#FFC012"
     chiral_color = "#34CCFF"
     plt.figure(figsize=(24, 8))
-    gs = gridspec.GridSpec(2, 6)
+    gs = gridspec.GridSpec(4, 6)
 
     ax1 = plt.subplot(gs[:, 0:2])
     ax1.plot(gdb_df["fraction_achiral"],
@@ -71,9 +71,9 @@ def fig1():
                 12,
                 alpha=0.5,
                 color='grey',
-                label="Enumerated\nChemistry\nCrossover")
+                label="Enumerated Chemistry\nCrossover")
 
-    ax2.legend(prop={"size": 14}, bbox_to_anchor=(1.01, 0.78), frameon=False)
+    ax2.legend(prop={"size": 20}, bbox_to_anchor=(1.01, 0.78), frameon=False)
     ax2.xaxis.grid(visible=True, which="both")
     ax2.yaxis.grid(visible=True, which="both")
     ax2.set_xlim(0, 16)
@@ -83,18 +83,18 @@ def fig1():
     ax2.set_title("KEGG")
     ax2.annotate("C", xy=(0,1.07), color="k", weight="bold", annotation_clip=False)
 
-    ax3 = plt.subplot(gs[1, 4:])
+    ax3 = plt.subplot(gs[1:, 4:])
     ax3.plot(gdb_cop, linewidth=3, label="GDB ", color="k", linestyle="--")
     ax3.plot(kegg_cop, linewidth=3, label="KEGG", color="k", linestyle=":")
 
-    ax3.legend(frameon=False, prop={"size": 14})
+    ax3.legend(frameon=False, prop={"size": 20})
     ax3.set_xlim(0, 16)
     ax3.set_ylim(-0.05, 1.05)
     ax3.set_xticks(list(np.arange(0, 16)), minor=True)
     ax3.set_xlabel("Heavy Atoms")
     ax3.set_ylabel("Chiral Order Parameter $\mathbb{C}$")
     ax3.annotate(
-        xy=(0.45, 0.6),
+        xy=(0.7, 0.7),
         text=r"$\mathbb{C} = \frac{C}{C+A}$",
     )
     ax3.annotate("D", xy=(0,1.08), color="k", weight="bold", annotation_clip=False)
@@ -544,7 +544,7 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
 
     ax4.set_xlabel("Expansion Step")
     ax4.set_ylabel("Chiral Order Parameter $\mathbb{C}$")
-    lgd = ax4.legend(prop={"size": 16}, frameon=False, bbox_to_anchor=(0.8,1))
+    lgd = ax4.legend(prop={"size": 16}, frameon=False, bbox_to_anchor=(0.75,1.25))
     ax4.annotate("D", xy=(-0.5,1.07), color="k", weight="bold", annotation_clip=False)
 
     def add_patch(legend):
@@ -555,7 +555,7 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
         labels.append("Modeled Crossover")
 
         handles.append(Patch(facecolor=luca_color, edgecolor=luca_color, alpha=0.5))
-        labels.append("Percent LUCA Compounds")
+        labels.append("Percent LUCA\nCompounds")
 
         legend._legend_box = None
         legend._init_legend_box(handles, labels)
@@ -940,7 +940,7 @@ def fig4():
 
     # Labels
     font_size = 14
-    ax1.set_xlabel("System Size (unique compounds)"
+    ax1.set_xlabel("System Size (Unique Compounds Per Sample)"
                    )  # TODO: why isn't this label showing up
     ax1.set_ylabel("$\mathbb{C}$")
     ax1.legend(bbox_to_anchor=(1.43, 1.2),
@@ -1364,7 +1364,7 @@ def fig5(seed_name, rxn_db, crossover_step, first_chiral_step):
                s=50)
 
     ax3.set_ylabel("$\mathbb{C}$", fontsize=30)
-    ax3.set_xlabel("System Size (Compounds Per Pathway)")
+    ax3.set_xlabel("System Size (Unique Compounds Per Pathway)")
     loc = plticker.MultipleLocator(
         base=20.0)  # this locator puts ticks at regular intervals
     ax3.xaxis.set_major_locator(loc)
