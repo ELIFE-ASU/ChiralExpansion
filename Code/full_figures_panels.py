@@ -122,8 +122,15 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
 
     ### Run network expansion on original seed set
     results = dict()
+    print("- Writing curated seed set to ../Data/curated_SeedSets.csv -")
+
     for name, seeds in seed_sets.items():
+        print(f"- Seed Set Size: {len(seeds)}")
         print(seeds)
+        curated_SS_df = pd.DataFrame(columns=[seed_name])
+        curated_SS_df[seed_name] = list(seeds)
+        curated_SS_df.to_csv("../Data/curated_SeedSets.csv") ### Will be re-used for LUCA in SI figure notebook
+
         results[name] = expand_from_seed_set(seeds=seeds,
                                              reactions=reaction_scope,
                                              max_gen=max_generation)
@@ -579,6 +586,11 @@ def fig3(seed_name, rxn_db, crossover_step, attributes, networks_uni):
     max_node_size = 25
 
     G = networks_uni['directed'].copy()
+    deg = G.degree()
+    nodes_to_remove = [n[0] for n in deg if n[1] < 50]
+    print(f"\tFiltering network to remove {len(nodes_to_remove)} nodes due to degree...")
+    G.remove_nodes_from(nodes_to_remove)
+    
     node_sizes = pd.Series({i: (np.log2(j + 2)) ** 1.5 for i, j in G.degree()})
     nx.set_node_attributes(G, node_sizes, 'size')
     nx.set_node_attributes(G, attributes['is_chiral_color'], 'group')
@@ -695,6 +707,15 @@ def fig3(seed_name, rxn_db, crossover_step, attributes, networks_uni):
 
     expansion_arrival_df["degree"] = expansion_arrival_df["compound_id"].map(
         cpd_degrees)
+    print("- Writing out full degree/compoundID/chiral-center-count dataframe to Data/expansion_arrival.csv -")
+    expansion_arrival_df.to_csv("../Data/expansion_arrival.csv")
+
+    print("- Writing out top 50 highest degree nodes to Data/top50_highestDegreeNodes.csv -")
+    # expansion_arrival_df.sort_values(by=["degree", "n_chiral_centers"], inplace=True, ascending=[False, True])
+    expansion_arrival_df.sort_values(by="degree", inplace=True, ascending=False)
+    columns_to_write = ["compound_id","formula","n_chiral_centers","degree"]
+    expansion_arrival_df.head(50).to_csv("../Data/top50_highestDegreeNodes.csv", columns=columns_to_write, index=False)
+
 
     fig = plt.figure(figsize=(16, 8))
     gs = fig.add_gridspec(2,
@@ -1156,6 +1177,7 @@ def fig5(seed_name, rxn_db, crossover_step, first_chiral_step):
     ### Run network expansion on original seed set
     results = dict()
     for name, seeds in seed_sets.items():
+        print(f"- Seed Set Size: {len(seeds)}")
         print(seeds)
         results[name] = expand_from_seed_set(seeds=seeds,
                                              reactions=reaction_scope,
