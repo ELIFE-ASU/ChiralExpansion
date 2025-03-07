@@ -4,3 +4,6 @@
 Output/**
 Archived/**
 Data/JGI*
+
+.idea/
+.vscode/
