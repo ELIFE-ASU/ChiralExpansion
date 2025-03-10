@@ -337,13 +337,14 @@ def linkArrivalStepHeavyAtoms(arrival_df, kegg_df):
                        arrival_df,
                        how="left",
                        left_on="compound_id",
-                       right_index=True).dropna()
+                       right_index=True)
+    
     kegg_df = kegg_df.rename(columns={"level_0": "arrival"})  # Cleaning up merge notation
-
-    heavy_atom_counts = np.array(kegg_df["n_heavy_atoms"])
-
+    df = kegg_df.dropna(subset=['arrival']) # Removing all cpds not found in expansion
+    heavy_atom_counts = np.array(df["n_heavy_atoms"])
     heavy_atom_percentiles = []
-    for ha in kegg_df["n_heavy_atoms"].to_list():
+
+    for ha in df["n_heavy_atoms"].to_list():
         try:  # Account for possible NaNs
             # Bins of 20 (10 bins) & 40 (5 bins) heavy atoms
             if ha <= np.percentile(heavy_atom_counts, 20):
@@ -360,9 +361,9 @@ def linkArrivalStepHeavyAtoms(arrival_df, kegg_df):
         except:
             heavy_atom_percentiles.append("0 - 20th")
 
-    kegg_df["heavy atom percentile"] = heavy_atom_percentiles
+    df["heavy atom percentile"] = heavy_atom_percentiles
 
-    return kegg_df
+    return df
 
 
 def degrees_PerRxn(rxnString, cpd_degrees):
@@ -614,12 +615,16 @@ def check_rxn_chirality(rxnString, keggC_df, rxn_chiral_count):
     reactant_chiral_count = 0
     product_chiral_count = 0
 
+    kegg_cpds = set(list(keggC_df.index))
+
     for cpd in reactant_cpds:
-        if keggC_df.loc[cpd]["n_chiral_centers"]:
-            reactant_chiral_count += 1
+        if cpd in kegg_cpds:
+            if keggC_df.loc[cpd]["n_chiral_centers"]:
+                reactant_chiral_count += 1
     for cpd in product_cpds:
-        if keggC_df.loc[cpd]["n_chiral_centers"]:
-            product_chiral_count += 1
+        if cpd in kegg_cpds:        
+            if keggC_df.loc[cpd]["n_chiral_centers"]:
+                product_chiral_count += 1
 
     chiral_str = f"{reactant_chiral_count}_{product_chiral_count}"
 
@@ -658,6 +663,7 @@ def get_heatmap_array(keggC_df):
                                                    args=(keggC_df,
                                                          rxn_chiral_count))
 
+    print(rxn_df)
     for i in range(5):
         row = []
         for j in range(5):

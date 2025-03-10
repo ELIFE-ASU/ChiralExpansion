@@ -21,9 +21,7 @@ max_generation = 1000  # Arbitrarily large value
 seed_candidates = pd.read_csv('../Data/SampleSeeds.csv.zip',
                               index_col=0,
                               compression='zip')
-keggC_df = pd.read_csv("../../lets-get-kegg/Data/kegg_data_C.csv.zip",
-                       index_col=0,
-                       compression="zip")
+keggC_df = pd.read_csv("../../CBRdb/CBRdb_C.csv")
 
 
 def fig1():
@@ -199,6 +197,7 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
         f"\tExpansion Size At Crossover: {summaries['compound count'].iloc[achiral_chiral_crossover_step][seed_name]} Compounds, {summaries['reaction count'].iloc[achiral_chiral_crossover_step][seed_name]} Reactions")
     print(
         f"\tAverage Achiral Heavy Atoms At Crossover Step: {round(summaries['achiral avg heavy atoms'].iloc[achiral_chiral_crossover_step][0], 3)}")
+    print(f"\tFinal Chiral Percentage (Generation {len(chiral_count)}): {round(chiral_count[-1] / (chiral_count[-1] + achiral_count[-1]), 3)}")
 
     ### Network figure
     print("- Generating Network Figure -")
@@ -212,10 +211,9 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     compound_nodes = {i: set(j.nodes()).difference(reaction_scope.index) for i, j in networks.items()}
     networks_uni = {i: bipartite.projected_graph(networks[i], nodes=compound_nodes[i]) for i in networks.keys()}
 
-    attributes = pd.read_csv("../Data/kegg_data_C.csv.zip",
-                             index_col=1,
-                             compression="zip")
-    attributes.drop(labels=["smiles", "Unnamed: 0", "formula", "molecular_weight", "n_heavy_atoms"], axis=1,
+    attributes = pd.read_csv("../../CBRdb/CBRdb_C.csv", 
+                             index_col=0)
+    attributes.drop(labels=["smiles", "formula", "molecular_weight", "n_heavy_atoms"], axis=1,
                     inplace=True)
     attributes["is_chiral"] = attributes['n_chiral_centers'].map(lambda x: x > 0)
     attributes['is_chiral_color'] = attributes['is_chiral'].map({True: '#34CCFF', False: '#FFC012'}).fillna("#FFFFFF")
@@ -235,7 +233,6 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
             steps.append(np.nan)
 
     attributes['gen'] = steps
-    attributes.dropna(inplace=True)
     attributes.sort_values(by='gen', inplace=True)
     gen_color = 'Greys'
     attributes['gen_color'] = colorize_Series(attributes['gen'], cmap=gen_color).tolist()
@@ -245,7 +242,6 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     rotate = False
 
     G1 = networks_uni[show]  # using impactful_precursor from network generation
-
     # Remove G nodes that are not in attributes df
     nodes_to_keep = attributes.index.to_list()
     nodes_to_remove = [n for n in nodes_to_keep if n not in G1.nodes()]
@@ -324,8 +320,8 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
 
     ax2.annotate(
         f"Achiral-to-Chiral\nCrossover Step {achiral_chiral_crossover_step}",
-        xy=(achiral_chiral_crossover_step, 5500),
-        xytext=(achiral_chiral_crossover_step + 8, 5850),
+        xy=(achiral_chiral_crossover_step, 6000),
+        xytext=(achiral_chiral_crossover_step + 8, 6150),
         color="k",
         arrowprops={
             "arrowstyle": "simple",
@@ -337,7 +333,7 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
         zorder=3)
     ax2.annotate(f"First Chiral\nCompound\nStep {first_chiral_step}",
                 xy=(first_chiral_step, 4750),
-                xytext=(first_chiral_step + 5, 5100),
+                xytext=(first_chiral_step + 5, 5250),
                 color="k",
                 arrowprops={
                     "arrowstyle": "simple",
@@ -351,7 +347,7 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     # ax.set_ylim([0, 3100])
     ax2.set_ylabel("Cumulative Molecules")
     ax2.set_xlabel("Expansion Generation")
-    ax2.annotate("B", xy=(-2,6300), color="k", weight="bold", annotation_clip=False)
+    ax2.annotate("B", xy=(-2,6600), color="k", weight="bold", annotation_clip=False)
 
     ax2a.set_ylim([0, 100])
     ax2a.bar(np.arange(0, len(percent_luca), 1),
@@ -560,10 +556,10 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     ax4.axvline(x=first_chiral_step, color="k", linestyle=":", alpha=0.5)
 
     ax4.set_ylim([0, 1.05])
-    ax4.set_xlim([-1,60])
+    ax4.set_xlim([-1,76])
 
     #Remove x-axis spine past 55
-    ax4.spines['bottom'].set_bounds(-1, 50)
+    ax4.spines['bottom'].set_bounds(-1, 60)
 
     #Remove 100 & 120 from xticks
     ax4_xticks = ax4.xaxis.get_major_ticks()
@@ -578,7 +574,7 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
 
     ax4.set_xlabel("Expansion Generation")
     ax4.set_ylabel("Chiral Order\nParameter $\mathbb{C}$")
-    lgd4 = ax4.legend(prop={"size": 16}, frameon=False, bbox_to_anchor=(1.05,1))
+    lgd4 = ax4.legend(prop={"size": 16}, frameon=False, bbox_to_anchor=(0.85,1))
     ax4.annotate("D", xy=(-0.5,1.07), color="k", weight="bold", annotation_clip=False)
 
     plt.tight_layout()
@@ -604,6 +600,15 @@ def fig3(seed_name, rxn_db, crossover_step, attributes, networks_uni):
     node_sizes = pd.Series({i: (np.log2(j + 2)) ** 1.5 for i, j in G.degree()})
     nx.set_node_attributes(G, node_sizes, 'size')
     nx.set_node_attributes(G, attributes['is_chiral_color'], 'group')
+
+    nodes_without_group = list()
+    for node, data in G.nodes(data=True):
+        if 'group' not in data:
+            nodes_without_group.append(node)
+
+    print(f"\tRemoving {len(nodes_without_group)} nodes without group attribute...")
+    for n in nodes_without_group:
+        G.remove_node(n)
 
     fig = plt.figure(figsize=(12,12), layout="constrained")
 
@@ -675,14 +680,14 @@ def fig3(seed_name, rxn_db, crossover_step, attributes, networks_uni):
 
     expansion_arrival_df = linkArrivalStepHeavyAtoms(
         results[name]['arrival_step'], keggC_df)
-
+    
     sns.set_palette(sns.color_palette("copper"))
     g = sns.jointplot(data=expansion_arrival_df.sort_values(by="n_heavy_atoms"),
                       x="arrival",
                       y="n_chiral_centers",
                       hue="heavy atom percentile",
-                      ylim=(-1, 39),
-                      xlim=(-1, 39),
+                      ylim=(-1, 38),
+                      xlim=(-1, 34),
                       s=100,
                       marginal_kws={'common_norm': False})
     h = sns.regplot(x="arrival",
@@ -703,9 +708,9 @@ def fig3(seed_name, rxn_db, crossover_step, attributes, networks_uni):
 
     g.figure.set_size_inches((16, 8))
     g.ax_joint.legend(title="Heavy Atom\nPercentiles",
-                      bbox_to_anchor=(0.75, 1),
+                      bbox_to_anchor=(0.78, 0.51),
                       prop={"size": 12})
-    plt.annotate("B", xy=(-0.5,37), color="k", weight="bold", annotation_clip=False)
+    plt.annotate("B", xy=(-0.5,36), color="k", weight="bold", annotation_clip=False)
 
     plt.savefig("../Figures/Fig3B.png", format="png")
     plt.savefig("../Figures/Fig3B.svg", format="svg")
@@ -745,6 +750,7 @@ def fig3(seed_name, rxn_db, crossover_step, attributes, networks_uni):
                  "k")
 
     ax.set_xscale("log")
+    ax.set_ylim(-2, 50)
 
     ax.set_xlabel("Degree")
     ax.set_ylabel("Chiral Centers")
@@ -1252,7 +1258,7 @@ def fig5(seed_name, rxn_db, crossover_step, first_chiral_step):
     ax2.legend(facecolor="white", framealpha=1, prop={"size": 12})
     ax2.set_xlabel("Expansion Step")
     ax2.set_ylabel("Reaction Count")
-    ax2.annotate("B", xy=(-1.5,94000), color="k", weight="bold", annotation_clip=False)
+    ax2.annotate("B", xy=(-1.5,98000), color="k", weight="bold", annotation_clip=False)
 
     ### Get pathway names & cpd lists from KEGG (see slack for API calls)
     session = prepare_session()
@@ -1433,7 +1439,8 @@ def main():
 
     # Seed set
     seed_name = "JM|G24|G17|TW"
-    rxn_db_fp = "../../lets-get-kegg/Data/atlas_kegg_processed_merged_deduped.csv.zip"
+    #rxn_db_fp = "../../lets-get-kegg/Data/atlas_kegg_processed_merged_deduped.csv.zip"
+    rxn_db_fp = "../../CBRdb/CBRdb_R.csv"
 
     print("---- Generating Figure 1 ----")
     fig1()
@@ -1442,7 +1449,7 @@ def main():
     # ~Five hours for full expansion (n_iter=1000, min=2, max=10)
     min_ss_size = 2
     max_ss_size = 10
-    n_iter = 2
+    n_iter = 100
     crossover_step, first_chiral_step, attributes, networks_uni = fig2(
         seed_name=seed_name,
         rxn_db=rxn_db_fp,

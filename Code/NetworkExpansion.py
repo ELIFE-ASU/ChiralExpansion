@@ -19,13 +19,13 @@ def get_dir_zoomout_level(dirname: str, attempts=5):
 
 # find relative path to data source
 data_folder = get_dir_zoomout_level('Data/')
-rxn_db_dir = get_dir_zoomout_level('lets-get-kegg/Data/')
+rxn_db_dir = get_dir_zoomout_level('CBRdb/') #Updated to fit CBRdb
 
 get_sides = lambda x: x[['left', 'right']]
 
 
 # imports a reaction dataframe, removes glycan reactions and reactions for which chiral info is missing
-def import_reaction_file(fpath=rxn_db_dir + 'kegg_data_R_processed.csv.zip'):
+def import_reaction_file(fpath=rxn_db_dir + 'CBRdb_R.csv'):
     df = pd.read_csv(fpath, index_col=0).drop(columns=['Unnamed: 0', 'Unnamed: 0.1'], errors='ignore')
     if 'id' in df.columns:
         df.set_index('id', inplace=True)
@@ -119,6 +119,7 @@ def define_reachable_components(seeds, reactions: pd.DataFrame):
 def generate_annotated_bipartite_edgelist(single_result):
     # use make_bipartite_edgelist to generate prelim edgelist
     single_result['bipartite_edgelist'] = make_bipartite_edgelist(single_result['edge_pool'])
+    # print(single_result)
     # use add_bipartite_edge_context to add context on essentiality of each edge
     single_result = add_bipartite_edge_context(single_result)
     return (single_result)
@@ -138,12 +139,19 @@ def make_bipartite_edgelist(edge_pool: pd.DataFrame):
         all_edges[['source', 'target', 'reaction']].applymap(lambda x: x.replace('T', 'A')))  # revert back to original
     return (all_edges)
 
+def get_single_result(x, single_result):
+    if x in single_result['arrival_step']:
+        return single_result['arrival_step'][x]
+    ### Remove comments if interested in missing reaction keys
+    # else:
+    #     print(f"{x} not in single_result['arrival_step']")
+
 
 # adds context to each edge regarding its essentiality
 def add_bipartite_edge_context(single_result):
     df = single_result['bipartite_edgelist']
     df = (df.join(
-        df[['reaction', 'source', 'target']].applymap(lambda x: single_result['arrival_step'][x]).add_suffix('_step')))
+        df[['reaction', 'source', 'target']].applymap(lambda x: get_single_result(x, single_result)).add_suffix('_step')))
     impactful_precursors = df.query('directed').query(
         '(target==reaction & reaction_step>source_step) | (reaction==source & reaction_step==target_step)').index
     immediate_precursors = df.loc[impactful_precursors].query('~(reaction_step-source_step!=1)').index
@@ -154,7 +162,7 @@ def add_bipartite_edge_context(single_result):
 
 # VARIABLES AND DATASETS
 # compound info (JM: Uses lets-get-kegg for compound parity)
-chiral_labels = ((pd.read_csv(rxn_db_dir + 'kegg_data_C.csv.zip', index_col=0)
+chiral_labels = ((pd.read_csv(rxn_db_dir + 'CBRdb_C.csv')
                   .assign(is_chiral=lambda x: x.n_chiral_centers > 0)
                   .rename(columns={'n_chiral_centers': 'Chiral_Centers'})
                   .set_index('compound_id')))
