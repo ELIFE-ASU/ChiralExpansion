@@ -161,7 +161,7 @@ def add_bipartite_edge_context(single_result):
 
 
 # VARIABLES AND DATASETS
-# compound info (JM: Uses lets-get-kegg for compound parity)
+# compound info (from CBRdb)
 chiral_labels = ((pd.read_csv(rxn_db_dir + 'CBRdb_C.csv')
                   .assign(is_chiral=lambda x: x.n_chiral_centers > 0)
                   .rename(columns={'n_chiral_centers': 'Chiral_Centers'})

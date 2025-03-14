@@ -20,9 +20,7 @@ max_generation = 1000  # Arbitrarily large value
 seed_candidates = pd.read_csv('../Data/SampleSeeds.csv.zip',
                               index_col=0,
                               compression='zip')
-keggC_df = pd.read_csv("../../lets-get-kegg/Data/kegg_data_C.csv.zip",
-                       index_col=0,
-                       compression="zip")
+keggC_df = pd.read_csv("../../CBRdb/CBRdb_C.csv")
 
 
 def fig1():
@@ -57,9 +55,9 @@ def fig1():
     ax1.set_xlim(0, 16)
     ax1.set_ylim(-0.05, 1.05)
     ax1.set_xticks(list(np.arange(0, 16)), minor=True)
-    ax1.set_xlabel("Heavy Atoms")
-    ax1.set_ylabel("Fraction Achiral/Chiral")
-    ax1.set_title("GDB")
+    ax1.set_xlabel("Heavy Atoms Per Molecule")
+    ax1.set_ylabel("Achiral-to-Chiral Ratio A/N")
+    ax1.set_title("Chemical Space")
     ax1.annotate("B", xy=(0,1.07), color="k", weight="bold", annotation_clip=False)
 
     ax2 = plt.subplot(gs[:, 2:4])
@@ -72,7 +70,7 @@ def fig1():
                 12,
                 alpha=0.5,
                 color='grey',
-                label="Enumerated Chemistry\nCrossover")
+                label="Phase Boundary")
 
     ax2.legend(prop={"size": 20}, bbox_to_anchor=(1.01, 0.78), frameon=False)
     ax2.xaxis.grid(visible=True, which="both")
@@ -80,19 +78,19 @@ def fig1():
     ax2.set_xlim(0, 16)
     ax2.set_ylim(-0.05, 1.05)
     ax2.set_xticks(list(np.arange(0, 16)), minor=True)
-    ax2.set_xlabel("Heavy Atoms")
-    ax2.set_title("KEGG")
+    ax2.set_xlabel("Heavy Atoms Per Molecule")
+    ax2.set_title("Metabolism")
     ax2.annotate("C", xy=(0,1.07), color="k", weight="bold", annotation_clip=False)
 
     ax3 = plt.subplot(gs[1:, 4:])
-    ax3.plot(gdb_cop, linewidth=3, label="GDB ", color="k", linestyle="--")
-    ax3.plot(kegg_cop, linewidth=3, label="KEGG", color="k", linestyle=":")
+    ax3.plot(gdb_cop, linewidth=3, label="Chemical Space", color="k", linestyle="--")
+    ax3.plot(kegg_cop, linewidth=3, label="Metabolism", color="k", linestyle=":")
 
     ax3.legend(frameon=False, prop={"size": 20})
     ax3.set_xlim(0, 16)
     ax3.set_ylim(-0.05, 1.05)
     ax3.set_xticks(list(np.arange(0, 16)), minor=True)
-    ax3.set_xlabel("Heavy Atoms")
+    ax3.set_xlabel("Heavy Atoms Per Molecule")
     ax3.set_ylabel("Chiral Order Parameter $\mathbb{C}$")
     ax3.annotate(
         xy=(0.7, 0.7),
@@ -197,6 +195,8 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
         f"\tExpansion Size At First Chiral Compound Appearence: {summaries['compound count'].iloc[first_chiral_step][seed_name]} Compounds, {summaries['reaction count'].iloc[first_chiral_step][seed_name]} Reactions")
     print(
         f"\tAverage Achiral Heavy Atoms At Crossover Step: {round(summaries['achiral avg heavy atoms'].iloc[achiral_chiral_crossover_step][0], 3)}")
+    print(f"\tFinal Chiral Percentage (Generation {len(chiral_count)}): {round(chiral_count[-1] / (chiral_count[-1] + achiral_count[-1]), 3)}")
+
 
     ### Network figure
     print("- Generating Network Figure -")
@@ -210,10 +210,9 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     networks_uni = {i: bipartite.projected_graph(networks[i], nodes=compound_nodes[i]) for i in networks.keys()}
     print(networks_uni["impactful_precursor"])
 
-    attributes = pd.read_csv("../Data/kegg_data_C.csv.zip",
-                             index_col=1,
-                             compression="zip")
-    attributes.drop(labels=["smiles", "Unnamed: 0", "formula", "molecular_weight", "n_heavy_atoms"], axis=1,
+    attributes = pd.read_csv("../../CBRdb/CBRdb_C.csv", 
+                             index_col=0)
+    attributes.drop(labels=["smiles", "formula", "molecular_weight", "n_heavy_atoms"], axis=1,
                     inplace=True)
     attributes["is_chiral"] = attributes['n_chiral_centers'].map(lambda x: x > 0)
     attributes['is_chiral_color'] = attributes['is_chiral'].map({True: '#34CCFF', False: '#FFC012'}).fillna("#FFFFFF")
@@ -233,7 +232,6 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
             steps.append(np.nan)
 
     attributes['gen'] = steps
-    attributes.dropna(inplace=True)
     attributes.sort_values(by='gen', inplace=True)
     gen_color = 'Greys'
     attributes['gen_color'] = colorize_Series(attributes['gen'], cmap=gen_color).tolist()
@@ -243,7 +241,6 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     rotate = False
 
     G1 = networks_uni[show]  # using impactful_precursor from network generation
-
     # Remove G nodes that are not in attributes df
     nodes_to_keep = attributes.index.to_list()
     nodes_to_remove = [n for n in nodes_to_keep if n not in G1.nodes()]
@@ -320,8 +317,8 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
 
     ax.annotate(
         f"Achiral-to-Chiral\nCrossover\nStep {achiral_chiral_crossover_step}",
-        xy=(achiral_chiral_crossover_step, 5500),
-        xytext=(achiral_chiral_crossover_step + 8, 5850),
+        xy=(achiral_chiral_crossover_step, 6000),
+        xytext=(achiral_chiral_crossover_step + 8, 6150),
         color="k",
         arrowprops={
             "arrowstyle": "simple",
@@ -333,7 +330,7 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
         zorder=3)
     ax.annotate(f"First Chiral\nCompound\nStep {first_chiral_step}",
                 xy=(first_chiral_step, 4750),
-                xytext=(first_chiral_step + 10, 5100),
+                xytext=(first_chiral_step + 10, 5250),
                 color="k",
                 arrowprops={
                     "arrowstyle": "simple",
@@ -345,18 +342,18 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
                 zorder=3)
 
     # ax.set_ylim([0, 3100])
-    ax.set_ylabel("Compounds")
-    ax.set_xlabel("Expansion Step")
-    ax.annotate("B", xy=(-2,6300), color="k", weight="bold", annotation_clip=False)
+    ax.set_ylabel("Cumulative Molecules")
+    ax.set_xlabel("Expansion Generation")
+    ax.annotate("B", xy=(-2,6600), color="k", weight="bold", annotation_clip=False)
 
     ax2.set_ylim([0, 100])
     ax2.bar(np.arange(0, len(percent_luca), 1),
             percent_luca,
             alpha=0.15,
             color=luca_color,
-            label="LUCA Percentage")
+            label="Percent LUCA Coverage")
 
-    ax2.set_ylabel("LUCA Percentage", color=luca_color)
+    ax2.set_ylabel("Percent LUCA Coverage", color=luca_color)
 
     # Set y-axis tick labels to luca color
     ax2.tick_params(colors=luca_color)
@@ -405,14 +402,14 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
                alpha=0.9,
                linestyle="--")
     ax.axhspan(
-        6, 13, alpha=0.5, color='grey',
-        label="Modeled Crossover") 
+        8, 9, alpha=0.5, color='grey',
+        label="Phase Boundary\nin Chemical Space") 
     ax.axvline(x=first_chiral_step, color="k", alpha=0.5, linestyle=":")
 
     ax.set_ylim([0, 55])
 
-    ax.set_ylabel("Average Heavy Atom Count")
-    ax.set_xlabel("Expansion Step")
+    ax.set_ylabel("Average Heavy Atoms Per Molecule")
+    ax.set_xlabel("Expansion Generation")
 
     ax.legend(prop={"size": 14})
     ax.annotate("C", xy=(-1.5,56), color="k", weight="bold", annotation_clip=False)
@@ -521,7 +518,7 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
                 marker="o",
                 linewidth=3,
                 markersize=10,
-                label="Chiral")
+                label="Chiral-Only Seeds")
 
     # Achiral errorbar
     ax.errorbar(x=np.arange(0, len(achiral_avg_percentages_chiral), 1),
@@ -531,7 +528,7 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
                 marker="o",
                 linewidth=3,
                 markersize=10,
-                label="Achiral")
+                label="Achiral-Only Seeds")
 
     # Original (Figure 2B) percentages
     original_chiralPercent = []
@@ -543,14 +540,14 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
             color="k",
             linewidth=3,
             zorder=5,
-            label="Original Expansion $\mathbb{C}$")
+            label="Primordial Expansion")
 
     ax.axvline(x=achiral_chiral_crossover_step, color="k", linestyle="--", alpha=0.9)
     ax.axvline(x=first_chiral_step, color="k", linestyle=":", alpha=0.5)
 
     ax.set_ylim([0, 1.05])
 
-    ax.set_xlabel("Expansion Step")
+    ax.set_xlabel("Expansion Generation")
     ax.set_ylabel("Chiral Order Parameter $\mathbb{C}$")
     ax.legend(prop={"size": 18})  # bbox_to_anchor=(1.05,0.60))
     ax.annotate("D", xy=(-2,1.07), color="k", weight="bold", annotation_clip=False)
@@ -576,6 +573,15 @@ def fig3(seed_name, rxn_db, crossover_step, attributes, networks_uni):
     node_sizes = pd.Series({i: (np.log2(j + 2)) ** 1.5 for i, j in G.degree()})
     nx.set_node_attributes(G, node_sizes, 'size')
     nx.set_node_attributes(G, attributes['is_chiral_color'], 'group')
+
+    nodes_without_group = list()
+    for node, data in G.nodes(data=True):
+        if 'group' not in data:
+            nodes_without_group.append(node)
+
+    print(f"\tRemoving {len(nodes_without_group)} nodes without group attribute...")
+    for n in nodes_without_group:
+        G.remove_node(n)
 
     fig = plt.figure(figsize=(12, 12), layout='constrained')
     stylized_network, config = nw.visualize(G, config={"zoom": 1.08,
@@ -667,7 +673,7 @@ def fig3(seed_name, rxn_db, crossover_step, attributes, networks_uni):
                        color="k",
                        linestyle="--",
                        label=f"Original Crossover\n(Step {crossover_step})")
-    g.set_axis_labels(xlabel="Expansion Step", ylabel="Chiral Centers")
+    g.set_axis_labels(xlabel="Expansion Generation", ylabel="Chiral Centers")
 
     g.figure.set_size_inches((16, 8))
     g.ax_joint.legend(title="Heavy Atom\nPercentiles",
@@ -927,19 +933,19 @@ def fig4():
                               color=chnops_color,
                               marker="o",
                               markersize=2,
-                              label='Reaxys: CHNOPS Elements')
+                              label='Synthesizable Chemistry: CHNOPS')
     kegg_patch = plt.Line2D([], [],
                             color=kegg_color,
                             marker="o",
                             markersize=2,
-                            label='Reaxys: KEGG Elements')
+                            label='Synthesizable Chemistry: All Metabolic Elements')
     handles.extend([chnops_patch, kegg_patch])
 
     # Labels
     font_size = 14
-    ax1.set_xlabel("System Size (Unique Compounds Per Sample)"
+    ax1.set_xlabel("System Size (Unique Molecules)"
                    )  # TODO: why isn't this label showing up
-    ax1.set_ylabel("$\mathbb{C}$")
+    ax1.set_ylabel("Chiral Order Parameter $\mathbb{C}$")
     ax1.legend(bbox_to_anchor=(1.43, 1.2),
                markerscale=5,
                handles=handles,
@@ -989,8 +995,8 @@ def fig4():
     y = df["LUCA"].ratio_chiral
 
     # Labels
-    ax2.set_ylabel("$\mathbb{C}$")
-    ax2.set_xlabel("Samples")
+    ax2.set_ylabel("Chiral Order Parameter $\mathbb{C}$")
+    ax2.set_xlabel("Number of Genomic\nSamples")
 
     ax2.set_xscale('log')
     ax2.tick_params(axis="both", which="major")
@@ -1132,7 +1138,7 @@ def fig5(seed_name, rxn_db, crossover_step, first_chiral_step):
 
     # Add the color bar
     cbar = ax.figure.colorbar(im, ax=ax)
-    cbar.ax.set_ylabel("Total Reactions")
+    cbar.ax.set_ylabel("Reaction Count")
     ax.annotate("A", xy=(-0.5,-0.55), color="k", weight="bold", annotation_clip=False)
 
     plt.savefig("../Figures/Fig5A.svg", format="svg")
@@ -1217,8 +1223,8 @@ def fig5(seed_name, rxn_db, crossover_step, first_chiral_step):
                 zorder=3)
 
     ax.legend(facecolor="white", framealpha=1, prop={"size": 12})
-    ax.set_xlabel("Expansion Step")
-    ax.set_ylabel("Reaction Count")
+    ax.set_xlabel("Expansion Generation")
+    ax.set_ylabel("Total Reactions")
     ax.annotate("B", xy=(-1.5,94000), color="k", weight="bold", annotation_clip=False)
 
     plt.savefig("../Figures/Fig5B.svg", format="svg")
@@ -1277,15 +1283,26 @@ def fig5(seed_name, rxn_db, crossover_step, first_chiral_step):
     for label, angle in zip(ax.get_xticklabels(), angles):
         x, y = label.get_position()
         try:
-            lab = ax.text(x,
+            if count % 2:
+                lab = ax.text(x,
+                            y-0.05,
+                            label.get_text(),
+                            transform=label.get_transform(),
+                            ha=label.get_ha(),
+                            va=label.get_va(),
+                            color=str(pathway_group_colors[int(
+                                label.get_text())]),
+                            fontsize=18)
+            else:
+                lab = ax.text(x,
                           y,
                           label.get_text(),
                           transform=label.get_transform(),
                           ha=label.get_ha(),
                           va=label.get_va(),
-                          color=str(pathway_group_colors[int(
-                              label.get_text())]),
-                          fontsize=12)
+                          color='w',
+                          fontsize=1)
+            count += 1
         except:
             lab = ax.text(x,
                           y,
@@ -1312,8 +1329,8 @@ def fig5(seed_name, rxn_db, crossover_step, first_chiral_step):
             weight="bold")
     ### Figure label annotation
     ax.text(np.radians(label_pos + 120),
-            ax.get_rmax() / 2. + 0.8,
-            "A",
+            ax.get_rmax() / 2. + 0.05,
+            "C",
             rotation=0, #Rotation of text (previous was label_pos - 10)
             ha='center',
             va='center',
@@ -1338,7 +1355,7 @@ def fig5(seed_name, rxn_db, crossover_step, first_chiral_step):
     for patch, c in zip(bplot["boxes"], color_list):
         patch.set_color(c)
 
-    ax.set_ylabel("$\mathbb{C}$", fontsize=30)
+    ax.set_ylabel("Chiral Order\nParameter $\mathbb{C}$", fontsize=30)
     ax.xaxis.set_ticks([])
 
     # legend of label colors
@@ -1357,7 +1374,7 @@ def fig5(seed_name, rxn_db, crossover_step, first_chiral_step):
               frameon=False,
               prop={"size": 14})
     ax.grid(True)
-    ax.annotate("B", xy=(-1,1.06), color="k", weight="bold", annotation_clip=False)
+    ax.annotate("D", xy=(-1,1.06), color="k", weight="bold", annotation_clip=False)
     plt.tight_layout()
 
     plt.savefig("../Figures/Fig5D.svg", format="svg")
@@ -1373,8 +1390,8 @@ def fig5(seed_name, rxn_db, crossover_step, first_chiral_step):
                c=pathway_df['Group'].map(colors),
                s=50)
 
-    ax.set_ylabel("$\mathbb{C}$", fontsize=30)
-    ax.set_xlabel("System Size (Unique Compounds Per Pathway)")
+    ax.set_ylabel("Chiral Order\nParameter $\mathbb{C}$", fontsize=30)
+    ax.set_xlabel("System Size (Unique Molecules Per Pathway)")
     loc = plticker.MultipleLocator(
         base=20.0)  # this locator puts ticks at regular intervals
     ax.xaxis.set_major_locator(loc)

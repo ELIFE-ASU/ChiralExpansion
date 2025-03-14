@@ -55,7 +55,7 @@ def fig1():
     ax1.set_ylim(-0.05, 1.05)
     ax1.set_xticks(list(np.arange(0, 16)), minor=True)
     ax1.set_xlabel("Heavy Atoms Per Molecule")
-    ax1.set_ylabel("Achiral-to-Chiral Ratio A/C")
+    ax1.set_ylabel("Achiral-to-Chiral Ratio A/N")
     ax1.set_title("Chemical Space")
     ax1.annotate("B", xy=(0,1.07), color="k", weight="bold", annotation_clip=False)
 
@@ -245,6 +245,7 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     # Remove G nodes that are not in attributes df
     nodes_to_keep = attributes.index.to_list()
     nodes_to_remove = [n for n in nodes_to_keep if n not in G1.nodes()]
+    print(f"\tFiltering  network to remove {len(nodes_to_remove)} nodes, as they are not in KEGG...")
     G1.remove_nodes_from(nodes_to_remove)
 
     nx.set_node_attributes(G1, attributes['is_chiral_color'], 'is_chiral_color')
@@ -611,8 +612,6 @@ def fig3(seed_name, rxn_db, crossover_step, attributes, networks_uni):
         G.remove_node(n)
 
     fig = plt.figure(figsize=(12,12), layout="constrained")
-
-    # #fig = plt.figure(figsize=(12, 12), layout='constrained')
     stylized_network, config = nw.visualize(G, config={"zoom": 1.08,
                                                         "node_charge": -100,
                                                         "node_gravity": 0.4,
@@ -704,7 +703,7 @@ def fig3(seed_name, rxn_db, crossover_step, attributes, networks_uni):
                        color="k",
                        linestyle="--",
                        label=f"Original Crossover\n(Step {crossover_step})")
-    g.set_axis_labels(xlabel="Expansion Step", ylabel="Chiral Centers")
+    g.set_axis_labels(xlabel="Expansion Generation", ylabel="Chiral Centers")
 
     g.figure.set_size_inches((16, 8))
     g.ax_joint.legend(title="Heavy Atom\nPercentiles",
@@ -1256,8 +1255,8 @@ def fig5(seed_name, rxn_db, crossover_step, first_chiral_step):
                 zorder=3)
 
     ax2.legend(facecolor="white", framealpha=1, prop={"size": 12})
-    ax2.set_xlabel("Expansion Step")
-    ax2.set_ylabel("Reaction Count")
+    ax2.set_xlabel("Expansion Generation")
+    ax2.set_ylabel("Total Reactions")
     ax2.annotate("B", xy=(-1.5,98000), color="k", weight="bold", annotation_clip=False)
 
     ### Get pathway names & cpd lists from KEGG (see slack for API calls)
