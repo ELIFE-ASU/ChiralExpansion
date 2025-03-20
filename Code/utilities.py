@@ -1014,7 +1014,7 @@ def get_chiral_order_parameters(keggC_df):
         chiral = len(sub_df[sub_df["n_chiral_centers"] != 0])
         kegg_cop.append(chiral / (achiral + chiral))
 
-    print(f"- KEGG Compound Size = {len(keggC_df)} -")
+    print(f"- CBRdb Compound Size = {len(keggC_df)} -")
 
     return gdb_cop, kegg_cop
 

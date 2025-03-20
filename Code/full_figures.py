@@ -21,7 +21,7 @@ seed_candidates = pd.read_csv('../Data/SampleSeeds.csv.zip',
                               index_col=0,
                               compression='zip')
 keggC_df = pd.read_csv("../../CBRdb/CBRdb_C.csv")
-
+keggR_df = pd.read_csv("../../CBRdb/CBRdb_R.csv")
 
 def fig1():
     # GDB data
@@ -30,6 +30,7 @@ def fig1():
     chiral_fraction, achiral_fraction = get_chiral_fraction_atHeavyAtomCounts(
         keggC_df)
     gdb_cop, kegg_cop = get_chiral_order_parameters(keggC_df)
+    print(f"- CBRdb Reaction Size = {len(keggR_df)} -")
 
     import matplotlib.gridspec as gridspec
 
@@ -196,6 +197,9 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     print(
         f"\tAverage Achiral Heavy Atoms At Crossover Step: {round(summaries['achiral avg heavy atoms'].iloc[achiral_chiral_crossover_step][0], 3)}")
     print(f"\tFinal Chiral Percentage (Generation {len(chiral_count)}): {round(chiral_count[-1] / (chiral_count[-1] + achiral_count[-1]), 3)}")
+    print(f"\tFinal Chiral Cpd Count: {chiral_count[-1]}")
+    print(f"\tFinal Achiral Cpd Count: {achiral_count[-1]}")
+    print(f"\tFinal Total Cpd Count: {chiral_count[-1] + achiral_count[-1]}")
 
 
     ### Network figure
@@ -287,6 +291,8 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     print(f"\tFull LUCA Expansion Step: {full_luca_exp}")
     print(
         f"\tExpansion Size At Full LUCA Expansion: {summaries['compound count'].iloc[full_luca_exp][seed_name]} Compounds, {summaries['reaction count'].iloc[full_luca_exp][seed_name]} Reactions")
+    print(f"\tPercent LUCA found in primordial expansion: {round(percent_luca[-1], 3)}")
+
 
     ### Chiral / achiral / LUCA compounds panel (Fig2B)
     # Colors
@@ -1413,16 +1419,16 @@ def main():
 
     # Seed set
     seed_name = "JM|G24|G17|TW"
-    rxn_db_fp = "../../lets-get-kegg/Data/atlas_kegg_processed_merged_deduped.csv.zip"
+    rxn_db_fp = "../../CBRdb/CBRdb_R.csv"
 
     print("---- Generating Figure 1 ----")
     fig1()
 
     print("---- Generating Figure 2 ----")
-    # ~Five hours for full expansion (n_iter=1000, min=2, max=10)
+    # ~Five hours for full expansion (n_iter=100, min=2, max=10)
     min_ss_size = 2
     max_ss_size = 10
-    n_iter = 2
+    n_iter = 100
     crossover_step, first_chiral_step, attributes, networks_uni = fig2(
         seed_name=seed_name,
         rxn_db=rxn_db_fp,
