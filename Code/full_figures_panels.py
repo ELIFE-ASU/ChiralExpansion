@@ -24,6 +24,7 @@ seed_candidates = pd.read_csv('../Data/SampleSeeds.csv.zip',
 keggC_df = pd.read_csv("../../CBRdb/CBRdb_C.csv")
 keggR_df = pd.read_csv("../../CBRdb/CBRdb_R.csv")
 
+
 def fig1():
     # GDB data
     gdb_df = pd.read_csv("../Data/GDB_output.csv")
@@ -58,7 +59,7 @@ def fig1():
     ax1.set_xlabel("Heavy Atoms Per Molecule")
     ax1.set_ylabel("Achiral-to-Chiral Ratio A/N")
     ax1.set_title("Chemical Space")
-    ax1.annotate("B", xy=(0,1.07), color="k", weight="bold", annotation_clip=False)
+    ax1.annotate("B", xy=(0, 1.07), color="k", weight="bold", annotation_clip=False)
 
     ax2 = plt.subplot(gs[:, 2:4])
     ax2.plot(achiral_fraction,
@@ -80,7 +81,7 @@ def fig1():
     ax2.set_xticks(list(np.arange(0, 16)), minor=True)
     ax2.set_xlabel("Heavy Atoms Per Molecule")
     ax2.set_title("Metabolism")
-    ax2.annotate("C", xy=(0,1.07), color="k", weight="bold", annotation_clip=False)
+    ax2.annotate("C", xy=(0, 1.07), color="k", weight="bold", annotation_clip=False)
 
     ax3 = plt.subplot(gs[2:, 4:])
     ax3.plot(gdb_cop, linewidth=3, label="Chemical Space", color="k", linestyle="--")
@@ -97,7 +98,7 @@ def fig1():
         text=r"$\mathbb{C} = \frac{C}{C+A}$",
         fontsize=24,
     )
-    ax3.annotate("D", xy=(0,1.08), color="k", weight="bold", annotation_clip=False)
+    ax3.annotate("D", xy=(0, 1.08), color="k", weight="bold", annotation_clip=False)
 
     plt.subplots_adjust(wspace=0.5)
 
@@ -129,7 +130,7 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
         print(seeds)
         curated_SS_df = pd.DataFrame(columns=[seed_name])
         curated_SS_df[seed_name] = list(seeds)
-        curated_SS_df.to_csv("../Data/curated_SeedSets.csv") ### Will be re-used for LUCA in SI figure notebook
+        curated_SS_df.to_csv("../Data/curated_SeedSets.csv")  ### Will be re-used for LUCA in SI figure notebook
 
         results[name] = expand_from_seed_set(seeds=seeds,
                                              reactions=reaction_scope,
@@ -198,7 +199,8 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
         f"\tExpansion Size At Crossover: {summaries['compound count'].iloc[achiral_chiral_crossover_step][seed_name]} Compounds, {summaries['reaction count'].iloc[achiral_chiral_crossover_step][seed_name]} Reactions")
     print(
         f"\tAverage Achiral Heavy Atoms At Crossover Step: {round(summaries['achiral avg heavy atoms'].iloc[achiral_chiral_crossover_step][0], 3)}")
-    print(f"\tFinal Chiral Percentage (Generation {len(chiral_count)}): {round(chiral_count[-1] / (chiral_count[-1] + achiral_count[-1]), 3)}")
+    print(
+        f"\tFinal Chiral Percentage (Generation {len(chiral_count)}): {round(chiral_count[-1] / (chiral_count[-1] + achiral_count[-1]), 3)}")
     print(f"\tFinal Chiral Cpd Count: {chiral_count[-1]}")
     print(f"\tFinal Achiral Cpd Count: {achiral_count[-1]}")
     print(f"\tFinal Total Cpd Count: {chiral_count[-1] + achiral_count[-1]}")
@@ -215,7 +217,7 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     compound_nodes = {i: set(j.nodes()).difference(reaction_scope.index) for i, j in networks.items()}
     networks_uni = {i: bipartite.projected_graph(networks[i], nodes=compound_nodes[i]) for i in networks.keys()}
 
-    attributes = pd.read_csv("../../CBRdb/CBRdb_C.csv", 
+    attributes = pd.read_csv("../../CBRdb/CBRdb_C.csv",
                              index_col=0)
     attributes.drop(labels=["smiles", "formula", "molecular_weight", "n_heavy_atoms"], axis=1,
                     inplace=True)
@@ -271,8 +273,8 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
                    markersize=20, label='Chiral'),
         plt.Line2D([0], [0], marker='s', color='w', markerfacecolor='#FFC012', markeredgecolor='k', markeredgewidth=0.2,
                    markersize=20, label='Achiral')], prop={'size': 20})
-    
-    ax.annotate("A", xy=(1.31,1), color="k", weight="bold", annotation_clip=False)
+
+    ax.annotate("A", xy=(1.31, 1), color="k", weight="bold", annotation_clip=False)
 
     plt.savefig("../Figures/Fig2A.svg", format="svg")
     plt.savefig("../Figures/Fig2A.png", format="png")
@@ -300,28 +302,28 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     luca_color = "indigo"
 
     # Set up graph part of figure
-    plt.figure(figsize=(20,10))
-    gs = gridspec.GridSpec(6,2) 
+    plt.figure(figsize=(20, 10))
+    gs = gridspec.GridSpec(6, 2)
 
-    ax2 = plt.subplot(gs[0:4,0])
+    ax2 = plt.subplot(gs[0:4, 0])
     ax2a = ax2.twinx()
 
     ax2.plot(summaries["chiral compound count"],
-            color=chiral_color,
-            marker="o",
-            linewidth=4,
-            markersize=10,
-            label="Chiral Compounds")
+             color=chiral_color,
+             marker="o",
+             linewidth=4,
+             markersize=10,
+             label="Chiral Compounds")
     ax2.plot(summaries["achiral compound count"],
-            color=achiral_color,
-            marker="o",
-            linewidth=4,
-            markersize=10,
-            label="Achiral Compounds")
+             color=achiral_color,
+             marker="o",
+             linewidth=4,
+             markersize=10,
+             label="Achiral Compounds")
     ax2.axvline(x=achiral_chiral_crossover_step,
-               color="k",
-               linestyle="--",
-               alpha=0.9)
+                color="k",
+                linestyle="--",
+                alpha=0.9)
     ax2.axvline(x=first_chiral_step, color="k", linestyle=":", alpha=0.5)
 
     ax2.annotate(
@@ -338,29 +340,29 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
         va='center',
         zorder=3)
     ax2.annotate(f"First Chiral\nCompound\nStep {first_chiral_step}",
-                xy=(first_chiral_step, 4750),
-                xytext=(first_chiral_step + 5, 5250),
-                color="k",
-                arrowprops={
-                    "arrowstyle": "simple",
-                    "color": "k"
-                },
-                fontsize=14,
-                ha='left',
-                va='center',
-                zorder=3)
+                 xy=(first_chiral_step, 4750),
+                 xytext=(first_chiral_step + 5, 5250),
+                 color="k",
+                 arrowprops={
+                     "arrowstyle": "simple",
+                     "color": "k"
+                 },
+                 fontsize=14,
+                 ha='left',
+                 va='center',
+                 zorder=3)
 
     # ax.set_ylim([0, 3100])
     ax2.set_ylabel("Cumulative Molecules")
     ax2.set_xlabel("Expansion Generation")
-    ax2.annotate("B", xy=(-2,6600), color="k", weight="bold", annotation_clip=False)
+    ax2.annotate("B", xy=(-2, 6600), color="k", weight="bold", annotation_clip=False)
 
     ax2a.set_ylim([0, 100])
     ax2a.bar(np.arange(0, len(percent_luca), 1),
-            percent_luca,
-            alpha=0.15,
-            color=luca_color,
-            label="Percent LUCA Coverage")
+             percent_luca,
+             alpha=0.15,
+             color=luca_color,
+             label="Percent LUCA Coverage")
 
     ax2a.set_ylabel("Percent LUCA Coverage", color=luca_color)
 
@@ -371,7 +373,7 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     lines, labels = ax2.get_legend_handles_labels()
     lines2, labels2 = ax2a.get_legend_handles_labels()
 
-    ax3 = plt.subplot(gs[0:4,1])
+    ax3 = plt.subplot(gs[0:4, 1])
 
     ax3.axhspan(
         8, 9, alpha=0.5, color='grey',
@@ -399,10 +401,10 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
         color=chiral_color)
 
     ax3.axvline(x=achiral_chiral_crossover_step,
-               color="k",
-               alpha=0.9,
-               linestyle="--")
-    
+                color="k",
+                alpha=0.9,
+                linestyle="--")
+
     ax3.axvline(x=first_chiral_step, color="k", alpha=0.5, linestyle=":")
 
     ax3.set_ylim([0, 55])
@@ -411,14 +413,14 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     ax3.set_xlabel("Expansion Generation")
 
     # ax.legend(prop={"size": 14})
-    ax3.annotate("C", xy=(-1.5,56), color="k", weight="bold", annotation_clip=False)
-    lgd3 = ax3.legend(prop={"size": 16}, frameon=False, bbox_to_anchor=(1.5,1.15))
+    ax3.annotate("C", xy=(-1.5, 56), color="k", weight="bold", annotation_clip=False)
+    lgd3 = ax3.legend(prop={"size": 16}, frameon=False, bbox_to_anchor=(1.5, 1.15))
 
     def add_patch(legend):
         ax = legend.axes
 
         handles, labels = ax.get_legend_handles_labels()
-        
+
         # handles.append(Patch(facecolor='grey', edgecolor='grey', alpha=0.5))
         # labels.append("Phase Boundary in Chemical Space")
 
@@ -428,52 +430,51 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
         legend._legend_box = None
         legend._init_legend_box(handles, labels)
         legend._set_loc(legend._loc)
-        #legend.set_title(legend.get_title().get_text())
+        # legend.set_title(legend.get_title().get_text())
 
     add_patch(lgd3)
-
 
     ### Get X random seed sets, both chiral & achiral
     randAchiral_results = dict()
     randChiral_results = dict()
     random_achiral_seeds = dict()
     random_chiral_seeds = dict()
-    for random_ss_size in range(min_ss_size, max_ss_size+1):
+    for random_ss_size in range(min_ss_size, max_ss_size + 1):
         for i in range(n_iter):
             random_achiral_seeds[f"Random_{random_ss_size}_{i}"] = getRandomSeedSet(
                 keggC_df, random_ss_size, chirality="achiral")
             random_chiral_seeds[f"Random_{random_ss_size}_{i}"] = getRandomSeedSet(
                 keggC_df, random_ss_size, chirality="chiral")
 
-    print(f"- Expanding {n_iter*(max_ss_size-min_ss_size+1)} Achiral Seed Sets -")
+    print(f"- Expanding {n_iter * (max_ss_size - min_ss_size + 1)} Achiral Seed Sets -")
     achiral_full_chiral_count = list()
     achiral_full_achiral_count = list()
-    for name, seeds in tqdm(random_achiral_seeds.items(), total=n_iter*(max_ss_size-min_ss_size+1)):
+    for name, seeds in tqdm(random_achiral_seeds.items(), total=n_iter * (max_ss_size - min_ss_size + 1)):
         randAchiral_results = expand_from_seed_set(
             seeds=seeds, reactions=reaction_scope, max_gen=max_generation)
         achiral_full_chiral_count.append(
-                getCpdCount(randAchiral_results["cps"],
-                            keggC_df,
-                            ischiral_flag=True)[0].to_list())
+            getCpdCount(randAchiral_results["cps"],
+                        keggC_df,
+                        ischiral_flag=True)[0].to_list())
         achiral_full_achiral_count.append(
-                getCpdCount(randAchiral_results["cps"],
-                            keggC_df,
-                            ischiral_flag=False)[0].to_list())
+            getCpdCount(randAchiral_results["cps"],
+                        keggC_df,
+                        ischiral_flag=False)[0].to_list())
 
-    print(f"- Expanding {n_iter*(max_ss_size-min_ss_size+1)} Chiral Seed Sets -")
+    print(f"- Expanding {n_iter * (max_ss_size - min_ss_size + 1)} Chiral Seed Sets -")
     chiral_full_chiral_count = list()
     chiral_full_achiral_count = list()
-    for name, seeds in tqdm(random_chiral_seeds.items(), total=n_iter*(max_ss_size-min_ss_size+1)):
+    for name, seeds in tqdm(random_chiral_seeds.items(), total=n_iter * (max_ss_size - min_ss_size + 1)):
         randChiral_results = expand_from_seed_set(
             seeds=seeds, reactions=reaction_scope, max_gen=max_generation)
         chiral_full_chiral_count.append(
-                getCpdCount(randChiral_results["cps"],
-                            keggC_df,
-                            ischiral_flag=True)[0].to_list())
+            getCpdCount(randChiral_results["cps"],
+                        keggC_df,
+                        ischiral_flag=True)[0].to_list())
         chiral_full_achiral_count.append(
-                getCpdCount(randChiral_results["cps"],
-                            keggC_df,
-                            ischiral_flag=False)[0].to_list())
+            getCpdCount(randChiral_results["cps"],
+                        keggC_df,
+                        ischiral_flag=False)[0].to_list())
 
     achiral_chiralPercentage = []
     chiral_chiralPercentage = []
@@ -525,26 +526,26 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
 
     ### Figure 2D
     # _, ax = plt.subplots(figsize=(10, 8))
-    ax4 = plt.subplot(gs[4:,:])
+    ax4 = plt.subplot(gs[4:, :])
     # Chiral errorbar
     ax4.errorbar(x=np.arange(0, len(chiral_avg_percentages_chiral), 1),
-                y=chiral_avg_percentages_chiral,
-                yerr=chiral_std_percentages_chiral,
-                color=chiral_color,
-                marker="o",
-                linewidth=3,
-                markersize=10,
-                label="Chiral-Only Seeds")
+                 y=chiral_avg_percentages_chiral,
+                 yerr=chiral_std_percentages_chiral,
+                 color=chiral_color,
+                 marker="o",
+                 linewidth=3,
+                 markersize=10,
+                 label="Chiral-Only Seeds")
 
     # Achiral errorbar
     ax4.errorbar(x=np.arange(0, len(achiral_avg_percentages_chiral), 1),
-                y=achiral_avg_percentages_chiral,
-                yerr=achiral_std_percentages_chiral,
-                color=achiral_color,
-                marker="o",
-                linewidth=3,
-                markersize=10,
-                label="Achiral-Only Seeds")
+                 y=achiral_avg_percentages_chiral,
+                 yerr=achiral_std_percentages_chiral,
+                 color=achiral_color,
+                 marker="o",
+                 linewidth=3,
+                 markersize=10,
+                 label="Achiral-Only Seeds")
 
     # Original (Figure 2B) percentages
     original_chiralPercent = []
@@ -552,22 +553,22 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
         original_chiralPercent.append(chiral_count[i] /
                                       (chiral_count[i] + achiral_count[i]))
     ax4.plot(original_chiralPercent,
-            "o-",
-            color="k",
-            linewidth=3,
-            zorder=5,
-            label="Primordial Expansion")
+             "o-",
+             color="k",
+             linewidth=3,
+             zorder=5,
+             label="Primordial Expansion")
 
     ax4.axvline(x=achiral_chiral_crossover_step, color="k", linestyle="--", alpha=0.9)
     ax4.axvline(x=first_chiral_step, color="k", linestyle=":", alpha=0.5)
 
     ax4.set_ylim([0, 1.05])
-    ax4.set_xlim([-1,76])
+    ax4.set_xlim([-1, 76])
 
-    #Remove x-axis spine past 55
+    # Remove x-axis spine past 55
     ax4.spines['bottom'].set_bounds(-1, 60)
 
-    #Remove 100 & 120 from xticks
+    # Remove 100 & 120 from xticks
     ax4_xticks = ax4.xaxis.get_major_ticks()
     ax4_xticks[-1].set_visible(False)
     ax4_xticks[-2].set_visible(False)
@@ -575,13 +576,13 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     # ax4_xticks[-4].set_visible(False)
     # ax4_xticks[-5].set_visible(False)
 
-    #Remove top & right ax3 borders to make legend more obviously connected to the rest of the plot
+    # Remove top & right ax3 borders to make legend more obviously connected to the rest of the plot
     ax4.spines[['right', 'top']].set_visible(False)
 
     ax4.set_xlabel("Expansion Generation")
     ax4.set_ylabel("Chiral Order\nParameter $\mathbb{C}$")
-    lgd4 = ax4.legend(prop={"size": 16}, frameon=False, bbox_to_anchor=(0.85,1))
-    ax4.annotate("D", xy=(-0.5,1.07), color="k", weight="bold", annotation_clip=False)
+    lgd4 = ax4.legend(prop={"size": 16}, frameon=False, bbox_to_anchor=(0.85, 1))
+    ax4.annotate("D", xy=(-0.5, 1.07), color="k", weight="bold", annotation_clip=False)
 
     plt.tight_layout()
 
@@ -616,33 +617,33 @@ def fig3(seed_name, rxn_db, crossover_step, attributes, networks_uni):
     for n in nodes_without_group:
         G.remove_node(n)
 
-    fig = plt.figure(figsize=(12,12), layout="constrained")
+    fig = plt.figure(figsize=(12, 12), layout="constrained")
     stylized_network, config = nw.visualize(G, config={"zoom": 1.08,
-                                                        "node_charge": -100,
-                                                        "node_gravity": 0.4,
-                                                        "link_distance": 0,
-                                                        "link_distance_variation": 0,
-                                                        "node_collision": True,
-                                                        "wiggle_nodes": False,
-                                                        "freeze_nodes": False,
-                                                        "node_fill_color": "#79aaa0",
-                                                        "node_stroke_color": "#555555",
-                                                        "node_label_color": "#000000",
-                                                        "node_size": 25,
-                                                        "node_stroke_width": 2,
-                                                        "node_size_variation": 0.75,
-                                                        "display_node_labels": False,
-                                                        "scale_node_size_by_strength": True,
-                                                        "link_color": "#000000",
-                                                        "link_width": 2,
-                                                        "link_alpha": 0.01,
-                                                        "link_width_variation": 0.5,
-                                                        "display_singleton_nodes": True,
-                                                        "min_link_weight_percentile": 0,
-                                                        "max_link_weight_percentile": 1})
-    
+                                                       "node_charge": -100,
+                                                       "node_gravity": 0.4,
+                                                       "link_distance": 0,
+                                                       "link_distance_variation": 0,
+                                                       "node_collision": True,
+                                                       "wiggle_nodes": False,
+                                                       "freeze_nodes": False,
+                                                       "node_fill_color": "#79aaa0",
+                                                       "node_stroke_color": "#555555",
+                                                       "node_label_color": "#000000",
+                                                       "node_size": 25,
+                                                       "node_stroke_width": 2,
+                                                       "node_size_variation": 0.75,
+                                                       "display_node_labels": False,
+                                                       "scale_node_size_by_strength": True,
+                                                       "link_color": "#000000",
+                                                       "link_width": 2,
+                                                       "link_alpha": 0.01,
+                                                       "link_width_variation": 0.5,
+                                                       "display_singleton_nodes": True,
+                                                       "min_link_weight_percentile": 0,
+                                                       "max_link_weight_percentile": 1})
+
     fig, ax = nw.draw_netwulf(stylized_network)
-    
+
     a = stylized_network.copy()
     a['nodeStrokeWidth'] = 0.0
     for i in list(range(len(a['nodes']))):
@@ -652,10 +653,13 @@ def fig3(seed_name, rxn_db, crossover_step, attributes, networks_uni):
     nw.draw_netwulf(a, fig=fig, ax=ax, draw_links=False)
 
     nodes = pd.DataFrame(a['nodes'])
-    gens_shown = pd.DataFrame({'gen': nodes['id'].map(attributes['gen']), 'color': nodes['color']}).drop_duplicates().sort_values(by='gen').set_index('gen')['color']
-    handles = [plt.Line2D([0], [0], marker='o', color='w', markeredgecolor='k', markeredgewidth=0, markerfacecolor=j, markersize=10, label=str(i)) for i,j in gens_shown.items()]
-    plt.legend(loc='lower left', frameon=False, handles=handles, handletextpad=0.01, title='GEN', prop={"size":10})
-    plt.annotate("A", xy=(25,600), color="k", weight="bold", annotation_clip=False)
+    gens_shown = \
+    pd.DataFrame({'gen': nodes['id'].map(attributes['gen']), 'color': nodes['color']}).drop_duplicates().sort_values(
+        by='gen').set_index('gen')['color']
+    handles = [plt.Line2D([0], [0], marker='o', color='w', markeredgecolor='k', markeredgewidth=0, markerfacecolor=j,
+                          markersize=10, label=str(i)) for i, j in gens_shown.items()]
+    plt.legend(loc='lower left', frameon=False, handles=handles, handletextpad=0.01, title='GEN', prop={"size": 10})
+    plt.annotate("A", xy=(25, 600), color="k", weight="bold", annotation_clip=False)
 
     plt.savefig("../Figures/Fig3A.png", format="png")
     plt.savefig("../Figures/Fig3A.svg", format="svg")
@@ -684,7 +688,7 @@ def fig3(seed_name, rxn_db, crossover_step, attributes, networks_uni):
 
     expansion_arrival_df = linkArrivalStepHeavyAtoms(
         results[name]['arrival_step'], keggC_df)
-    
+
     sns.set_palette(sns.color_palette("copper"))
     g = sns.jointplot(data=expansion_arrival_df.sort_values(by="n_heavy_atoms"),
                       x="arrival",
@@ -714,7 +718,7 @@ def fig3(seed_name, rxn_db, crossover_step, attributes, networks_uni):
     g.ax_joint.legend(title="Heavy Atom\nPercentiles",
                       bbox_to_anchor=(0.78, 0.51),
                       prop={"size": 12})
-    plt.annotate("B", xy=(-0.5,36), color="k", weight="bold", annotation_clip=False)
+    plt.annotate("B", xy=(-0.5, 36), color="k", weight="bold", annotation_clip=False)
 
     plt.savefig("../Figures/Fig3B.png", format="png")
     plt.savefig("../Figures/Fig3B.svg", format="svg")
@@ -732,9 +736,8 @@ def fig3(seed_name, rxn_db, crossover_step, attributes, networks_uni):
     print("- Writing out top 50 highest degree nodes to Data/top50_highestDegreeNodes.csv -")
     # expansion_arrival_df.sort_values(by=["degree", "n_chiral_centers"], inplace=True, ascending=[False, True])
     expansion_arrival_df.sort_values(by="degree", inplace=True, ascending=False)
-    columns_to_write = ["compound_id","formula","n_chiral_centers","degree"]
+    columns_to_write = ["compound_id", "formula", "n_chiral_centers", "degree"]
     expansion_arrival_df.head(50).to_csv("../Data/top50_highestDegreeNodes.csv", columns=columns_to_write, index=False)
-
 
     fig = plt.figure(figsize=(16, 8))
     gs = fig.add_gridspec(2,
@@ -758,7 +761,7 @@ def fig3(seed_name, rxn_db, crossover_step, attributes, networks_uni):
 
     ax.set_xlabel("Degree")
     ax.set_ylabel("Chiral Centers")
-    ax.annotate("C", xy=(0.7,45), color="k", weight="bold", annotation_clip=False)
+    ax.annotate("C", xy=(0.7, 45), color="k", weight="bold", annotation_clip=False)
 
     plt.savefig("../Figures/Fig3C.png", format="png")
     plt.savefig("../Figures/Fig3C.svg", format="svg")
@@ -993,7 +996,7 @@ def fig4():
     # Axis
     ax1.set_ylim(0.4, 0.8)
     ax1.set_xlim(-300, 7900)
-    ax1.annotate("A", xy=(-100,0.78), color="k", weight="bold", annotation_clip=False)
+    ax1.annotate("A", xy=(-100, 0.78), color="k", weight="bold", annotation_clip=False)
 
     ### Inset distribution axes
     ax2 = plt.subplot(gs[0:5, 7:])
@@ -1039,7 +1042,7 @@ def fig4():
     ax2.set_xscale('log')
     ax2.tick_params(axis="both", which="major")
     ax2.set_ylim(0.4, 0.8)
-    ax2.annotate("B", xy=(700,0.78), color="k", weight="bold", annotation_clip=False)
+    ax2.annotate("B", xy=(700, 0.78), color="k", weight="bold", annotation_clip=False)
 
     ax3 = plt.subplot(gs[6:, 0:5])
     ax4 = plt.subplot(gs[6:, 6:])
@@ -1089,7 +1092,7 @@ def fig4():
     # Hide the right and top spines
     ax3.spines[['right', 'top']].set_visible(False)
     ax3.set_xticklabels(["", "", "", "", "", ""])
-    ax3.annotate("C", xy=(0,1.05), color="k", weight="bold", annotation_clip=False)
+    ax3.annotate("C", xy=(0, 1.05), color="k", weight="bold", annotation_clip=False)
 
     ### Ax4, chiral differences
     get_chiral_difference(m_chiral, m_achiral, color_number["Metagenome"],
@@ -1134,7 +1137,7 @@ def fig4():
     ax4.set_xlabel("Normalized rank-order")
 
     ax4.spines[['right', 'top']].set_visible(False)
-    ax4.annotate("D", xy=(0,0.21), color="k", weight="bold", annotation_clip=False)
+    ax4.annotate("D", xy=(0, 0.21), color="k", weight="bold", annotation_clip=False)
 
     plt.tight_layout(pad=0.25)
 
@@ -1146,10 +1149,10 @@ def fig5(seed_name, rxn_db, crossover_step, first_chiral_step):
     ### Panel 5A - chiral rxn counts
     heatmap_array, rxn_df = get_heatmap_array(keggC_df)
 
-    fig = plt.figure(figsize=(24,21))
-    gs = gridspec.GridSpec(12,6)
+    fig = plt.figure(figsize=(24, 21))
+    gs = gridspec.GridSpec(12, 6)
 
-    ax1 = fig.add_subplot(gs[0:4,0:3])
+    ax1 = fig.add_subplot(gs[0:4, 0:3])
 
     im = ax1.imshow(heatmap_array)
 
@@ -1169,17 +1172,17 @@ def fig5(seed_name, rxn_db, crossover_step, first_chiral_step):
             else:
                 c = "silver"
             text = ax1.text(j,
-                           i,
-                           heatmap_array[i][j],
-                           ha="center",
-                           va="center",
-                           color=c,
-                           fontsize=14)
+                            i,
+                            heatmap_array[i][j],
+                            ha="center",
+                            va="center",
+                            color=c,
+                            fontsize=14)
 
     # Add the color bar
     cbar = ax1.figure.colorbar(im, ax=ax1)
     cbar.ax.set_ylabel("Reaction Count")
-    ax1.annotate("A", xy=(-0.5,-0.55), color="k", weight="bold", annotation_clip=False)
+    ax1.annotate("A", xy=(-0.5, -0.55), color="k", weight="bold", annotation_clip=False)
 
     ### Panel 5B - achiral/chiral modulating &conserving
     ### Get full seed set & reaction set
@@ -1213,56 +1216,55 @@ def fig5(seed_name, rxn_db, crossover_step, first_chiral_step):
     print(
         f"- Total Achiral Conserving Reactions: {achiral_conserving[-1]}, {round((achiral_conserving[-1] / total_rxns) * 100, 3)}% -")
 
-
     ax2 = fig.add_subplot(gs[0:4, 3:])
 
     ax2.plot(chiral_modulating,
-            linestyle="solid",
-            linewidth=3,
-            color='k',
-            label="Chiral Modulating Rxns")
+             linestyle="solid",
+             linewidth=3,
+             color='k',
+             label="Chiral Modulating Rxns")
     ax2.plot(chiral_conserving,
-            linestyle="dashed",
-            linewidth=3,
-            color='k',
-            label="Chiral Conserving Rxns")
+             linestyle="dashed",
+             linewidth=3,
+             color='k',
+             label="Chiral Conserving Rxns")
     ax2.plot(achiral_conserving,
-            linestyle="dotted",
-            linewidth=3,
-            color='k',
-            label="Achiral Conserving Rxns")
+             linestyle="dotted",
+             linewidth=3,
+             color='k',
+             label="Achiral Conserving Rxns")
 
     ax2.axvline(x=crossover_step, color="k", linestyle="--", alpha=0.9)
     ax2.axvline(x=first_chiral_step, color="k", linestyle=":", alpha=0.5)
     ax2.annotate(f"Achiral-to-Chiral\nCrossover\nStep {crossover_step}",
-                xy=(crossover_step, 83000),
-                xytext=(crossover_step + 8, 85000),
-                color="k",
-                arrowprops={
-                    "arrowstyle": "simple",
-                    "color": "k"
-                },
-                fontsize=14,
-                ha='center',
-                va='center',
-                zorder=3)
+                 xy=(crossover_step, 83000),
+                 xytext=(crossover_step + 8, 85000),
+                 color="k",
+                 arrowprops={
+                     "arrowstyle": "simple",
+                     "color": "k"
+                 },
+                 fontsize=14,
+                 ha='center',
+                 va='center',
+                 zorder=3)
     ax2.annotate(f"First Chiral\nCompound\nStep {first_chiral_step}",
-                xy=(first_chiral_step, 70000),
-                xytext=(first_chiral_step + 5, 72000),
-                color="k",
-                arrowprops={
-                    "arrowstyle": "simple",
-                    "color": "k"
-                },
-                fontsize=14,
-                ha='left',
-                va='center',
-                zorder=3)
+                 xy=(first_chiral_step, 70000),
+                 xytext=(first_chiral_step + 5, 72000),
+                 color="k",
+                 arrowprops={
+                     "arrowstyle": "simple",
+                     "color": "k"
+                 },
+                 fontsize=14,
+                 ha='left',
+                 va='center',
+                 zorder=3)
 
     ax2.legend(facecolor="white", framealpha=1, prop={"size": 12})
     ax2.set_xlabel("Expansion Generation")
     ax2.set_ylabel("Total Reactions")
-    ax2.annotate("B", xy=(-1.5,98000), color="k", weight="bold", annotation_clip=False)
+    ax2.annotate("B", xy=(-1.5, 98000), color="k", weight="bold", annotation_clip=False)
 
     ### Get pathway names & cpd lists from KEGG (see slack for API calls)
     session = prepare_session()
@@ -1301,7 +1303,7 @@ def fig5(seed_name, rxn_db, crossover_step, first_chiral_step):
     angles = np.linspace(0, 2 * np.pi, len(labels), endpoint=False)
     stats = pathway_df['Chirality'].tolist()
 
-    ax = fig.add_subplot(gs[4:9,0:3], polar=True)
+    ax = fig.add_subplot(gs[4:9, 0:3], polar=True)
 
     ax.plot(angles, stats, 'o-', linewidth=2, color="dimgrey")
     ax.fill(angles, stats, alpha=0.25, color="dimgrey")
@@ -1320,23 +1322,23 @@ def fig5(seed_name, rxn_db, crossover_step, first_chiral_step):
         try:
             if count % 2:
                 lab = ax.text(x,
-                            y-0.05,
-                            label.get_text(),
-                            transform=label.get_transform(),
-                            ha=label.get_ha(),
-                            va=label.get_va(),
-                            color=str(pathway_group_colors[int(
-                                label.get_text())]),
-                            fontsize=18)
+                              y - 0.05,
+                              label.get_text(),
+                              transform=label.get_transform(),
+                              ha=label.get_ha(),
+                              va=label.get_va(),
+                              color=str(pathway_group_colors[int(
+                                  label.get_text())]),
+                              fontsize=18)
             else:
                 lab = ax.text(x,
-                          y,
-                          label.get_text(),
-                          transform=label.get_transform(),
-                          ha=label.get_ha(),
-                          va=label.get_va(),
-                          color='w',
-                          fontsize=1)
+                              y,
+                              label.get_text(),
+                              transform=label.get_transform(),
+                              ha=label.get_ha(),
+                              va=label.get_va(),
+                              color='w',
+                              fontsize=1)
             count += 1
         except:
             lab = ax.text(x,
@@ -1366,7 +1368,7 @@ def fig5(seed_name, rxn_db, crossover_step, first_chiral_step):
     ax.text(np.radians(label_pos + 120),
             ax.get_rmax() / 2. + 0.8,
             "C",
-            rotation=0, #Rotation of text (previous was label_pos - 10)
+            rotation=0,  # Rotation of text (previous was label_pos - 10)
             ha='center',
             va='center',
             fontsize=22,
@@ -1374,7 +1376,7 @@ def fig5(seed_name, rxn_db, crossover_step, first_chiral_step):
 
     ### Boxplot of pathway chirality distribution per metabolic group
     # fig, ax = plt.subplots(figsize=(12, 8))
-    ax2 = fig.add_subplot(gs[4:9,3:])
+    ax2 = fig.add_subplot(gs[4:9, 3:])
 
     c = colors["Carbohydrate Metabolism"]
     bplot = ax2.boxplot(
@@ -1399,24 +1401,24 @@ def fig5(seed_name, rxn_db, crossover_step, first_chiral_step):
                    markersize=15) for color in colors.values()
     ]
     ax2.legend(markers,
-              colors.keys(),
-              bbox_to_anchor=(1, 0.7),
-              loc="upper left",
-              numpoints=1,
-              frameon=False,
-              prop={"size": 14})
+               colors.keys(),
+               bbox_to_anchor=(1, 0.7),
+               loc="upper left",
+               numpoints=1,
+               frameon=False,
+               prop={"size": 14})
     ax2.grid(True)
-    ax2.annotate("D", xy=(-1,1.06), color="k", weight="bold", annotation_clip=False)
+    ax2.annotate("D", xy=(-1, 1.06), color="k", weight="bold", annotation_clip=False)
 
     ### Pathway size by chirality
     # fig, ax = plt.subplots(figsize=(16, 8))
-    ax3 = fig.add_subplot(gs[9:,:])
+    ax3 = fig.add_subplot(gs[9:, :])
 
     pathway_df.sort_values(by="Group Key", inplace=True)
     ax3.scatter(pathway_df['Size'],
-               pathway_df['Chirality'],
-               c=pathway_df['Group'].map(colors),
-               s=50)
+                pathway_df['Chirality'],
+                c=pathway_df['Group'].map(colors),
+                s=50)
 
     ax3.set_ylabel("Chiral Order\nParameter $\mathbb{C}$", fontsize=30)
     ax3.set_xlabel("System Size (Unique Molecules In Pathway)")
@@ -1424,7 +1426,7 @@ def fig5(seed_name, rxn_db, crossover_step, first_chiral_step):
         base=20.0)  # this locator puts ticks at regular intervals
     ax3.xaxis.set_major_locator(loc)
     ax3.set_ylim(-.05, 1.05)
-    ax3.annotate("E", xy=(-6,1.07), color="k", weight="bold", annotation_clip=False)
+    ax3.annotate("E", xy=(-6, 1.07), color="k", weight="bold", annotation_clip=False)
 
     plt.tight_layout()
 
@@ -1443,7 +1445,7 @@ def main():
 
     # Seed set
     seed_name = "JM|G24|G17|TW"
-    #rxn_db_fp = "../../lets-get-kegg/Data/atlas_kegg_processed_merged_deduped.csv.zip"
+    # rxn_db_fp = "../../lets-get-kegg/Data/atlas_kegg_processed_merged_deduped.csv.zip"
     rxn_db_fp = "../../CBRdb/CBRdb_R.csv"
 
     print("---- Generating Figure 1 ----")

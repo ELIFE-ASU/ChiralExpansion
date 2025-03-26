@@ -338,9 +338,9 @@ def linkArrivalStepHeavyAtoms(arrival_df, kegg_df):
                        how="left",
                        left_on="compound_id",
                        right_index=True)
-    
+
     kegg_df = kegg_df.rename(columns={"level_0": "arrival"})  # Cleaning up merge notation
-    df = kegg_df.dropna(subset=['arrival']) # Removing all cpds not found in expansion
+    df = kegg_df.dropna(subset=['arrival'])  # Removing all cpds not found in expansion
     heavy_atom_counts = np.array(df["n_heavy_atoms"])
     heavy_atom_percentiles = []
 
@@ -478,6 +478,7 @@ def scatter_hist(x, y, ax, ax_histy, c):
             bar.set_facecolor(achiral_color)
         else:
             bar.set_facecolor(chiral_color)
+
 
 def find_fit(X, Y, color):
     """
@@ -622,7 +623,7 @@ def check_rxn_chirality(rxnString, keggC_df, rxn_chiral_count):
             if keggC_df.loc[cpd]["n_chiral_centers"]:
                 reactant_chiral_count += 1
     for cpd in product_cpds:
-        if cpd in kegg_cpds:        
+        if cpd in kegg_cpds:
             if keggC_df.loc[cpd]["n_chiral_centers"]:
                 product_chiral_count += 1
 
@@ -937,6 +938,7 @@ def get_pathway_colors(pathway_df):
 
     return pathway_df, chiralities, pathway_group_colors, metabolism_groups, colors, color_list
 
+
 def set_box_color(bp, color):
     """
     Set the color of various elements in a box plot.
@@ -1042,4 +1044,4 @@ def colorize_Series(S, cmap='cet_CET_C6s'):
         S = pd.Series(S.factorize()[0]) / (pd.Series(S.factorize()[0]).max())
         c_ser = pd.Series(map(tuple, color_map(float_norm(S)(list(S.values)))), index=S.index)
         c_ser = c_ser.apply(to_hex)
-    return (c_ser)
+    return c_ser

@@ -122,6 +122,7 @@ def count_atoms(smiles):
     """
     return len(re.findall(r'(?<!\[)C|N|O|F|P|S|Cl|Br|I|B|(?<=\[)([^\]]+)(?=\])', smiles))
 
+
 def write_data_by_mass(in_data, output_data):
     """
     Write data to files based on the number of heavy atoms in SMILES strings.

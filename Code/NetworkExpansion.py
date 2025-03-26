@@ -19,7 +19,7 @@ def get_dir_zoomout_level(dirname: str, attempts=5):
 
 # find relative path to data source
 data_folder = get_dir_zoomout_level('Data/')
-rxn_db_dir = get_dir_zoomout_level('CBRdb/') #Updated to fit CBRdb
+rxn_db_dir = get_dir_zoomout_level('CBRdb/')  # Updated to fit CBRdb
 
 get_sides = lambda x: x[['left', 'right']]
 
@@ -122,7 +122,7 @@ def generate_annotated_bipartite_edgelist(single_result):
     # print(single_result)
     # use add_bipartite_edge_context to add context on essentiality of each edge
     single_result = add_bipartite_edge_context(single_result)
-    return (single_result)
+    return single_result
 
 
 # generates a bipartite edgelist from expand_from_seed_set's edge_pool output
@@ -139,6 +139,7 @@ def make_bipartite_edgelist(edge_pool: pd.DataFrame):
         all_edges[['source', 'target', 'reaction']].applymap(lambda x: x.replace('T', 'A')))  # revert back to original
     return (all_edges)
 
+
 def get_single_result(x, single_result):
     if x in single_result['arrival_step']:
         return single_result['arrival_step'][x]
@@ -151,7 +152,8 @@ def get_single_result(x, single_result):
 def add_bipartite_edge_context(single_result):
     df = single_result['bipartite_edgelist']
     df = (df.join(
-        df[['reaction', 'source', 'target']].applymap(lambda x: get_single_result(x, single_result)).add_suffix('_step')))
+        df[['reaction', 'source', 'target']].applymap(lambda x: get_single_result(x, single_result)).add_suffix(
+            '_step')))
     impactful_precursors = df.query('directed').query(
         '(target==reaction & reaction_step>source_step) | (reaction==source & reaction_step==target_step)').index
     immediate_precursors = df.loc[impactful_precursors].query('~(reaction_step-source_step!=1)').index

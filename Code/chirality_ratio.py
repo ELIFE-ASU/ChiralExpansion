@@ -57,7 +57,7 @@ def curve_fit_log_linear(xdata, ydata):
     popt_log, pcov_log = curve_fit(linlaw, xdata_log, ydata)
     # y variables as results from fitting
     ydatafit = linlaw(xdata_log, *popt_log)
-    return (popt_log, pcov_log, ydatafit)
+    return popt_log, pcov_log, ydatafit
 
 
 def curve_fit_log_log(xdata, ydata):
@@ -77,7 +77,7 @@ def curve_fit_log_log(xdata, ydata):
     popt_log, pcov_log = curve_fit(linlaw, xdata_log, ydata_log)
     # y variables as results from fitting
     ydatafit = pow(10, linlaw(xdata_log, *popt_log))
-    return (popt_log, pcov_log, ydatafit)
+    return popt_log, pcov_log, ydatafit
 
 
 def find_fit(X, Y, color):
