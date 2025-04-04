@@ -57,7 +57,7 @@ def fig1():
     ax1.set_ylim(-0.05, 1.05)
     ax1.set_xticks(list(np.arange(0, 16)), minor=True)
     ax1.set_xlabel("Heavy Atoms Per Molecule")
-    ax1.set_ylabel("Achiral-to-Chiral Ratio A/N")
+    ax1.set_ylabel("Fraction of All Molecules")
     ax1.set_title("Chemical Space")
     ax1.annotate("B", xy=(0, 1.07), color="k", weight="bold", annotation_clip=False)
 
