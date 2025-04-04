@@ -1,279 +1,279 @@
 Compound_id,Compound_name,Source,is_dummy
-C00697,Nitrogen; N2,G17,False
-C00033,Acetate; Acetic acid; Ethanoic acid,G17 G24 LUCA,False
-C00058,Formate; Methanoic acid; Formic acid,G17 G24,False
-C00283,Hydrogen sulfide; Hydrogen-sulfide; H2S; Sulfide,G17 G24 LUCA,False
-C00288,HCO3-; Hydrogencarbonate; Bicarbonate; Hydrogen carbonate; Acid carbonate,G17 G24 LUCA LUCA LUCA,False
-C00001,H2O; Water,G17 JM G24 LUCA,False
-C00009,Orthophosphate; Phosphate; Phosphoric acid; Orthophosphoric acid,JM G24 LUCA,False
-C00011,CO2; Carbon dioxide,G17 JM G24 LUCA,False
-C00014,Ammonia; NH3,G17 JM G24 LUCA,False
-C00080,H+; Hydron,G17 JM G24 LUCA,False
-C00059,Sulfate; Sulfuric acid,JM,False
-C00022,Pyruvate; Pyruvic acid; 2-Oxopropanoate; 2-Oxopropanoic acid; Pyroracemic acid,G24 LUCA,False
+C00697,Nitrogen;~N2,G17,False
+C00033,Acetate;~Acetic acid;~Ethanoic acid,G17 G24 LUCA,False
+C00058,Formate;~Methanoic acid;~Formic acid,G17 G24,False
+C00283,Hydrogen sulfide;~Hydrogen-sulfide;~H2S;~Sulfide,G17 G24 LUCA,False
+C00288,HCO3-;~Hydrogencarbonate;~Bicarbonate;~Hydrogen carbonate;~Acid carbonate,G17 G24 LUCA LUCA LUCA,False
+C00001,H2O;~Water,G17 JM G24 LUCA,False
+C00009,Orthophosphate;~Phosphate;~Phosphoric acid;~Orthophosphoric acid,JM G24 LUCA,False
+C00011,CO2;~Carbon dioxide,G17 JM G24 LUCA,False
+C00014,Ammonia;~NH3,G17 JM G24 LUCA,False
+C00080,H+;~Hydron,G17 JM G24 LUCA,False
+C00059,Sulfate;~Sulfuric acid,JM,False
+C00022,Pyruvate;~Pyruvic acid;~2-Oxopropanoate;~2-Oxopropanoic acid;~Pyroracemic acid,G24 LUCA,False
 C00023,Iron,G24,False
-C00026,2-Oxoglutarate; Oxoglutaric acid; 2-Ketoglutaric acid; alpha-Ketoglutaric acid,G24 LUCA,False
-C00028,Acceptor; Hydrogen-acceptor; A; Oxidized donor,G24 LUCA,True
-C00030,Reduced acceptor; AH2; Hydrogen-donor; Donor,G24 LUCA,True
-C00036,Oxaloacetate; Oxalacetic acid; Oxaloacetic acid; 2-Oxobutanedioic acid; 2-Oxosuccinic acid; keto-Oxaloacetate,G24 LUCA,False
-C00042,Succinate; Succinic acid; Butanedionic acid; Ethylenesuccinic acid,G24 LUCA,False
-C00048,Glyoxylate; Glyoxalate; Glyoxylic acid,G24,False
+C00026,2-Oxoglutarate;~Oxoglutaric acid;~2-Ketoglutaric acid;~alpha-Ketoglutaric acid,G24 LUCA,False
+C00028,Acceptor;~Hydrogen-acceptor;~A;~Oxidized donor,G24 LUCA,True
+C00030,Reduced acceptor;~AH2;~Hydrogen-donor;~Donor,G24 LUCA,True
+C00036,Oxaloacetate;~Oxalacetic acid;~Oxaloacetic acid;~2-Oxobutanedioic acid;~2-Oxosuccinic acid;~keto-Oxaloacetate,G24 LUCA,False
+C00042,Succinate;~Succinic acid;~Butanedionic acid;~Ethylenesuccinic acid,G24 LUCA,False
+C00048,Glyoxylate;~Glyoxalate;~Glyoxylic acid,G24,False
 C00069,Alcohol,G24,True
 C00070,Copper,G24,False
-C00071,Aldehyde; RCHO,G24,True
-C00122,Fumarate; Fumaric acid; trans-Butenedioic acid,G24 LUCA,False
-C00160,Glycolate; Glycolic acid; Hydroxyacetic acid,G24,False
-C00161,2-Oxo acid; 2-Oxocarboxylate; 2-Oxocarboxylic acid; 2-Oxo carboxylate,G24 LUCA,False
-C00175,Cobalt ion; Cobalt(2+); Co2+; Co(II),G24,False
-C00205,hn; Light; Photon; hnu,G24,True
-C00209,Oxalate; Oxalic acid; Ethanedioic acid,G24,False
-C00238,Potassium cation; K+; Potassium(1+); Potassium ion,G24,False
-C00282,Hydrogen; H2,G24,False
-C00305,Magnesium cation; Mg2+; Magnesium(2+); Magnesium ion,G24,False
-C00383,Malonate; Malonic acid; Propanedioic acid,G24,False
-C00417,cis-Aconitate; cis-Aconitic acid,G24,False
-C01330,Sodium cation; Na+; Sodium(1+); Sodium ion,G24,False
+C00071,Aldehyde;~RCHO,G24,True
+C00122,Fumarate;~Fumaric acid;~trans-Butenedioic acid,G24 LUCA,False
+C98944,Glycolate;~Glycolic acid;~Hydroxyacetic acid,G24,False
+C00161,2-Oxo acid;~2-Oxocarboxylate;~2-Oxocarboxylic acid;~2-Oxo carboxylate,G24 LUCA,False
+C00175,Cobalt ion;~Cobalt(2+);~Co2+;~Co(II),G24,False
+C00205,hn;~Light;~Photon;~hnu,G24,True
+C00209,Oxalate;~Oxalic acid;~Ethanedioic acid,G24,False
+C00238,Potassium cation;~K+;~Potassium(1+);~Potassium ion,G24,False
+C00282,Hydrogen;~H2,G24,False
+C00305,Magnesium cation;~Mg2+;~Magnesium(2+);~Magnesium ion,G24,False
+C98947,Malonate;~Malonic acid;~Propanedioic acid,G24,False
+C00417,cis-Aconitate;~cis-Aconitic acid,G24,False
+C01330,Sodium cation;~Na+;~Sodium(1+);~Sodium ion,G24,False
 C01335,ROH,G24,True
-C01528,Hydrogen selenide; Selenide,G24 LUCA,False
-C01732,Mesaconate; 2-Methylfumarate; Mesaconic acid; Methylfumaric acid; (E)-2-Methyl-2-butenedioic acid,G24,False
+C01528,Hydrogen selenide;~Selenide,G24 LUCA,False
+C01732,Mesaconate;~2-Methylfumarate;~Mesaconic acid;~Methylfumaric acid;~(E)-2-Methyl-2-butenedioic acid,G24,False
 C06232,Molybdate,G24,False
-C14818,Fe2+; Fe(II); Ferrous ion; Iron(2+),G24,False
-C14819,Fe3+; Fe(III); Ferric ion; Iron(3+),G24,False
-C17023,Sulfur donor; S-donor,G24,True
-C19609,Nickel(2+); Ni2+; Ni(II),G24,False
-C19806,"Propane-1,2,3-tricarboxylate; Tricarballylate",G24,False
-C00027,Hydrogen peroxide; H2O2; Oxydol,TW,False
-C00076,Calcium cation; Ca2+; Calcium(2+); Calcium ion,TW,False
-C00488,Formamide; Methanamide,TW,False
-C00698,Cl-; Chloride; Chloride ion,TW,False
-C01324,Bromide; Br-,TW,False
-C01326,Hydrogen cyanide; HCN; Cyanide,TW,False
-C01327,Hydrochloric acid; HCl; Hydrogen chloride; Hydrochloride,TW,False
-C01328,HO-; OH-; Hydroxide ion,TW,False
-C05359,Electron,TW,True
-C06547,Ethylene; Ethene,TW,False
-C15584,"Phenol; under umbrella of C01335, which is in G24 and which contains C00069 (in seed set)",TW,False
-C19610,Manganese(2+); Mn2+; Mn(II),TW,False
-C19611,Manganese(3+); Mn3+; Mn(III),TW,False
+C14818,Fe2+;~Fe(II);~Ferrous ion;~Iron(2+),G24,False
+C14819,Fe3+;~Fe(III);~Ferric ion;~Iron(3+),G24,False
+C17023,Sulfur donor;~S-donor,G24,True
+C19609,Nickel(2+);~Ni2+;~Ni(II),G24,False
+C19806,"Propane-1,2,3-tricarboxylate;~Tricarballylate",G24,False
+C00027,Hydrogen peroxide;~H2O2;~Oxydol,TW,False
+C00076,Calcium cation;~Ca2+;~Calcium(2+);~Calcium ion,TW,False
+C00488,Formamide;~Methanamide,TW,False
+C00698,Cl-;~Chloride;~Chloride ion,TW,False
+C01324,Bromide;~Br-,TW,False
+C01326,Hydrogen cyanide;~HCN;~Cyanide,TW,False
+C01327,Hydrochloric acid;~HCl;~Hydrogen chloride;~Hydrochloride,TW,False
+C01328,HO-;~OH-;~Hydroxide ion,TW,False
+C05359,e-;~Electron,TW,True
+C98999,Ethylene;~Ethene,TW,False
+C98924,Phenol;~Benzenol;~Hydroxybenzene;~Phenic acid;~Phenylic acid,TW,False
+C19610,Manganese(2+);~Mn2+;~Mn(II),TW,False
+C19611,Manganese(3+);~Mn3+;~Mn(III),TW,False
 C20396,Methylphosphonate,TW,False
-C00067,Formaldehyde; Methanal; Oxomethane; Oxomethylene; Methylene oxide; Formalin,TW ,False
-C00111,Glycerone phosphate; Dihydroxyacetone phosphate; 3-Hydroxy-2-oxopropyl phosphate,TW LUCA,False
-C00708,Iodide; I-; Iodide ion,TW ,False
-C01353,Carbonic acid; Dihydrogen carbonate; H2CO3,TW ,False
+C00067,Formaldehyde;~Methanal;~Oxomethane;~Oxomethylene;~Methylene oxide;~Formalin,TW ,False
+C00111,Glycerone phosphate;~Dihydroxyacetone phosphate;~3-Hydroxy-2-oxopropyl phosphate,TW LUCA,False
+C00708,Iodide;~I-;~Iodide ion,TW ,False
+C01353,Carbonic acid;~Dihydrogen carbonate;~H2CO3,TW ,False
 C05684,Selenite,TW LUCA,False
-C00002,TODO,LUCA,False
-C00003,TODO,LUCA,False
-C00004,TODO,LUCA,False
-C00005,TODO,LUCA,False
-C00006,TODO,LUCA,False
-C00008,TODO,LUCA,False
-C00010,TODO,LUCA,False
-C00012,TODO,LUCA,False
-C00013,TODO,LUCA,False
-C00015,TODO,LUCA,False
-C00017,TODO,LUCA,False
-C00019,TODO,LUCA,False
-C00020,TODO,LUCA,False
-C00021,TODO,LUCA,False
-C00024,TODO,LUCA,False
-C00025,TODO,LUCA,False
-C00029,TODO,LUCA,False
-C00031,TODO,LUCA,False
-C00035,TODO,LUCA,False
-C00037,TODO,LUCA,False
-C00039,TODO,LUCA,False
-C00041,TODO,LUCA,False
-C00044,TODO,LUCA,False
-C00046,TODO,LUCA,False
-C00047,TODO,LUCA,False
-C00049,TODO,LUCA,False
-C00051,TODO,LUCA,False
-C00053,TODO,LUCA,False
-C00055,TODO,LUCA,False
-C00060,TODO,LUCA,False
-C00062,TODO,LUCA,False
-C00063,TODO,LUCA,False
-C00064,TODO,LUCA,False
-C00065,TODO,LUCA,False
-C00068,TODO,LUCA,False
-C00073,TODO,LUCA,False
-C00074,TODO,LUCA,False
-C00075,TODO,LUCA,False
-C00077,TODO,LUCA,False
-C00078,TODO,LUCA,False
-C00079,TODO,LUCA,False
-C00081,TODO,LUCA,False
-C00082,TODO,LUCA,False
-C00085,TODO,LUCA,False
-C00091,TODO,LUCA,False
-C00092,TODO,LUCA,False
-C00093,TODO,LUCA,False
-C00094,TODO,LUCA,False
-C00097,TODO,LUCA,False
-C00101,TODO,LUCA,False
-C00103,TODO,LUCA,False
-C00104,TODO,LUCA,False
-C00105,TODO,LUCA,False
-C00106,TODO,LUCA,False
-C00108,TODO,LUCA,False
-C00109,TODO,LUCA,False
-C00112,TODO,LUCA,False
-C00117,TODO,LUCA,False
-C00118,TODO,LUCA,False
-C00119,TODO,LUCA,False
-C00120,TODO,LUCA,False
-C00123,TODO,LUCA,False
-C00129,TODO,LUCA,False
-C00130,TODO,LUCA,False
-C00131,TODO,LUCA,False
-C00134,TODO,LUCA,False
-C00135,TODO,LUCA,False
-C00137,TODO,LUCA,False
+C00002,ATP;~Adenosine 5'-triphosphate,LUCA,False
+C00003,NAD+;~NAD;~Nicotinamide adenine dinucleotide;~DPN;~Diphosphopyridine nucleotide;~Nadide;~beta-NAD+,LUCA,False
+C00004,NADH;~DPNH;~Reduced nicotinamide adenine dinucleotide,LUCA,False
+C00005,NADPH;~TPNH;~Reduced nicotinamide adenine dinucleotide phosphate,LUCA,False
+C00006,NADP+;~NADP;~Nicotinamide adenine dinucleotide phosphate;~beta-Nicotinamide adenine dinucleotide phosphate;~TPN;~Triphosphopyridine nucleotide;~beta-NADP+,LUCA,False
+C00008,ADP;~Adenosine 5'-diphosphate,LUCA,False
+C00010,CoA;~Coenzyme A;~CoA-SH,LUCA,False
+C00012,Peptide,LUCA,False
+C00013,Diphosphate;~Diphosphoric acid;~Pyrophosphate;~Pyrophosphoric acid;~PPi,LUCA,False
+C00015,UDP;~Uridine 5'-diphosphate,LUCA,False
+C00017,Protein,LUCA,False
+C00019,S-Adenosyl-L-methionine;~S-Adenosylmethionine;~AdoMet;~SAM,LUCA,False
+C00020,AMP;~Adenosine 5'-monophosphate;~Adenylic acid;~Adenylate;~5'-AMP;~5'-Adenylic acid;~5'-Adenosine monophosphate;~Adenosine 5'-phosphate,LUCA,False
+C00021,S-Adenosyl-L-homocysteine;~S-Adenosylhomocysteine,LUCA,False
+C00024,Acetyl-CoA;~Acetyl coenzyme A,LUCA,False
+C00025,L-Glutamate;~L-Glutamic acid;~L-Glutaminic acid;~Glutamate,LUCA,False
+C00029,UDP-glucose;~UDPglucose;~UDP-D-glucose;~Uridine diphosphate glucose;~UDP-alpha-D-glucose,LUCA,False
+C00031,D-Glucose;~Grape sugar;~Dextrose;~Glucose;~D-Glucopyranose,LUCA,False
+C00035,GDP;~Guanosine 5'-diphosphate;~Guanosine diphosphate,LUCA,False
+C00037,Glycine;~Aminoacetic acid;~Gly,LUCA,False
+C00039,DNA;~DNAn;~DNAn+1;~(Deoxyribonucleotide)n;~(Deoxyribonucleotide)m;~(Deoxyribonucleotide)n+m;~Deoxyribonucleic acid,LUCA,False
+C00041,L-Alanine;~L-2-Aminopropionic acid;~L-alpha-Alanine,LUCA,False
+C00044,GTP;~Guanosine 5'-triphosphate,LUCA,False
+C00046,RNA;~RNAn;~RNAn+1;~RNA(linear);~(Ribonucleotide)n;~(Ribonucleotide)m;~(Ribonucleotide)n+m;~Ribonucleic acid,LUCA,False
+C00047,"L-Lysine;~Lysine acid;~2,6-Diaminohexanoic acid",LUCA,False
+C00049,L-Aspartate;~L-Aspartic acid;~2-Aminosuccinic acid;~L-Asp,LUCA,False
+C00051,Glutathione;~5-L-Glutamyl-L-cysteinylglycine;~N-(N-gamma-L-Glutamyl-L-cysteinyl)glycine;~gamma-L-Glutamyl-L-cysteinyl-glycine;~GSH;~Reduced glutathione,LUCA,False
+C00053,3'-Phosphoadenylyl sulfate;~3'-Phosphoadenosine 5'-phosphosulfate;~3'-Phospho-5'-adenylyl sulfate;~PAPS,LUCA,False
+C00055,CMP;~Cytidine-5'-monophosphate;~Cytidylic acid,LUCA,False
+C00060,Carboxylate;~R-COOH;~Monocarboxylate;~Carboxylic acid,LUCA,False
+C00062,L-Arginine;~(S)-2-Amino-5-guanidinovaleric acid;~L-Arg,LUCA,False
+C00063,CTP;~Cytidine 5'-triphosphate;~Cytidine triphosphate,LUCA,False
+C00064,L-Glutamine;~L-2-Aminoglutaramic acid,LUCA,False
+C00065,L-Serine;~L-2-Amino-3-hydroxypropionic acid;~L-3-Hydroxy-alanine;~Serine,LUCA,False
+C00068,Thiamin diphosphate;~Thiamine diphosphate;~Thiamin pyrophosphate;~TPP;~ThPP,LUCA,False
+C00073,L-Methionine;~Methionine;~L-2-Amino-4methylthiobutyric acid,LUCA,False
+C00074,Phosphoenolpyruvate;~Phosphoenolpyruvic acid;~PEP,LUCA,False
+C00075,UTP;~Uridine 5'-triphosphate;~Uridine triphosphate,LUCA,False
+C00077,"L-Ornithine;~(S)-2,5-Diaminovaleric acid;~(S)-2,5-Diaminopentanoic acid;~(S)-2,5-Diaminopentanoate",LUCA,False
+C00078,L-Tryptophan;~Tryptophan;~(S)-alpha-Amino-beta-(3-indolyl)-propionic acid,LUCA,False
+C00079,L-Phenylalanine;~(S)-alpha-Amino-beta-phenylpropionic acid,LUCA,False
+C00081,ITP;~Inosine 5'-triphosphate;~Inosine triphosphate;~Inosine tripolyphosphate,LUCA,False
+C00082,L-Tyrosine;~(S)-3-(p-Hydroxyphenyl)alanine;~(S)-2-Amino-3-(p-hydroxyphenyl)propionic acid;~Tyrosine,LUCA,False
+C00085,D-Fructose 6-phosphate;~D-Fructose 6-phosphoric acid;~Neuberg ester,LUCA,False
+C00091,Succinyl-CoA;~Succinyl coenzyme A,LUCA,False
+C00092,D-Glucose 6-phosphate;~Glucose 6-phosphate;~Robison ester,LUCA,False
+C00093,sn-Glycerol 3-phosphate;~Glycerophosphoric acid;~D-Glycerol 1-phosphate,LUCA,False
+C00094,Sulfite;~Sulfurous acid,LUCA,False
+C00097,L-Cysteine;~L-2-Amino-3-mercaptopropionic acid,LUCA,False
+C00101,"Tetrahydrofolate;~5,6,7,8-Tetrahydrofolate;~Tetrahydrofolic acid;~THF;~(6S)-Tetrahydrofolate;~(6S)-Tetrahydrofolic acid;~(6S)-THFA",LUCA,False
+C00103,D-Glucose 1-phosphate;~alpha-D-Glucose 1-phosphate;~Cori ester;~D-Glucose alpha-1-phosphate,LUCA,False
+C00104,IDP;~Inosine 5'-diphosphate;~Inosine diphosphate,LUCA,False
+C00105,UMP;~Uridylic acid;~Uridine monophosphate;~Uridine 5'-monophosphate;~5'Uridylic acid;~Uridylate,LUCA,False
+C00106,Uracil,LUCA,False
+C00108,Anthranilate;~Anthranilic acid;~o-Aminobenzoic acid;~Vitamin L1;~2-Aminobenzoate,LUCA,False
+C00109,2-Oxobutanoate;~2-Ketobutyric acid;~2-Oxobutyric acid;~2-Oxobutyrate;~2-Oxobutanoic acid;~alpha-Ketobutyric acid;~alpha-Ketobutyrate,LUCA,False
+C00112,CDP;~Cytidine 5'-diphosphate;~Cytidine diphosphate,LUCA,False
+C00117,D-Ribose 5-phosphate;~Ribose 5-phosphate,LUCA,False
+C00118,D-Glyceraldehyde 3-phosphate;~(2R)-2-Hydroxy-3-(phosphonooxy)-propanal;~Glyceraldehyde 3-phosphate,LUCA,False
+C00119,5-Phospho-alpha-D-ribose 1-diphosphate;~5-Phosphoribosyl diphosphate;~5-Phosphoribosyl 1-pyrophosphate;~PRPP,LUCA,False
+C00120,Biotin;~D-Biotin;~Vitamin H;~Coenzyme R,LUCA,False
+C00123,L-Leucine;~2-Amino-4-methylvaleric acid;~(2S)-alpha-2-Amino-4-methylvaleric acid;~(2S)-alpha-Leucine,LUCA,False
+C00129,Isopentenyl diphosphate;~Delta3-Isopentenyl diphosphate;~Delta3-Methyl-3-butenyl diphosphate;~3-Methylbut-3-en-1-yl diphosphate,LUCA,False
+C00130,IMP;~Inosinic acid;~Inosine monophosphate;~Inosine 5'-monophosphate;~Inosine 5'-phosphate;~5'-Inosinate;~5'-Inosinic acid;~5'-Inosine monophosphate;~5'-IMP,LUCA,False
+C00131,dATP;~2'-Deoxyadenosine 5'-triphosphate;~Deoxyadenosine 5'-triphosphate;~Deoxyadenosine triphosphate,LUCA,False
+C98954,"alpha,omega-Diamine",LUCA,False
+C00135,L-Histidine;~(S)-alpha-Amino-1H-imidazole-4-propionic acid,LUCA,False
+C00137,myo-Inositol;~D-myo-Inositol;~1D-myo-Inositol;~L-myo-Inositol;~1L-myo-Inositol;~meso-Inositol;~Inositol;~Dambose;~Cyclohexitol;~Meat sugar;~Bios I,LUCA,False
 C00138,TODO,LUCA,False
 C00139,TODO,LUCA,False
-C00141,TODO,LUCA,False
-C00143,TODO,LUCA,False
-C00144,TODO,LUCA,False
-C00147,TODO,LUCA,False
-C00148,TODO,LUCA,False
-C00149,TODO,LUCA,False
-C00152,TODO,LUCA,False
-C00155,TODO,LUCA,False
-C00166,TODO,LUCA,False
-C00167,TODO,LUCA,False
-C00169,TODO,LUCA,False
-C00170,TODO,LUCA,False
-C00179,TODO,LUCA,False
-C00180,TODO,LUCA,False
-C00183,TODO,LUCA,False
-C00188,TODO,LUCA,False
-C00197,TODO,LUCA,False
-C00201,TODO,LUCA,False
-C00206,TODO,LUCA,False
-C00212,TODO,LUCA,False
-C00214,TODO,LUCA,False
-C00217,TODO,LUCA,False
-C00221,TODO,LUCA,False
-C00224,TODO,LUCA,False
-C00229,TODO,LUCA,False
-C00234,TODO,LUCA,False
-C00235,TODO,LUCA,False
-C00236,TODO,LUCA,False
-C00241,TODO,LUCA,False
-C00242,TODO,LUCA,False
-C00248,TODO,LUCA,False
-C00251,TODO,LUCA,False
-C00254,TODO,LUCA,False
-C00263,TODO,LUCA,False
-C00267,TODO,LUCA,False
-C00272,TODO,LUCA,False
-C00275,TODO,LUCA,False
-C00279,TODO,LUCA,False
-C00286,TODO,LUCA,False
-C00294,TODO,LUCA,False
-C00295,TODO,LUCA,False
-C00299,TODO,LUCA,False
-C00302,TODO,LUCA,False
-C00315,TODO,LUCA,False
-C00320,TODO,LUCA,False
-C00322,TODO,LUCA,False
-C00327,TODO,LUCA,False
-C00337,TODO,LUCA,False
-C00342,TODO,LUCA,False
-C00343,TODO,LUCA,False
-C00352,TODO,LUCA,False
-C00353,TODO,LUCA,False
-C00354,TODO,LUCA,False
-C00360,TODO,LUCA,False
-C00361,TODO,LUCA,False
-C00363,TODO,LUCA,False
-C00364,TODO,LUCA,False
-C00365,TODO,LUCA,False
-C00407,TODO,LUCA,False
-C00415,TODO,LUCA,False
-C00438,TODO,LUCA,False
-C00439,TODO,LUCA,False
-C00441,TODO,LUCA,False
-C00447,TODO,LUCA,False
-C00448,TODO,LUCA,False
-C00454,TODO,LUCA,False
-C00455,TODO,LUCA,False
-C00458,TODO,LUCA,False
-C00459,TODO,LUCA,False
-C00460,TODO,LUCA,False
-C00463,TODO,LUCA,False
-C00475,TODO,LUCA,False
-C00490,TODO,LUCA,False
-C00493,TODO,LUCA,False
-C00504,TODO,LUCA,False
-C00506,TODO,LUCA,False
-C00511,TODO,LUCA,False
-C00526,TODO,LUCA,False
-C00527,TODO,LUCA,False
-C00531,TODO,LUCA,False
-C00542,TODO,LUCA,False
-C00559,TODO,LUCA,False
+C00141,3-Methyl-2-oxobutanoic acid;~3-Methyl-2-oxobutyric acid;~3-Methyl-2-oxobutanoate;~2-Oxo-3-methylbutanoate;~2-Oxoisovalerate;~2-Oxoisopentanoate;~alpha-Ketovaline;~2-Ketovaline;~2-Keto-3-methylbutyric acid;~alpha-Ketoisovalerate,LUCA,False
+C00143,"5,10-Methylenetetrahydrofolate;~(6R)-5,10-Methylenetetrahydrofolate;~5,10-Methylene-THF",LUCA,False
+C00144,GMP;~Guanosine 5'-phosphate;~Guanosine monophosphate;~Guanosine 5'-monophosphate;~Guanylic acid,LUCA,False
+C00147,Adenine;~6-Aminopurine,LUCA,False
+C00148,L-Proline;~2-Pyrrolidinecarboxylic acid,LUCA,False
+C00149,(S)-Malate;~L-Malate;~L-Apple acid;~L-Malic acid;~L-2-Hydroxybutanedioic acid;~Malate;~Malic acid,LUCA,False
+C00152,L-Asparagine;~2-Aminosuccinamic acid,LUCA,False
+C00155,L-Homocysteine;~L-2-Amino-4-mercaptobutyric acid;~Homocysteine,LUCA,False
+C00166,Phenylpyruvate;~Phenylpyruvic acid;~alpha-Ketohydrocinnamic acid;~keto-Phenylpyruvate;~3-Phenyl-2-oxopropanoate;~2-Oxo-3-phenylpropanoate,LUCA,False
+C00167,UDP-glucuronate;~UDPglucuronate;~UDP-D-glucuronate;~UDP-alpha-D-glucuronate,LUCA,False
+C00169,Carbamoyl phosphate,LUCA,False
+C00170,5'-Methylthioadenosine;~Methylthioadenosine;~S-Methyl-5'-thioadenosine;~5-Methylthioadenosine;~5'-Deoxy-5'-(methylthio)adenosine;~Thiomethyladenosine;~MTA;~5'-Deoxy-5'-(methylsulfanyl)adenosine,LUCA,False
+C00179,Agmatine;~(4-Aminobutyl) guanidine,LUCA,False
+C98942,Benzoate;~Benzoic acid;~Benzenecarboxylic acid;~Phenylformic acid;~Dracylic acid,LUCA,False
+C00183,L-Valine;~2-Amino-3-methylbutyric acid,LUCA,False
+C00188,L-Threonine;~2-Amino-3-hydroxybutyric acid,LUCA,False
+C00197,3-Phospho-D-glycerate;~D-Glycerate 3-phosphate;~3-Phospho-(R)-glycerate;~3-Phosphoglycerate,LUCA,False
+C00201,Nucleoside triphosphate;~NTP;~Nucleoside 5'-triphosphate,LUCA,False
+C00206,dADP;~2'-Deoxyadenosine 5'-diphosphate,LUCA,False
+C00212,Adenosine,LUCA,False
+C00214,Thymidine;~Deoxythymidine,LUCA,False
+C00217,D-Glutamate;~D-Glutamic acid;~D-Glutaminic acid;~D-2-Aminoglutaric acid,LUCA,False
+C00221,beta-D-Glucose;~beta-D-Glucopyranose,LUCA,False
+C00224,Adenylyl sulfate;~Adenosine 5'-phosphosulfate;~APS;~5'-Adenylyl sulfate,LUCA,False
+C00229,Acyl-carrier protein;~ACP;~[Acyl-carrier protein];~Holo-[acyl-carrier protein],LUCA,False
+C00234,10-Formyltetrahydrofolate;~10-Formyl-THF,LUCA,False
+C00235,Dimethylallyl diphosphate;~2-Isopentenyl diphosphate;~Delta2-Isopentenyl diphosphate;~Dimethylallyl pyrophosphate;~DMAPP;~Monoprenyl diphosphate;~Prenyl diphosphate,LUCA,False
+C00236,"3-Phospho-D-glyceroyl phosphate;~1,3-Bisphospho-D-glycerate;~(R)-2-Hydroxy-3-(phosphonooxy)-1-monoanhydride with phosphoric propanoic acid;~D-Glycerate 1,3-diphosphate",LUCA,False
+C00241,Amide,LUCA,False
+C00242,Guanine;~2-Amino-6-hydroxypurine,LUCA,False
+C00248,Lipoamide;~Thioctic acid amide,LUCA,False
+C00251,"Chorismate;~Chorismic acid;~(3R,4R)-3-[(1-Carboxyethenyl)oxy]-4-hydroxycyclohexa-1,5-diene-1-carboxylate",LUCA,False
+C00254,Prephenate;~Prephenic acid,LUCA,False
+C00263,L-Homoserine;~2-Amino-4-hydroxybutyric acid,LUCA,False
+C00267,alpha-D-Glucose,LUCA,False
+C00272,"Tetrahydrobiopterin;~5,6,7,8-Tetrahydrobiopterin;~2-Amino-6-(1,2-dihydroxypropyl)-5,6,7,8-tetrahydoro-4(1H)-pteridinone;~L-erythro-Tetrahydrobiopterin",LUCA,False
+C00275,D-Mannose 6-phosphate,LUCA,False
+C00279,D-Erythrose 4-phosphate,LUCA,False
+C00286,dGTP;~2'-Deoxyguanosine 5'-triphosphate;~Deoxyguanosine 5'-triphosphate;~Deoxyguanosine triphosphate,LUCA,False
+C00294,Inosine,LUCA,False
+C00295,Orotate;~Orotic acid;~Uracil-6-carboxylic acid,LUCA,False
+C00299,Uridine,LUCA,False
+C00302,Glutamate;~Glutaminic acid;~2-Aminoglutaric acid,LUCA,False
+C00315,"Spermidine;~N-(3-Aminopropyl)-1,4-butane-diamine",LUCA,False
+C00320,Thiosulfate;~Hyposulfite,LUCA,False
+C00322,2-Oxoadipate;~2-Oxoadipic acid;~2-Oxohexanedioic acid,LUCA,False
+C00327,L-Citrulline;~2-Amino-5-ureidovaleric acid;~Citrulline,LUCA,False
+C00337,"(S)-Dihydroorotate;~(S)-4,5-Dihydroorotate;~L-Dihydroorotate;~L-Dihydroorotic acid;~Dihydro-L-orotic acid",LUCA,False
+C00342,Thioredoxin;~Reduced thioredoxin,LUCA,False
+C00343,Thioredoxin disulfide;~Oxidized thioredoxin;~Thioredoxin sulfide,LUCA,False
+C00352,D-Glucosamine 6-phosphate;~D-Glucosamine phosphate,LUCA,False
+C00353,"Geranylgeranyl diphosphate;~Geranylgeranyl pyrophosphate;~all-trans-Geranylgeranyl diphosphate;~all-trans-Geranylgeranyl pyrophosphate;~(2E,6E,10E)-3,7,11,15-Tetramethylhexadeca-2,6,10,14-tetraen-1-yl diphosphate",LUCA,False
+C00354,"D-Fructose 1,6-bisphosphate",LUCA,False
+C00360,dAMP;~2'-Deoxyadenosine 5'-phosphate;~2'-Deoxyadenosine 5'-monophosphate;~Deoxyadenylic acid;~Deoxyadenosine monophosphate,LUCA,False
+C00361,dGDP;~2'-Deoxyguanosine 5'-diphosphate,LUCA,False
+C00363,dTDP;~Deoxythymidine 5'-diphosphate,LUCA,False
+C00364,dTMP;~Thymidine 5'-phosphate;~Deoxythymidine 5'-phosphate;~Thymidylic acid;~5'-Thymidylic acid;~Thymidine monophosphate;~Deoxythymidylic acid;~Thymidylate,LUCA,False
+C00365,dUMP;~Deoxyuridylic acid;~Deoxyuridine monophosphate;~Deoxyuridine 5'-phosphate;~2'-Deoxyuridine 5'-phosphate,LUCA,False
+C00407,L-Isoleucine;~2-Amino-3-methylvaleric acid,LUCA,False
+C00415,"Dihydrofolate;~Dihydrofolic acid;~7,8-Dihydrofolate;~7,8-Dihydrofolic acid;~7,8-Dihydropteroylglutamate",LUCA,False
+C00438,N-Carbamoyl-L-aspartate,LUCA,False
+C00439,N-Formimino-L-glutamate;~N-Formimidoyl-L-glutamate,LUCA,False
+C00441,L-Aspartate 4-semialdehyde;~Aspartate beta-semialdehyde;~L-Aspartic 4-semialdehyde,LUCA,False
+C00447,"Sedoheptulose 1,7-bisphosphate;~D-Sedoheptulose 1,7-bisphosphate;~D-altro-Heptulose 1,7-biphosphate",LUCA,False
+C00448,"trans,trans-Farnesyl diphosphate;~Farnesyl diphosphate;~Farnesyl pyrophosphate;~2-trans,6-trans-Farnesyl diphosphate;~(2E,6E)-Farnesyl diphosphate",LUCA,False
+C00454,NDP;~Nucleoside diphosphate;~Nucleoside 5'-diphosphate,LUCA,False
+C00455,Nicotinamide D-ribonucleotide;~NMN;~Nicotinamide mononucleotide;~Nicotinamide ribonucleotide;~Nicotinamide nucleotide;~beta-Nicotinamide D-ribonucleotide;~beta-Nicotinamide ribonucleotide;~beta-Nicotinamide mononucleotide,LUCA,False
+C00458,dCTP;~Deoxycytidine 5'-triphosphate;~Deoxycytidine triphosphate;~2'-Deoxycytidine 5'-triphosphate,LUCA,False
+C00459,dTTP;~Deoxythymidine triphosphate;~Deoxythymidine 5'-triphosphate;~TTP,LUCA,False
+C00460,dUTP;~2'-Deoxyuridine 5'-triphosphate,LUCA,False
+C00463,"Indole;~2,3-Benzopyrrole",LUCA,False
+C00475,Cytidine,LUCA,False
+C00490,Itaconate;~Itaconic acid;~Methylenesuccinic acid,LUCA,False
+C00493,"Shikimate;~Shikimic acid;~3,4,5-Trihydroxy-1-cyclohexenecarboxylic acid",LUCA,False
+C00504,Folate;~Pteroylglutamic acid;~Folic acid,LUCA,False
+C00506,L-Cysteate;~L-Cysteic acid;~3-Sulfoalanine;~2-Amino-3-sulfopropionic acid,LUCA,False
+C98996,Acrylic acid;~Propenoate;~Acrylate;~2-Propenoic acid;~Vinylformic acid,LUCA,False
+C00526,Deoxyuridine;~2-Deoxyuridine;~2'-Deoxyuridine,LUCA,False
+C00527,Glutaryl-CoA,LUCA,False
+C00531,Itaconyl-CoA,LUCA,False
+C00542,Cystathionine,LUCA,False
+C00559,Deoxyadenosine;~2'-Deoxyadenosine,LUCA,False
 C00562,TODO,LUCA,False
-C00568,TODO,LUCA,False
-C00577,TODO,LUCA,False
-C00579,TODO,LUCA,False
-C00606,TODO,LUCA,False
-C00620,TODO,LUCA,False
-C00631,TODO,LUCA,False
-C00636,TODO,LUCA,False
-C00655,TODO,LUCA,False
+C00568,4-Aminobenzoate;~ABEE;~4-Aminobenzoic acid;~p-Aminobenzoate,LUCA,False
+C00577,D-Glyceraldehyde,LUCA,False
+C00579,Dihydrolipoamide;~Dihydrothioctamide,LUCA,False
+C00606,3-Sulfino-L-alanine;~L-Cysteinesulfinic acid;~3-Sulphino-L-alanine;~3-Sulfinoalanine,LUCA,False
+C00620,alpha-D-Ribose 1-phosphate;~Ribose 1-phosphate;~D-Ribose 1-phosphate,LUCA,False
+C00631,2-Phospho-D-glycerate;~D-Glycerate 2-phosphate;~2-Phospho-(R)-glycerate,LUCA,False
+C00636,D-Mannose 1-phosphate;~alpha-D-Mannose 1-phosphate,LUCA,False
+C00655,Xanthosine 5'-phosphate;~Xanthylic acid;~XMP;~(9-D-Ribosylxanthine)-5'-phosphate,LUCA,False
 C00662,TODO,LUCA,False
-C00666,TODO,LUCA,False
+C00666,"LL-2,6-Diaminoheptanedioate;~LL-2,6-Diaminopimelate;~LL-2,6-Diaminopimelic acid;~(2S,6S)-2,6-Diaminoheptanedioic acid",LUCA,False
 C00667,TODO,LUCA,False
-C00668,TODO,LUCA,False
-C00677,TODO,LUCA,False
-C00680,TODO,LUCA,False
-C00683,TODO,LUCA,False
-C00700,TODO,LUCA,False
-C00705,TODO,LUCA,False
-C00726,TODO,LUCA,False
-C00740,TODO,LUCA,False
+C00668,alpha-D-Glucose 6-phosphate,LUCA,False
+C00677,Deoxynucleoside triphosphate;~2'-Deoxyribonucleoside 5'-triphosphate;~2'-Deoxyribonucleoside triphosphate,LUCA,False
+C00680,"meso-2,6-Diaminoheptanedioate;~meso-2,6-Diaminopimelate;~meso-2,6-Diaminopimelic acid;~meso-Diaminoheptanedioate",LUCA,False
+C00683,(S)-Methylmalonyl-CoA;~(S)-Methylmalonyl-coenzyme A;~(2S)-Methylmalonyl-CoA;~D-Methylmalonyl-CoA,LUCA,False
+C00700,XTP;~Xanthosine 5'-triphosphate,LUCA,False
+C00705,dCDP;~2'-Deoxycytidine diphosphate;~2'-Deoxycytidine 5'-diphosphate,LUCA,False
+C00726,Nitrile;~R-CN,LUCA,False
+C00740,D-Serine,LUCA,False
 C00787,TODO,LUCA,False
-C00819,TODO,LUCA,False
-C00826,TODO,LUCA,False
-C00857,TODO,LUCA,False
-C00868,TODO,LUCA,False
-C00886,TODO,LUCA,False
-C00900,TODO,LUCA,False
-C00921,TODO,LUCA,False
-C00954,TODO,LUCA,False
-C00956,TODO,LUCA,False
-C00957,TODO,LUCA,False
-C00979,TODO,LUCA,False
-C01005,TODO,LUCA,False
-C01035,TODO,LUCA,False
-C01037,TODO,LUCA,False
-C01063,TODO,LUCA,False
-C01081,TODO,LUCA,False
-C01092,TODO,LUCA,False
-C01094,TODO,LUCA,False
-C01100,TODO,LUCA,False
-C01102,TODO,LUCA,False
-C01103,TODO,LUCA,False
-C01134,TODO,LUCA,False
-C01137,TODO,LUCA,False
-C01157,TODO,LUCA,False
-C01171,TODO,LUCA,False
-C01172,TODO,LUCA,False
-C01177,TODO,LUCA,False
-C01179,TODO,LUCA,False
-C01185,TODO,LUCA,False
-C01213,TODO,LUCA,False
-C01217,TODO,LUCA,False
-C01251,TODO,LUCA,False
-C01267,TODO,LUCA,False
-C01300,TODO,LUCA,False
-C01302,TODO,LUCA,False
-C01344,TODO,LUCA,False
-C01345,TODO,LUCA,False
-C01346,TODO,LUCA,False
-C01401,TODO,LUCA,False
-C01563,TODO,LUCA,False
+C00819,D-Glutamine;~D-2-Aminoglutaramic acid,LUCA,False
+C00826,L-Arogenate;~L-Arogenic acid;~Pretyrosine,LUCA,False
+C00857,Deamino-NAD+;~Deamido-NAD+;~Deamido-NAD;~Nicotinic acid adenine dinucleotide,LUCA,False
+C00868,tRNA uridine;~Uracil in tRNA,LUCA,False
+C00886,L-Alanyl-tRNA;~L-Alanyl-tRNA(Ala),LUCA,False
+C00900,2-Acetolactate;~2-Hydroxy-2-methyl-3-oxobutanoic acid,LUCA,False
+C00921,"Dihydropteroate;~7,8-Dihydropteroate",LUCA,False
+C00954,Indole-3-acetate;~Indole-3-acetic acid;~(Indol-3-yl)acetate;~Indoleacetate;~Indoleacetic acid;~(1H-indol-3-yl)acetate;~IAA,LUCA,False
+C00956,L-2-Aminoadipate;~L-alpha-Aminoadipate;~L-alpha-Aminoadipic acid;~L-2-Aminoadipic acid;~L-2-Aminohexanedioate,LUCA,False
+C00957,Mercaptopyruvate;~2-Oxo-3-sulfanylpropanoate;~3-Mercaptopyruvic acid;~3-Mercaptopyruvate,LUCA,False
+C00979,O-Acetyl-L-serine;~O3-Acetyl-L-serine,LUCA,False
+C01005,O-Phospho-L-serine;~L-O-Phosphoserine;~3-Phosphoserine;~Dexfosfoserine;~3-Phospho-L-serine,LUCA,False
+C01035,4-Guanidinobutanoate;~4-Guanidinobutyric acid,LUCA,False
+C01037,"7,8-Diaminononanoate;~7,8-Diaminopelargonic acid;~DAPA;~7,8-Diaminononanoic acid",LUCA,False
+C01063,Pimeloyl-CoA;~6-Carboxyhexanoyl-CoA,LUCA,False
+C01081,Thiamin monophosphate;~Thiamine monophosphate;~Thiamin phosphate;~Thiamine phosphate;~TMP,LUCA,False
+C01092,8-Amino-7-oxononanoate;~8-Amino-7-oxononanoic acid;~7-Keto-8-aminopelargonic acid;~KAPA,LUCA,False
+C01094,D-Fructose 1-phosphate,LUCA,False
+C01100,L-Histidinol phosphate,LUCA,False
+C01102,O-Phospho-L-homoserine,LUCA,False
+C01103,Orotidine 5'-phosphate;~Orotidylic acid,LUCA,False
+C01134,Pantetheine 4'-phosphate;~4'-Phosphopantetheine;~Phosphopantetheine;~D-Pantetheine 4'-phosphate,LUCA,False
+C01137,S-Adenosylmethioninamine;~(5-Deoxy-5-adenosyl)(3-aminopropyl)methylsulfonium;~(5-Deoxy-5-adenosyl)(3-aminopropyl)methylsulfonium cation;~S-Adenosyl-(5')-3-methylthiopropylamine;~S-Adenosyl 3-(methylthio)propylamine;~S-Adenosyl 3-(methylsulfanyl)propylamine;~Decarboxy-AdoMet,LUCA,False
+C01157,Hydroxyproline;~L-Hydroxyproline;~trans-4-Hydroxy-L-proline,LUCA,False
+C01171,alpha-D-Hexose 1-phosphate,LUCA,False
+C01172,beta-D-Glucose 6-phosphate,LUCA,False
+C01177,Inositol 1-phosphate;~myo-Inositol 1-phosphate;~1D-myo-Inositol 1-phosphate;~D-myo-Inositol 1-phosphate;~1D-myo-Inositol 1-monophosphate,LUCA,False
+C01179,3-(4-Hydroxyphenyl)pyruvate;~4-Hydroxyphenylpyruvate;~p-Hydroxyphenylpyruvic acid,LUCA,False
+C01185,Nicotinate D-ribonucleotide;~beta-Nicotinate D-ribonucleotide;~Nicotinate ribonucleotide;~Nicotinic acid ribonucleotide,LUCA,False
+C01213,(R)-Methylmalonyl-CoA;~L-Methylmalonyl-CoA,LUCA,False
+C01217,"5,6,7,8-Tetrahydromethanopterin;~H4MPT;~THMPT;~Tetrahydromethanopterin",LUCA,False
+C01251,"(R)-2-Hydroxybutane-1,2,4-tricarboxylate;~Homocitrate;~Homocitric acid;~3-Hydroxy-3-carboxyadipic acid;~(R)-2-Hydroxy-1,2,4-butanetricarboxylic acid",LUCA,False
+C01267,3-(Imidazol-4-yl)-2-oxopropyl phosphate;~Imidazole-acetol phosphate,LUCA,False
+C01300,"6-(Hydroxymethyl)-7,8-dihydropterin;~6-Hydroxymethyl-7,8-dihydropterin;~2-Amino-4-hydroxy-6-hydroxymethyl-7,8-dihydropteridine",LUCA,False
+C01302,1-(2-Carboxyphenylamino)-1-deoxy-D-ribulose 5-phosphate,LUCA,False
+C01344,dIDP;~2'-Deoxyinosine-5'-diphosphate;~2'-Deoxyinosine 5'-diphosphate,LUCA,False
+C01345,dITP;~2'-Deoxyinosine-5'-triphosphate;~2'-Deoxyinosine 5'-triphosphate,LUCA,False
+C01346,dUDP;~2'-Deoxyuridine 5'-diphosphate,LUCA,False
+C01401,Alanine;~2-Aminopropionic acid;~2-Aminopropanoic acid,LUCA,False
+C01563,Carbamate;~Carbamic acid;~Aminoformic acid,LUCA,False
 C01609,TODO,LUCA,False
 C01635,TODO,LUCA,False
 C01636,TODO,LUCA,False
@@ -291,192 +291,192 @@ C01650,TODO,LUCA,False
 C01651,TODO,LUCA,False
 C01652,TODO,LUCA,False
 C01653,TODO,LUCA,False
-C01659,TODO,LUCA,False
-C01672,TODO,LUCA,False
-C01764,TODO,LUCA,False
-C01909,TODO,LUCA,False
-C01931,TODO,LUCA,False
-C02015,TODO,LUCA,False
-C02047,TODO,LUCA,False
-C02051,TODO,LUCA,False
-C02090,TODO,LUCA,False
-C02163,TODO,LUCA,False
-C02282,TODO,LUCA,False
-C02291,TODO,LUCA,False
-C02297,TODO,LUCA,False
-C02412,TODO,LUCA,False
-C02430,TODO,LUCA,False
-C02504,TODO,LUCA,False
-C02505,TODO,LUCA,False
-C02532,TODO,LUCA,False
-C02553,TODO,LUCA,False
-C02554,TODO,LUCA,False
-C02612,TODO,LUCA,False
-C02630,TODO,LUCA,False
-C02631,TODO,LUCA,False
-C02637,TODO,LUCA,False
-C02693,TODO,LUCA,False
-C02702,TODO,LUCA,False
-C02714,TODO,LUCA,False
+C01659,Acrylamide;~2-Propenamide,LUCA,False
+C01672,"Cadaverine;~1,5-Pentanediamine;~1,5-Diaminopentane;~Pentamethylenediamine",LUCA,False
+C01764,tRNA containing uridine at position 54;~tRNA UpsiC,LUCA,False
+C01909,Dethiobiotin;~Desthiobiotin,LUCA,False
+C01931,L-Lysyl-tRNA;~L-Lysyl-tRNA(Lys),LUCA,False
+C02015,CoA-disulfide,LUCA,False
+C02047,L-Leucyl-tRNA;~L-Leucyl-tRNA(Leu),LUCA,False
+C02051,Lipoylprotein;~[H-protein]-lipoyllysine;~[GCSH]-N6-lipoyl-L-lysine;~[GcvH]-N6-lipoyl-L-lysine;~[Glycine cleavage system H]-N6-lipoyl-L-lysine;~[Glycine-cleavage complex H protein]-N6-lipoyl-L-lysine,LUCA,False
+C02090,"Trypanothione;~N1,N8-Bis(gamma-L-glutamyl-L-cysteinyl-glycyl)spermidine;~N1,N8-Bis(glutathionyl)spermidine;~Reduced trypanothione",LUCA,False
+C02163,L-Arginyl-tRNA(Arg);~L-Arginyl-tRNA,LUCA,False
+C02282,Glutaminyl-tRNA;~L-Glutaminyl-tRNA(Gln);~Glutaminyl-tRNA(Gln);~Gln-tRNA(Gln),LUCA,False
+C02291,L-Cystathionine,LUCA,False
+C02297,N-Acetyldiamine,LUCA,False
+C02412,Glycyl-tRNA(Gly),LUCA,False
+C02430,L-Methionyl-tRNA;~L-Methionyl-tRNA(Met),LUCA,False
+C02504,alpha-Isopropylmalate;~(2S)-2-Isopropylmalate;~(2S)-2-Hydroxy-2-isopropylsuccinic acid;~2-Isopropylmalic acid;~3-Carboxy-3-hydroxy-4-methylpentanoate;~3-Carboxy-3-hydroxyisocaproate;~(2S)-2-Isopropylmalic acid,LUCA,False
+C02505,2-Phenylacetamide;~alpha-Phenylacetamide,LUCA,False
+C02532,O-Phospho-D-serine;~D-O-Phosphoserine,LUCA,False
+C02553,L-Seryl-tRNA(Ser),LUCA,False
+C02554,L-Valyl-tRNA(Val),LUCA,False
+C02612,(R)-2-Methylmalate;~(R)-2-Methylmalic acid;~(R)-Citramalate;~(R)-Citramalic acid;~(R)-alpha-Hydroxypyrotartaric acid;~D-Citramalate;~D-Citramalic acid;~D-alpha-Hydroxypyrotartaric acid;~(2R)-2-Hydroxy-2-methylbutanedioate,LUCA,False
+C02630,2-Hydroxyglutarate;~alpha-Hydroxyglutarate;~2-Hydroxyglutaric acid,LUCA,False
+C02631,2-Isopropylmaleate;~beta-Isopropylmaleate,LUCA,False
+C02637,3-Dehydroshikimate,LUCA,False
+C02693,(Indol-3-yl)acetamide;~Indole-3-acetamide,LUCA,False
+C02702,L-Prolyl-tRNA(Pro),LUCA,False
+C02714,N-Acetylputrescine,LUCA,False
 C02729,TODO,LUCA,False
-C02739,TODO,LUCA,False
-C02764,TODO,LUCA,False
-C02839,TODO,LUCA,False
-C02938,TODO,LUCA,False
-C02953,TODO,LUCA,False
-C02972,TODO,LUCA,False
-C02987,TODO,LUCA,False
-C02988,TODO,LUCA,False
-C02992,TODO,LUCA,False
-C03028,TODO,LUCA,False
-C03078,TODO,LUCA,False
-C03082,TODO,LUCA,False
-C03090,TODO,LUCA,False
-C03125,TODO,LUCA,False
-C03127,TODO,LUCA,False
-C03170,TODO,LUCA,False
-C03232,TODO,LUCA,False
-C03356,TODO,LUCA,False
-C03373,TODO,LUCA,False
-C03375,TODO,LUCA,False
-C03431,TODO,LUCA,False
-C03446,TODO,LUCA,False
-C03492,TODO,LUCA,False
-C03506,TODO,LUCA,False
-C03511,TODO,LUCA,False
-C03512,TODO,LUCA,False
-C03541,TODO,LUCA,False
-C03546,TODO,LUCA,False
-C03620,TODO,LUCA,False
-C03680,TODO,LUCA,False
-C03687,TODO,LUCA,False
-C03722,TODO,LUCA,False
-C03723,TODO,LUCA,False
-C03735,TODO,LUCA,False
-C03741,TODO,LUCA,False
-C03794,TODO,LUCA,False
-C03912,TODO,LUCA,False
-C03972,TODO,LUCA,False
-C04006,TODO,LUCA,False
-C04039,TODO,LUCA,False
-C04051,TODO,LUCA,False
-C04076,TODO,LUCA,False
-C04181,TODO,LUCA,False
-C04232,TODO,LUCA,False
-C04242,TODO,LUCA,False
-C04272,TODO,LUCA,False
-C04281,TODO,LUCA,False
-C04302,TODO,LUCA,False
-C04309,TODO,LUCA,False
-C04327,TODO,LUCA,False
-C04352,TODO,LUCA,False
-C04376,TODO,LUCA,False
-C04377,TODO,LUCA,False
-C04411,TODO,LUCA,False
-C04593,TODO,LUCA,False
-C04640,TODO,LUCA,False
-C04646,TODO,LUCA,False
-C04666,TODO,LUCA,False
-C04677,TODO,LUCA,False
-C04681,TODO,LUCA,False
-C04735,TODO,LUCA,False
-C04752,TODO,LUCA,False
-C04807,TODO,LUCA,False
-C04823,TODO,LUCA,False
-C04896,TODO,LUCA,False
-C04916,TODO,LUCA,False
-C05125,TODO,LUCA,False
-C05167,TODO,LUCA,False
-C05172,TODO,LUCA,False
-C05335,TODO,LUCA,False
-C05336,TODO,LUCA,False
-C05345,TODO,LUCA,False
-C05378,TODO,LUCA,False
-C05382,TODO,LUCA,False
-C05512,TODO,LUCA,False
-C05526,TODO,LUCA,False
-C05527,TODO,LUCA,False
-C05528,TODO,LUCA,False
-C05686,TODO,LUCA,False
-C05688,TODO,LUCA,False
-C05696,TODO,LUCA,False
-C05698,TODO,LUCA,False
-C05699,TODO,LUCA,False
-C05703,TODO,LUCA,False
-C05714,TODO,LUCA,False
-C05715,TODO,LUCA,False
-C05921,TODO,LUCA,False
-C05928,TODO,LUCA,False
-C05929,TODO,LUCA,False
-C05946,TODO,LUCA,False
-C05947,TODO,LUCA,False
-C06006,TODO,LUCA,False
-C06007,TODO,LUCA,False
-C06010,TODO,LUCA,False
-C06019,TODO,LUCA,False
-C06027,TODO,LUCA,False
-C06028,TODO,LUCA,False
-C06055,TODO,LUCA,False
-C06056,TODO,LUCA,False
-C06112,TODO,LUCA,False
-C06156,TODO,LUCA,False
-C06196,TODO,LUCA,False
-C06244,TODO,LUCA,False
-C06249,TODO,LUCA,False
-C06250,TODO,LUCA,False
-C06481,TODO,LUCA,False
-C07086,TODO,LUCA,False
-C07649,TODO,LUCA,False
-C09332,TODO,LUCA,False
-C09814,TODO,LUCA,False
-C09815,TODO,LUCA,False
-C11038,TODO,LUCA,False
-C11039,TODO,LUCA,False
-C11736,TODO,LUCA,False
-C14463,TODO,LUCA,False
-C15541,TODO,LUCA,False
+C02739,1-(5-Phospho-D-ribosyl)-ATP;~Phosphoribosyl-ATP;~N1-(5-Phospho-D-ribosyl)-ATP;~1-(5-Phosphoribosyl)-ATP;~1-(5-Phospho-beta-D-ribosyl)-ATP,LUCA,False
+C02764,tRNA pseudouridine,LUCA,False
+C02839,L-Tyrosyl-tRNA(Tyr),LUCA,False
+C02938,3-Indoleacetonitrile;~Indol-3-ylacetonitrile;~Indole-3-acetonitrile;~(Indol-3-yl)acetonitrile,LUCA,False
+C02953,"7,8-Dihydrobiopterin;~L-erythro-7,8-Dihydrobiopterin",LUCA,False
+C02972,Dihydrolipoylprotein;~[H-protein]-dihydrolipoyllysine;~[GCSH]-N6-[(R)-dihydrolipoyl]-L-lysine;~[GcvH]-N6-[(R)-dihydrolipoyl]-L-lysine;~[Glycine cleavage system H]-N6-[(R)-dihydrolipoyl]-L-lysine,LUCA,False
+C02987,L-Glutamyl-tRNA(Glu),LUCA,False
+C02988,L-Histidyl-tRNA(His),LUCA,False
+C02992,L-Threonyl-tRNA(Thr),LUCA,False
+C03028,Thiamin triphosphate;~Thiamine triphosphate,LUCA,False
+C03078,4-Guanidinobutanamide,LUCA,False
+C03082,4-Phospho-L-aspartate;~L-4-Aspartyl phosphate,LUCA,False
+C03090,5-Phosphoribosylamine;~5-Phospho-beta-D-ribosylamine;~5-Phospho-D-ribosylamine;~5-Phosphoribosyl-1-amine,LUCA,False
+C03125,L-Cysteinyl-tRNA(Cys),LUCA,False
+C03127,L-Isoleucyl-tRNA(Ile),LUCA,False
+C03170,Trypanothione disulfide;~Oxidized trypanothione,LUCA,False
+C03232,3-Phosphonooxypyruvate;~3-Phosphonooxypyruvic acid;~3-Phosphohydroxypyruvate;~3-Phosphohydroxypyruvic acid;~3-Phosphooxypyruvate,LUCA,False
+C03356,3-Phospho-D-erythronate,LUCA,False
+C03373,Aminoimidazole ribotide;~AIR;~1-(5'-Phosphoribosyl)-5-aminoimidazole;~5'-Phosphoribosyl-5-aminoimidazole;~1-(5-Phospho-D-ribosyl)-5-aminoimidazole;~5-Amino-1-(5-phospho-D-ribosyl)imidazole;~5-Amino-1-(5-phospho-beta-D-ribosyl)imidazole,LUCA,False
+C03375,"Norspermidine;~Bis(3-aminopropyl)amine;~3,3'-Iminobispropylamine",LUCA,False
+C03431,S-Inosyl-L-homocysteine,LUCA,False
+C03446,tRNA containing ribothymidine at position 54;~tRNA TpsiC,LUCA,False
+C03492,D-4'-Phosphopantothenate;~(R)-4'-Phosphopantothenate,LUCA,False
+C03506,"Indoleglycerol phosphate;~1-C-(Indol-3-yl)glycerol 3-phosphate;~(3-Indolyl)-glycerol phosphate;~C1-(3-Indolyl)-glycerol 3-phosphate;~(1S,2R)-1-C-(Indol-3-yl)glycerol 3-phosphate;~Indole-3-glycerol phosphate",LUCA,False
+C03511,L-Phenylalanyl-tRNA(Phe),LUCA,False
+C03512,L-Tryptophanyl-tRNA(Trp),LUCA,False
+C98951,Tetrahydropteroyltri-L-glutamate;~(6S)-H4PteGlu3,LUCA,False
+C03546,myo-Inositol 4-phosphate;~D-myo-Inositol 4-phosphate;~1D-myo-Inositol 4-phosphate;~1D-myo-Inositol 4-monophosphate;~Inositol 4-phosphate,LUCA,False
+C03620,Monocarboxylic acid amide,LUCA,False
+C03680,"4-Imidazolone-5-propanoate;~4-Imidazolone-5-propionic acid;~4,5-Dihydro-4-oxo-5-imidazolepropanoate",LUCA,False
+C98953,"Alkane-alpha,omega-diamine",LUCA,False
+C03722,"Quinolinate;~Pyridine-2,3-dicarboxylate;~Quinolinic acid;~2,3-Pyridinedicarboxylic acid",LUCA,False
+C03723,Ribonucleoside diphosphate;~Ribonucleoside 5'-diphosphate,LUCA,False
+C03735,alpha-D-Hexose 6-phosphate,LUCA,False
+C03741,(S)-4-Amino-5-oxopentanoate;~L-Glutamate 1-semialdehyde,LUCA,False
+C03794,"N6-(1,2-Dicarboxyethyl)-AMP;~N6-(1,2-Dicarboxyethyl)AMP;~Adenylosuccinate;~Adenylosuccinic acid",LUCA,False
+C03912,(S)-1-Pyrroline-5-carboxylate;~L-1-Pyrroline-5-carboxylate;~1-Pyrroline-5-carboxylate,LUCA,False
+C03972,"2,3,4,5-Tetrahydrodipicolinate;~Delta1-Piperidine-2,6-dicarboxylate;~L-2,3,4,5-Tetrahydrodipicolinate;~(S)-2,3,4,5-Tetrahydropyridine-2,6-dicarboxylate",LUCA,False
+C04006,1D-myo-Inositol 3-phosphate;~D-myo-Inositol 3-phosphate;~myo-Inositol 3-phosphate;~Inositol 3-phosphate;~1D-myo-Inositol 3-monophosphate;~D-myo-Inositol 3-monophosphate;~myo-Inositol 3-monophosphate;~Inositol 3-monophosphate;~1L-myo-Inositol 1-phosphate;~L-myo-Inositol 1-phosphate,LUCA,False
+C04039,"2,3-Dihydroxy-3-methylbutanoate;~2,3-Dihydroxy-isovalerate;~2,3-Dihydroxy-isovaleric acid",LUCA,False
+C04051,5-Amino-4-imidazolecarboxyamide,LUCA,False
+C04076,L-2-Aminoadipate 6-semialdehyde;~2-Aminoadipate 6-semialdehyde;~L-Allysine;~Allysine;~(S)-2-Amino-6-oxohexanoate,LUCA,False
+C04181,3-Hydroxy-3-methyl-2-oxobutanoic acid;~3-Hydroxy-3-methyl-2-oxobutanoate;~2-Oxo-3-hydroxyisovalerate,LUCA,False
+C04232,2'-Deoxyribonucleoside diphosphate;~2'-Deoxyribonucleoside 5'-diphosphate,LUCA,False
+C04242,5-Fluorodeoxyuridine monophosphate,LUCA,False
+C04272,"(R)-2,3-Dihydroxy-3-methylbutanoate;~(R)-2,3-Dihydroxy-isovalerate;~(R)-2,3-Dihydroxy-isovaleric acid;~(2R)-2,3-Dihydroxy-3-methylbutanoate;~(2R)-2,3-Dihydroxy-3-methylbutanoic acid",LUCA,False
+C04281,"L-1-Pyrroline-3-hydroxy-5-carboxylate;~3-Hydroxy-L-1-pyrroline-5-carboxylate;~(3R,5S)-1-Pyrroline-3-hydroxy-5-carboxylate;~(3R,5S)-3-Hydroxy-1-pyrroline-5-carboxylate",LUCA,False
+C04302,N-(5-Phospho-D-ribosyl)anthranilate;~N-(5-Phospho-beta-D-ribosyl)anthranilate;~N-(5-Phosphoribosyl)anthranilic acid,LUCA,False
+C04309,Phosphoenol-4-deoxy-3-tetrulosonate,LUCA,False
+C04327,4-Methyl-5-(2-phosphooxyethyl)thiazole;~4-Methyl-5-(2-phosphonooxyethyl)thiazole;~5-(2-Hydroxyethyl)-4-methylthiazole phosphate;~HET-P,LUCA,False
+C04352,(R)-4'-Phosphopantothenoyl-L-cysteine;~N-[(R)-4'-Phosphopantothenoyl]-L-cysteine,LUCA,False
+C04376,5'-Phosphoribosyl-N-formylglycinamide;~N-Formyl-GAR;~N-Formylglycinamide ribonucleotide;~N2-Formyl-N1-(5-phospho-D-ribosyl)glycinamide;~N2-Formyl-N1-(5-phospho-beta-D-ribosyl)glycinamide,LUCA,False
+C04377,"5,10-Methylenetetrahydromethanopterin;~N5,N10-Methylenetetrahydromethanopterin",LUCA,False
+C04411,"(2R,3S)-3-Isopropylmalate;~3-Isopropylmalate;~3-Carboxy-2-hydroxy-4-methylpentanoate;~2-D-threo-Hydroxy-3-carboxy-isocaproate",LUCA,False
+C04593,"(2S,3R)-3-Hydroxybutane-1,2,3-tricarboxylate;~Methylisocitrate;~Methylisocitric acid",LUCA,False
+C04640,2-(Formamido)-N1-(5'-phosphoribosyl)acetamidine;~1-(5'-Phosphoribosyl)-N-formylglycinamidine;~5'-Phosphoribosyl-N-formylglycinamidine;~5'-Phosphoribosylformylglycinamidine;~2-(Formamido)-N1-(5-phospho-D-ribosyl)acetamidine,LUCA,False
+C04646,6-Thioinosine-5'-monophosphate;~9-(5-Phospho-1-ribofuranosyl)-6-mercaptopurine,LUCA,False
+C04666,D-erythro-1-(Imidazol-4-yl)glycerol 3-phosphate;~D-erythro-Imidazole-glycerol 3-phosphate;~D-erythro-Imidazole-glycerol phosphate,LUCA,False
+C04677,1-(5'-Phosphoribosyl)-5-amino-4-imidazolecarboxamide;~5'-Phosphoribosyl-5-amino-4-imidazolecarboxamide;~5'-Phospho-ribosyl-5-amino-4-imidazole carboxamide;~AICAR;~5-Aminoimidazole-4-carboxamide ribotide;~5-Phosphoribosyl-4-carbamoyl-5-aminoimidazole;~5-Amino-1-(5-phospho-D-ribosyl)imidazole-4-carboxamide;~5-Amino-1-(5-phospho-beta-D-ribosyl)imidazole-4-carboxamide,LUCA,False
+C04681,[Acetyl-CoA:carbon-dioxide ligase (ADP-forming)];~Holo-[acetyl-CoA:carbon-dioxide ligase (ADP-forming)];~Biotin-[acetyl-CoA:carbon-dioxide ligase (ADP-forming)];~Holo-[acetyl-CoA carboxylase];~Biotin-[acetyl-CoA carboxylase],LUCA,False
+C04735,Apo-[acetyl-CoA:carbon-dioxide ligase (ADP-forming)];~Apo-[acetyl-CoA carboxylase],LUCA,False
+C04752,4-Amino-5-hydroxymethyl-2-methylpyrimidine diphosphate;~4-Amino-2-methyl-5-(diphosphooxymethyl)pyrimidine;~HMP-PP,LUCA,False
+C04807,"6-Hydroxymethyl-7,8-dihydropterin diphosphate;~(7,8-Dihydropterin-6-yl)methyl diphosphate;~2-Amino-7,8-dihydro-4-hydroxy-6-(diphosphooxymethyl)pteridine;~2-Amino-4-hydroxy-6-hydroxymethyl-7,8-dihydropteridine diphosphate;~7,8-Dihydropterin pyrophosphate",LUCA,False
+C04823,1-(5'-Phosphoribosyl)-5-amino-4-(N-succinocarboxamide)-imidazole;~1-(5'-Phosphoribosyl)-4-(N-succinocarboxamide)-5-aminoimidazole;~5'-Phosphoribosyl-4-(N-succinocarboxamide)-5-aminoimidazole;~(S)-2-[5-Amino-1-(5-phospho-D-ribosyl)imidazole-4-carboxamido]succinate;~SAICAR,LUCA,False
+C04896,5-(5-Phospho-D-ribosylaminoformimino)-1-(5-phosphoribosyl)-imidazole-4-carboxamide;~N-(5'-Phospho-D-ribosylformimino)-5-amino-1-(5''-phospho-D-ribosyl)-4-imidazolecarboxamide;~N-(5'-Phosphoribosylformimino)-5-amino-1-(5''-phosphoribosyl)-4-imidazolecarboxamide;~Phosphoribosyl-formimino-AICAR-phosphate;~1-(5-Phosphoribosyl)-5-[(5-phosphoribosylamino)methylideneamino]imidazole-4-carboxamide;~1-(5-Phospho-beta-D-ribosyl)-5-[(5-phospho-beta-D-ribosylamino)methylideneamino]imidazole-4-carboxamide,LUCA,False
+C04916,N-(5'-Phospho-D-1'-ribulosylformimino)-5-amino-1-(5''-phospho-D-ribosyl)-4-imidazolecarboxamide;~5-[(5-Phospho-1-deoxyribulos-1-ylamino)methylideneamino]-1-(5-phosphoribosyl)imidazole-4-carboxamide;~Phosphoribulosyl-formimino-AICAR-phosphate;~5-[(5-Phospho-1-deoxy-D-ribulos-1-ylamino)methylideneamino]-1-(5-phospho-beta-D-ribosyl)imidazole-4-carboxamide,LUCA,False
+C05125,2-(alpha-Hydroxyethyl)thiamine diphosphate;~2-Hydroxyethyl-ThPP,LUCA,False
+C05167,alpha-Amino acid,LUCA,False
+C05172,Selenophosphoric acid;~Selenophosphate,LUCA,False
+C05335,L-Selenomethionine,LUCA,False
+C05336,Selenomethionyl-tRNA(Met);~L-Selenomethionyl-tRNA(Met),LUCA,False
+C05345,beta-D-Fructose 6-phosphate;~beta-D-Fructofuranose 6-phosphate,LUCA,False
+C05378,"beta-D-Fructose 1,6-bisphosphate",LUCA,False
+C05382,Sedoheptulose 7-phosphate;~D-Sedoheptulose 7-phosphate;~D-altro-Heptulose 7-phosphate;~altro-Heptulose 7-phosphate,LUCA,False
+C05512,Deoxyinosine;~2'-Deoxyinosine,LUCA,False
+C05526,S-Glutathionyl-L-cysteine,LUCA,False
+C05527,3-Sulfinylpyruvate;~3-Sulfinopyruvate,LUCA,False
+C05528,3-Sulfopyruvate;~3-Sulfopyruvic acid,LUCA,False
+C05686,Adenylylselenate;~Adenosine-5'-phosphoselenate,LUCA,False
+C05688,L-Selenocysteine,LUCA,False
+C05696,3'-Phosphoadenylylselenate;~3'-Phosphoadenosine-5'-phosphoselenate,LUCA,False
+C05698,Selenohomocysteine,LUCA,False
+C05699,L-Selenocystathionine,LUCA,False
+C05703,Methaneselenol;~Methylselenol,LUCA,False
+C05714,alpha-Aminopropiononitrile,LUCA,False
+C05715,gamma-Amino-gamma-cyanobutanoate;~4-Amino-4-cyanobutanoic acid,LUCA,False
+C05921,Biotinyl-5'-AMP,LUCA,False
+C05928,(6R)-10-Formyltetrahydropteroyldiglutamate;~10-Formyl-THF-L-glutamate;~(6R)-10-HCO-H4PteGlu2,LUCA,False
+C05929,10-Formyltetrahydrofolylpolyglutamate;~10-Formyl-THF-polyglutamate,LUCA,False
+C05946,(4R)-4-Hydroxy-2-oxoglutarate;~(R)-2-Hydroxy-4-oxopentanedioate;~D-4-Hydroxy-2-oxoglutarate,LUCA,False
+C05947,L-erythro-4-Hydroxyglutamate;~erythro-4-Hydroxy-L-glutamate,LUCA,False
+C06006,(S)-2-Aceto-2-hydroxybutanoate;~(S)-2-Hydroxy-2-ethyl-3-oxobutanoate;~(2S)-2-Ethyl-2-hydroxy-3-oxobutanoic acid,LUCA,False
+C06007,"(R)-2,3-Dihydroxy-3-methylpentanoate;~(R)-2,3-Dihydroxy-3-methylvalerate;~(2R,3R)-2,3-Dihydroxy-3-methylpentanoate;~(2R,3R)-2,3-Dihydroxy-3-methylpentanoic acid",LUCA,False
+C06010,(S)-2-Acetolactate;~(S)-2-Hydroxy-2-methyl-3-oxobutanoate;~(2S)-2-Hydroxy-2-methyl-3-oxobutanoate;~(2S)-2-Hydroxy-2-methyl-3-oxobutanoic acid,LUCA,False
+C06019,D-arabino-Hex-3-ulose 6-phosphate;~D-arabino-3-Hexulose 6-phosphate;~D-arabino-6-Phospho-hex-3-ulose,LUCA,False
+C06027,"L-erythro-3-Methylmalyl-CoA;~beta-Methylmalyl-CoA;~(2R,3S)-2-Methylmalyl-CoA;~L-erythro-beta-Methylmalyl-CoA;~(2R,3S)-2-Methyl-3-carboxy-3-hydroxypropanoyl-CoA",LUCA,False
+C06028,2-Methylfumaryl-CoA;~Mesaconyl-CoA;~Mesaconyl-C1-CoA;~(E)-3-Carboxy-2-methylprop-2-enoyl-CoA,LUCA,False
+C06055,O-Phospho-4-hydroxy-L-threonine;~4-(Phosphonooxy)-threonine;~4-(Phosphonooxy)-L-threonine;~4-Phosphooxy-L-threonine,LUCA,False
+C06056,4-Hydroxy-L-threonine;~Hydroxythreonine,LUCA,False
+C06112,L-Glutamyl-tRNA(Gln);~Glu-tRNA(Gln);~Glutamyl-tRNA(Gln),LUCA,False
+C06156,alpha-D-Glucosamine 1-phosphate;~D-Glucosamine 1-phosphate,LUCA,False
+C06196,2'-Deoxyinosine 5'-phosphate;~dIMP,LUCA,False
+C06244,Acetamide,LUCA,False
+C06249,Apo-[carboxylase];~[Biotin carboxyl-carrier protein]-L-lysine,LUCA,False
+C06250,Holo-[carboxylase];~Biotin-carboxyl-carrier protein;~[Biotin carboxyl-carrier protein]-biotin-N6-L-lysine;~[Biotin carboxyl-carrier protein]-N6-biotinyl-L-lysine,LUCA,False
+C06481,L-Seryl-tRNA(Sec),LUCA,False
+C07086,Phenylacetic acid;~Benzylformic acid;~Phenylacetate;~Benzeneacetic acid,LUCA,False
+C07649,5-FU;~Fluorouracil;~5-Fluorouracil,LUCA,False
+C09332,THF-L-glutamate;~Tetrahydropteroyldiglutamate;~(6S)-H4PteGlu2,LUCA,False
+C09814,Benzonitrile;~Phenyl cyanide;~Cyanobenzene,LUCA,False
+C09815,Benzamide,LUCA,False
+C11038,2'-Deoxy-5-hydroxymethylcytidine-5'-diphosphate,LUCA,False
+C11039,2'-Deoxy-5-hydroxymethylcytidine-5'-triphosphate,LUCA,False
+C11736,5-Fluorodeoxyuridine;~Floxuridine,LUCA,False
+C14463,(R)-3-Hydroxy-3-methyl-2-oxopentanoate;~(R)-3-Hydroxy-3-methyl-2-oxopentanoic acid,LUCA,False
+C15541,NDP-glucose;~NDP-D-glucose;~NDP-alpha-D-glucose,LUCA,False
 C15585,TODO,LUCA,False
-C15602,TODO,LUCA,False
-C15603,TODO,LUCA,False
-C15667,TODO,LUCA,False
-C15972,TODO,LUCA,False
-C15973,TODO,LUCA,False
-C15996,TODO,LUCA,False
-C16074,TODO,LUCA,False
-C16237,TODO,LUCA,False
-C16565,TODO,LUCA,False
-C16618,TODO,LUCA,False
-C16619,TODO,LUCA,False
-C16633,TODO,LUCA,False
-C16634,TODO,LUCA,False
+C98925,"Hydroquinone;~p-Benzenediol;~1,4-Benzenediol;~1,4-Dihydroxybenzene;~Benzene-1,4-diol;~Quinol;~4-Hydroxyphenol",LUCA,False
+C98925,"Hydroquinone;~p-Benzenediol;~1,4-Benzenediol;~1,4-Dihydroxybenzene;~Benzene-1,4-diol;~Quinol;~4-Hydroxyphenol",LUCA,False
+C15667,5-Carboxyamino-1-(5-phospho-D-ribosyl)imidazole,LUCA,False
+C15972,Enzyme N6-(lipoyl)lysine;~Lipoamide-E;~[E2 protein]-N6-lipoyl-L-lysine;~[Lipoyl-carrier protein E2]-N6-lipoyl-L-lysine,LUCA,False
+C15973,Enzyme N6-(dihydrolipoyl)lysine;~Dihydrolipoamide-E;~[E2 protein]-N6-[(R)-dihydrolipoyl]-L-lysine;~[Lipoyl-carrier protein E2]-N6-[(R)-dihydrolipoyl]-L-lysine,LUCA,False
+C15996,7-Cyano-7-carbaguanine;~7-Cyano-7-deazaguanine,LUCA,False
+C16074,Phenylacetonitrile;~Benzyl cyanide,LUCA,False
+C16237,Protein N6-(lipoyl)lysine;~[Lipoyl-carrier protein]-N6-(lipoyl)lysine,LUCA,False
+C16565,Aminopropylcadaverine,LUCA,False
+C16618,6-Thioxanthine 5'-monophosphate,LUCA,False
+C16619,6-Thioguanosine monophosphate,LUCA,False
+C16633,5-Fluorouridine,LUCA,False
+C16634,5-Fluorouridine monophosphate,LUCA,False
 C16636,TODO,LUCA,False
 C16663,TODO,LUCA,False
 C16664,TODO,LUCA,False
-C16832,TODO,LUCA,False
-C17324,TODO,LUCA,False
-C18026,TODO,LUCA,False
-C18902,TODO,LUCA,False
-C19669,TODO,LUCA,False
-C19787,TODO,LUCA,False
-C19791,TODO,LUCA,False
-C19845,TODO,LUCA,False
-C19885,TODO,LUCA,False
-C19886,TODO,LUCA,False
-C20238,TODO,LUCA,False
-C20246,TODO,LUCA,False
-C20247,TODO,LUCA,False
-C20248,TODO,LUCA,False
-C20258,TODO,LUCA,False
-C20560,TODO,LUCA,False
-C20641,TODO,LUCA,False
-C20751,TODO,LUCA,False
-C20864,TODO,LUCA,False
-C20904,TODO,LUCA,False
-C20905,TODO,LUCA,False
-C20969,TODO,LUCA,False
-C21004,TODO,LUCA,False
-C21031,TODO,LUCA,False
-C21748,TODO,LUCA,False
-C21749,TODO,LUCA,False
-C21750,TODO,LUCA,False
-C21751,TODO,LUCA,False
+C16832,[Protein]-N6-[(R)-dihydrolipoyl]-L-lysine;~[Lipoyl-carrier protein]-N6-[(R)-dihydrolipoyl]-L-lysine;~Protein N6-(dihydrolipoyl)lysine,LUCA,False
+C17324,tRNA adenine;~Adenosine in tRNA,LUCA,False
+C18026,(2S)-Ethylmalonyl-CoA;~(S)-Ethylmalonyl-CoA;~Ethylmalonyl-CoA;~Ethylmalonyl coenzyme A,LUCA,False
+C18902,Methylselenic acid;~Methylseleninate,LUCA,False
+C19669,Thermospermine,LUCA,False
+C19787,5'-S-Methyl-5'-thioinosine;~5'-Deoxy-5'-methylthioinosine;~S-Methyl-5'-thioinosine,LUCA,False
+C19791,2-O-(alpha-D-Glucopyranosyl)-3-phospho-D-glycerate;~(2R)-2-(alpha-D-Glucopyranosyloxy)-3-(phosphonooxy)propanoate,LUCA,False
+C19845,Pimeloyl-[acyl-carrier protein];~Pimeloyl-[acp];~Pimelyl-[acyl-carrier protein];~Pimelyl-[acp];~7-Hydroxy-7-oxoheptanoyl-[acyl-carrier protein],LUCA,False
+C19885,alpha-Aminoadipate carrier protein LysW;~[LysW];~[Lysine-biosynthesis-protein LysW]-C-terminal-L-glutamate,LUCA,False
+C19886,LysW-gamma-L-alpha-aminoadipate;~[LysW]-L-2-aminoadipate;~[Lysine-biosynthesis-protein LysW]-C-terminal-gamma-(L-2-aminoadip-2-yl)-L-glutamate,LUCA,False
+C20238,(2R)-Ethylmalonyl-CoA,LUCA,False
+C20246,"2-[(2R,5Z)-2-Carboxy-4-methylthiazol-5(2H)-ylidene]ethyl phosphate;~cThz*-P",LUCA,False
+C20247,"2-(2-Carboxy-4-methylthiazol-5-yl)ethyl phosphate;~4-Methyl-5-[2-(phosphonooxy)ethyl]-1,3-thiazole-2-carboxylate;~cThz-P",LUCA,False
+C20248,7-Carboxy-7-carbaguanine;~7-Carboxy-7-deazaguanine,LUCA,False
+C20258,"(2S,4S)-4-Hydroxy-2,3,4,5-tetrahydrodipicolinate;~(2S,4S)-4-Hydroxy-2,3,4,5-tetrahydropyridine-2,6-dicarboxylate;~HTPA",LUCA,False
+C20560,N1-(3-Aminopropyl)agmatine;~N1-Aminopropylagmatine;~N1-(Aminopropyl)agmatine,LUCA,False
+C20641,L-Threonylcarbamoyladenylate;~L-Threonylcarbamoyl-AMP;~TC-AMP,LUCA,False
+C20751,N6-L-Threonylcarbamoyladenine in tRNA;~t6A in tRNA,LUCA,False
+C20864,5'-Triphospho-[mRNA];~(5')pppPur-mRNA,LUCA,False
+C20904,2-Iminopropanoate,LUCA,False
+C20905,2-Iminobutanoate,LUCA,False
+C20969,Carboxyphosphate,LUCA,False
+C21004,"Norspermine;~N,N'-Bis(3-aminopropyl)-1,3-propanediamine",LUCA,False
+C21031,5-Hydroxymethylcytosine in DNA;~DNA 5-hydroxymethylcytosine,LUCA,False
+C21748,5-Fluorouridine diphosphate,LUCA,False
+C21749,5-Fluorouridine triphosphate,LUCA,False
+C21750,5-Fluorodeoxyuridine diphosphate,LUCA,False
+C21751,5-Fluorodeoxyuridine triphosphate,LUCA,False
