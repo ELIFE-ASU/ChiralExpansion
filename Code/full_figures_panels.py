@@ -135,8 +135,7 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
         results[name] = expand_from_seed_set(seeds=seeds,
                                              reactions=reaction_scope,
                                              max_gen=max_generation)
-        results[name]['bipartite_edgelist'] = make_bipartite_edgelist(
-            results[name]['edge_pool'])
+        results[name]['bipartite_edgelist'] = make_bipartite_edge_list(results[name]['edge_pool'])
 
     ### Process expansion (including chiral %s at each step & heavy atom count)
     def result_to_df(key: str, to_apply):
@@ -207,7 +206,7 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
 
     ### Network figure
     print("- Generating Network Figure -")
-    result_network = generate_annotated_bipartite_edgelist(results[seed_name])
+    result_network = generate_annotated_bipartite_edge_list(results[seed_name])
     # summary_network = generate_expansion_summary(result_network)
     transition_edge_df = result_network['bipartite_edgelist'].query('step <= @achiral_chiral_crossover_step').copy(
         deep=True)

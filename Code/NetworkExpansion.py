@@ -6,7 +6,20 @@ import pandas as pd
 
 
 # scans for a directory within higher-level directory structure; means code can run from any subdirectory of ChiralExpansion
-def get_dir_zoomout_level(dirname: str, attempts=5):
+def get_dir_zoom_out_level(dirname: str, attempts=5):
+    """
+    Scans for a directory within a higher-level directory structure, allowing the code to run from any subdirectory of ChiralExpansion.
+
+    Parameters:
+    dirname (str): The name of the directory to search for.
+    attempts (int): The maximum number of levels to move up in the directory structure. Default is 5.
+
+    Returns:
+    str: The path to the found directory.
+
+    Raises:
+    FileNotFoundError: If the directory is not found within the specified number of levels.
+    """
     n = 0
     while not os.path.isdir(dirname) and n < attempts:
         dirname, n = '../' + dirname, n + 1
@@ -18,9 +31,8 @@ def get_dir_zoomout_level(dirname: str, attempts=5):
 
 
 # find relative path to data source
-data_folder = get_dir_zoomout_level('Data/')
-rxn_db_dir = get_dir_zoomout_level('CBRdb/')  # Updated to fit CBRdb
-
+data_folder = get_dir_zoom_out_level('Data/')
+rxn_db_dir = get_dir_zoom_out_level('CBRdb/')  # Updated to fit CBRdb
 get_sides = lambda x: x[['left', 'right']]
 
 
@@ -40,9 +52,16 @@ def import_reaction_file(fpath=rxn_db_dir + 'CBRdb_R.csv'):
     return df
 
 
-# turns a boolean DataFrame into a series of lists; entry shows which rows are true for a given column, i.e.,
-# which reactions are enabled.
 def get_rn_sets(rndf: pd.DataFrame):
+    """
+    Converts a boolean DataFrame into a series of sets, where each set contains the indices of rows that are True for a given column.
+
+    Parameters:
+    rndf (pd.DataFrame): A boolean DataFrame where each cell indicates the presence (True) or absence (False) of a reaction.
+
+    Returns:
+    pd.Series: A series where each element is a set of indices (row labels) that are True for the corresponding column in the input DataFrame.
+    """
     return rndf[rndf].apply(lambda x: set(x.dropna().index))
 
 
@@ -53,21 +72,19 @@ def expand_from_seed_set(seeds, reactions: pd.DataFrame, max_gen: int):
     rns, cps = dict(), {0: dict(zip(seeds, len(seeds) * [True]))}
     compound_pool, reaction_pool = set(seeds), reactions
     fwd_rns, bwd_rns = set(), set()
-    cp_sets = dict({1: compound_pool})
     # actual expansion code starts here
     for g in range(1, max_gen + 1):
-        has_R = reaction_pool['right'].apply(lambda x: x <= compound_pool)  # are all right-side compounds present?
-        has_L = reaction_pool['left'].apply(lambda x: x <= compound_pool)  # are all left-side compounds present?
-        rns[g] = (has_R + has_L) > 0  # if so, reaction is enabled
-        fwd_rns = fwd_rns.union(set(reaction_pool[has_L > has_R].index))  # new compounds will be from right side
-        bwd_rns = bwd_rns.union(set(reaction_pool[has_L < has_R].index))  # new compounds will be from left side
+        has_r = reaction_pool['right'].apply(lambda x: x <= compound_pool)  # are all right-side compounds present?
+        has_r = reaction_pool['left'].apply(lambda x: x <= compound_pool)  # are all left-side compounds present?
+        rns[g] = (has_r + has_r) > 0  # if so, reaction is enabled
+        fwd_rns = fwd_rns.union(set(reaction_pool[has_r > has_r].index))  # new compounds will be from right side
+        bwd_rns = bwd_rns.union(set(reaction_pool[has_r < has_r].index))  # new compounds will be from left side
         compound_pool = set.union(compound_pool,
                                   *reaction_pool.loc[rns[g]].stack())  # add new-compound side to the pool
         cps[g] = dict(zip(compound_pool, len(compound_pool) * [True]))
         if cps[g] == cps[g - 1]:  # if no new compounds were added,
             break  # stop expanding
     # end of actual expansion code, start of processing
-    directions = pd.concat([pd.Series(index=fwd_rns, data='fwd'), pd.Series(index=bwd_rns, data='bwd')])
     rns = pd.DataFrame(rns).replace(False, float('nan')).dropna(how='all').fillna(False).T.cummax().T
     cps = pd.DataFrame(cps).dropna(how='all').fillna(False).T.cummax().T  # store outputs
     cp_sets = pd.Series(
@@ -115,18 +132,26 @@ def define_reachable_components(seeds, reactions: pd.DataFrame):
              'reachable_reactions': [i for i in accessible_nodes if i.startswith('R') or i.startswith('A')]})
 
 
-# generates an annotated bipartite edgelist 
-def generate_annotated_bipartite_edgelist(single_result):
+
+def generate_annotated_bipartite_edge_list(single_result):
+    """
+    Generates an annotated bipartite edge list by first creating a preliminary edge list and then adding context on the essentially of each edge.
+
+    Parameters:
+    single_result (dict): A dictionary containing the results of the network expansion, including the edge pool.
+
+    Returns:
+    dict: The updated single_result dictionary with the annotated bipartite edge list.
+    """
     # use make_bipartite_edgelist to generate prelim edgelist
-    single_result['bipartite_edgelist'] = make_bipartite_edgelist(single_result['edge_pool'])
-    # print(single_result)
+    single_result['bipartite_edgelist'] = make_bipartite_edge_list(single_result['edge_pool'])
     # use add_bipartite_edge_context to add context on essentiality of each edge
     single_result = add_bipartite_edge_context(single_result)
     return single_result
 
 
 # generates a bipartite edgelist from expand_from_seed_set's edge_pool output
-def make_bipartite_edgelist(edge_pool: pd.DataFrame):
+def make_bipartite_edge_list(edge_pool: pd.DataFrame):
     df = edge_pool.copy(deep=True)
     df['reaction'] = df['reaction'].str.replace('A', 'T')  # so that max identifies reaction, not compound
     sub_edges = df.explode('source').drop(columns='target').rename(columns={'reaction': 'target'})
@@ -137,15 +162,22 @@ def make_bipartite_edgelist(edge_pool: pd.DataFrame):
                 all_edges.nunique().sort_values().index]
     all_edges.update(
         all_edges[['source', 'target', 'reaction']].applymap(lambda x: x.replace('T', 'A')))  # revert back to original
-    return (all_edges)
+    return all_edges
 
 
 def get_single_result(x, single_result):
+    """
+    Retrieves the arrival step of a given compound or reaction from the single_result dictionary.
+
+    Parameters:
+    x (str): The compound or reaction identifier.
+    single_result (dict): A dictionary containing the arrival steps of compounds and reactions.
+
+    Returns:
+    int: The arrival step of the given compound or reaction if it exists in single_result['arrival_step'].
+    """
     if x in single_result['arrival_step']:
         return single_result['arrival_step'][x]
-    ### Remove comments if interested in missing reaction keys
-    # else:
-    #     print(f"{x} not in single_result['arrival_step']")
 
 
 # adds context to each edge regarding its essentiality
@@ -159,7 +191,7 @@ def add_bipartite_edge_context(single_result):
     immediate_precursors = df.loc[impactful_precursors].query('~(reaction_step-source_step!=1)').index
     single_result['bipartite_edgelist'] = df.assign(impactful_precursor=df.index.isin(impactful_precursors),
                                                     immediate_precursor=df.index.isin(immediate_precursors))
-    return (single_result)
+    return single_result
 
 
 # VARIABLES AND DATASETS
