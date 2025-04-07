@@ -803,22 +803,22 @@ def fig4():
     num_metagenomes = 6112
     print(f"- Total JGI Sample Count: {num_bacteria + num_archaea + num_eukarya + num_metagenomes} -")
 
-    with open("../Data/archaea_occurance.csv") as f:
+    with open("../Data/archaea_occurrence.csv") as f:
         next(f)
         reader = csv.reader(f, skipinitialspace=True)
         a_cpd_occurances = dict(reader)
 
-    with open("../Data/bacteria_occurance.csv") as f:
+    with open("../Data/bacteria_occurrence.csv") as f:
         next(f)
         reader = csv.reader(f, skipinitialspace=True)
         b_cpd_occurances = dict(reader)
 
-    with open("../Data/eukarya_occurance.csv") as f:
+    with open("../Data/eukarya_occurrence.csv") as f:
         next(f)
         reader = csv.reader(f, skipinitialspace=True)
         e_cpd_occurances = dict(reader)
 
-    with open("../Data/metagenome_occurance.csv") as f:
+    with open("../Data/metagenome_occurrence.csv") as f:
         next(f)
         reader = csv.reader(f, skipinitialspace=True)
         m_cpd_occurances = dict(reader)
