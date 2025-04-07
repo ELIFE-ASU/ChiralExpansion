@@ -12,10 +12,10 @@ from networkx.algorithms import bipartite
 import netwulf as nw
 from netgraph import get_multipartite_layout
 
-from NetworkExpansion import *
+from network_expansion import *
 from utilities import *
 
-### Global variables & methods (usually overwriting those from NetworkExpansion.py)
+### Global variables & methods (usually overwriting those from network_expansion.py)
 max_generation = 1000  # Arbitrarily large value
 seed_candidates = pd.read_csv('../Data/SampleSeeds.csv.zip',
                               index_col=0,
