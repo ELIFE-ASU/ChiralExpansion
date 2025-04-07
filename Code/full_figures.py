@@ -33,8 +33,6 @@ def fig1():
     gdb_cop, kegg_cop = get_chiral_order_parameters(keggC_df)
     print(f"- CBRdb Reaction Size = {len(keggR_df)} -")
 
-    import matplotlib.gridspec as gridspec
-
     plt.rcParams['figure.constrained_layout.use'] = False
     achiral_color = "#FFC012"
     chiral_color = "#34CCFF"
@@ -625,8 +623,9 @@ def fig3(seed_name, rxn_db, crossover_step, attributes, networks_uni):
 
     nodes = pd.DataFrame(a['nodes'])
     gens_shown = \
-    pd.DataFrame({'gen': nodes['id'].map(attributes['gen']), 'color': nodes['color']}).drop_duplicates().sort_values(
-        by='gen').set_index('gen')['color']
+        pd.DataFrame(
+            {'gen': nodes['id'].map(attributes['gen']), 'color': nodes['color']}).drop_duplicates().sort_values(
+            by='gen').set_index('gen')['color']
     handles = [plt.Line2D([0], [0], marker='o', color='w', markeredgecolor='k', markeredgewidth=0, markerfacecolor=j,
                           markersize=10, label=str(i)) for i, j in gens_shown.items()]
     plt.legend(loc='lower left', frameon=False, handles=handles, handletextpad=0.01, title='GEN', prop={"size": 10})
