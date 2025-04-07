@@ -29,7 +29,7 @@ def fig1():
     # GDB data
     gdb_df = pd.read_csv("../Data/GDB_output.csv")
     # Chiral fractions at heavy atom counts
-    chiral_fraction, achiral_fraction = get_chiral_fraction_atHeavyAtomCounts(
+    chiral_fraction, achiral_fraction = get_chiral_fraction_at_heavy_atom_counts(
         keggC_df)
     gdb_cop, kegg_cop = get_chiral_order_parameters(keggC_df)
     print(f"- CBRdb Reaction Size = {len(keggR_df)} -")
@@ -148,34 +148,31 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
         'reaction count':
             result_to_df(key='rns', to_apply=lambda x: x.sum()),
         'chiral compound count':
-            getCpdCount(results[seed_name]["cps"], keggC_df,
-                        ischiral_flag=True),
+            get_compound_chiral_count(results[seed_name]["cps"], keggC_df, chiral_flag=True),
         'achiral compound count':
-            getCpdCount(results[seed_name]["cps"],
-                        keggC_df,
-                        ischiral_flag=False),
+            get_compound_chiral_count(results[seed_name]["cps"], keggC_df, chiral_flag=False),
         'chiral fraction':
             result_to_df(key='chiral_fraction', to_apply=lambda x: x),
         'chiral avg heavy atoms':
-            getHeavyAtoms_perGen_fromKegg(results[seed_name]["cps"],
-                                          keggC_df,
-                                          ischiral_flag=True,
-                                          calc="mean"),
+            get_heavy_atoms_per_gen_from_kegg(results[seed_name]["cps"],
+                                              keggC_df,
+                                              chiral_flag=True,
+                                              calc="mean"),
         'achiral avg heavy atoms':
-            getHeavyAtoms_perGen_fromKegg(results[seed_name]["cps"],
-                                          keggC_df,
-                                          ischiral_flag=False,
-                                          calc="mean"),
+            get_heavy_atoms_per_gen_from_kegg(results[seed_name]["cps"],
+                                              keggC_df,
+                                              chiral_flag=False,
+                                              calc="mean"),
         'chiral std heavy atoms':
-            getHeavyAtoms_perGen_fromKegg(results[seed_name]["cps"],
-                                          keggC_df,
-                                          ischiral_flag=True,
-                                          calc="std"),
+            get_heavy_atoms_per_gen_from_kegg(results[seed_name]["cps"],
+                                              keggC_df,
+                                              chiral_flag=True,
+                                              calc="std"),
         'achiral std heavy atoms':
-            getHeavyAtoms_perGen_fromKegg(results[seed_name]["cps"],
-                                          keggC_df,
-                                          ischiral_flag=False,
-                                          calc="std")
+            get_heavy_atoms_per_gen_from_kegg(results[seed_name]["cps"],
+                                              keggC_df,
+                                              chiral_flag=False,
+                                              calc="std")
     }
     ### Determines achiral/chiral crossover & first chiral compound
     achiral_chiral_crossover_step = 0
@@ -240,7 +237,7 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     attributes['gen'] = steps
     attributes.sort_values(by='gen', inplace=True)
     gen_color = 'Greys'
-    attributes['gen_color'] = colorize_Series(attributes['gen'], cmap=gen_color).tolist()
+    attributes['gen_color'] = colorize_series(attributes['gen'], cmap=gen_color).tolist()
 
     ### Network figure
     show = 'impactful_precursor'
@@ -440,9 +437,9 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     random_chiral_seeds = dict()
     for random_ss_size in range(min_ss_size, max_ss_size + 1):
         for i in range(n_iter):
-            random_achiral_seeds[f"Random_{random_ss_size}_{i}"] = getRandomSeedSet(
+            random_achiral_seeds[f"Random_{random_ss_size}_{i}"] = get_random_seed_set(
                 keggC_df, random_ss_size, chirality="achiral")
-            random_chiral_seeds[f"Random_{random_ss_size}_{i}"] = getRandomSeedSet(
+            random_chiral_seeds[f"Random_{random_ss_size}_{i}"] = get_random_seed_set(
                 keggC_df, random_ss_size, chirality="chiral")
 
     print(f"- Expanding {n_iter * (max_ss_size - min_ss_size + 1)} Achiral Seed Sets -")
@@ -452,13 +449,9 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
         randAchiral_results = expand_from_seed_set(
             seeds=seeds, reactions=reaction_scope, max_gen=max_generation)
         achiral_full_chiral_count.append(
-            getCpdCount(randAchiral_results["cps"],
-                        keggC_df,
-                        ischiral_flag=True)[0].to_list())
+            get_compound_chiral_count(randAchiral_results["cps"], keggC_df, chiral_flag=True)[0].to_list())
         achiral_full_achiral_count.append(
-            getCpdCount(randAchiral_results["cps"],
-                        keggC_df,
-                        ischiral_flag=False)[0].to_list())
+            get_compound_chiral_count(randAchiral_results["cps"], keggC_df, chiral_flag=False)[0].to_list())
 
     print(f"- Expanding {n_iter * (max_ss_size - min_ss_size + 1)} Chiral Seed Sets -")
     chiral_full_chiral_count = list()
@@ -467,13 +460,9 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
         randChiral_results = expand_from_seed_set(
             seeds=seeds, reactions=reaction_scope, max_gen=max_generation)
         chiral_full_chiral_count.append(
-            getCpdCount(randChiral_results["cps"],
-                        keggC_df,
-                        ischiral_flag=True)[0].to_list())
+            get_compound_chiral_count(randChiral_results["cps"], keggC_df, chiral_flag=True)[0].to_list())
         chiral_full_achiral_count.append(
-            getCpdCount(randChiral_results["cps"],
-                        keggC_df,
-                        ischiral_flag=False)[0].to_list())
+            get_compound_chiral_count(randChiral_results["cps"], keggC_df, chiral_flag=False)[0].to_list())
 
     achiral_chiralPercentage = []
     chiral_chiralPercentage = []
@@ -484,13 +473,13 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
 
     for i in range(len(achiral_full_chiral_count)):
         achiral_chiralPercentage.append(
-            get_ChiralPercentage(np.cumsum(achiral_full_chiral_count[i]),
-                                 np.cumsum(achiral_full_achiral_count[i])))
+            get_chiral_percentage(np.cumsum(achiral_full_chiral_count[i]),
+                                  np.cumsum(achiral_full_achiral_count[i])))
 
     for i in range(len(chiral_full_chiral_count)):
         chiral_chiralPercentage.append(
-            get_ChiralPercentage(np.cumsum(chiral_full_chiral_count[i]),
-                                 np.cumsum(chiral_full_achiral_count[i])))
+            get_chiral_percentage(np.cumsum(chiral_full_chiral_count[i]),
+                                  np.cumsum(chiral_full_achiral_count[i])))
 
     for i in range(max_generation):
         percentages = []
@@ -686,7 +675,7 @@ def fig3(seed_name, rxn_db, crossover_step, attributes, networks_uni):
                                              reactions=reaction_scope,
                                              max_gen=max_generation)
 
-    expansion_arrival_df = linkArrivalStepHeavyAtoms(
+    expansion_arrival_df = link_arrival_step_heavy_atoms(
         results[name]['arrival_step'], keggC_df)
 
     sns.set_palette(sns.color_palette("copper"))
@@ -726,7 +715,7 @@ def fig3(seed_name, rxn_db, crossover_step, attributes, networks_uni):
 
     ### Get degrees for each compound & merge into expansion arrival dataframe
     cpd_degrees = dict.fromkeys(expansion_arrival_df["compound_id"], 0)
-    cpd_degrees = get_CpdDegrees(cpd_degrees=cpd_degrees)
+    cpd_degrees = get_compound_degrees(cpd_degrees=cpd_degrees)
 
     expansion_arrival_df["degree"] = expansion_arrival_df["compound_id"].map(
         cpd_degrees)
@@ -1048,24 +1037,24 @@ def fig4():
     ax4 = plt.subplot(gs[6:, 6:])
 
     print("-- Table A Data --")
-    m_chiral = make_AUC_dashes(m_chiral_universality, "Metagenome, Chiral",
+    m_chiral = make_auc_dashes(m_chiral_universality, "Metagenome, Chiral",
                                color_number["Metagenome"], chiral_ls, ax3)
-    m_achiral = make_AUC_dashes(m_achiral_universality, "Metagenome, Achiral",
+    m_achiral = make_auc_dashes(m_achiral_universality, "Metagenome, Achiral",
                                 color_number["Metagenome"], achiral_ls, ax3)
 
-    e_chiral = make_AUC_dashes(e_chiral_universality, "Eukarya, Chiral",
+    e_chiral = make_auc_dashes(e_chiral_universality, "Eukarya, Chiral",
                                color_number["Eukarya"], chiral_ls, ax3)
-    e_achiral = make_AUC_dashes(e_achiral_universality, "Eukarya, Achiral",
+    e_achiral = make_auc_dashes(e_achiral_universality, "Eukarya, Achiral",
                                 color_number["Eukarya"], achiral_ls, ax3)
 
-    b_chiral = make_AUC_dashes(b_chiral_universality, "Bacteria, Chiral",
+    b_chiral = make_auc_dashes(b_chiral_universality, "Bacteria, Chiral",
                                color_number["Bacteria"], chiral_ls, ax3)
-    b_achiral = make_AUC_dashes(b_achiral_universality, "Bacteria, Achiral",
+    b_achiral = make_auc_dashes(b_achiral_universality, "Bacteria, Achiral",
                                 color_number["Bacteria"], achiral_ls, ax3)
 
-    a_chiral = make_AUC_dashes(a_chiral_universality, "Archaea, Chiral",
+    a_chiral = make_auc_dashes(a_chiral_universality, "Archaea, Chiral",
                                color_number["Archaea"], chiral_ls, ax3)
-    a_achiral = make_AUC_dashes(a_achiral_universality, "Archaea, Achiral",
+    a_achiral = make_auc_dashes(a_achiral_universality, "Archaea, Achiral",
                                 color_number["Archaea"], achiral_ls, ax3)
 
     ax3.grid()
@@ -1276,7 +1265,7 @@ def fig5(seed_name, rxn_db, crossover_step, first_chiral_step):
     print("- Calculating chiral percentage of pathways -")
     for pathway in tqdm(pathway_cpd_links.keys()):
         pathway_chiralPercentage[pathway], pathway_size[
-            pathway] = get_chiral_percentage_fromList(
+            pathway] = get_chiral_percentage_from_list(
             pathway_cpd_links[pathway], keggC_df)
 
     pathway_df = pd.DataFrame(
