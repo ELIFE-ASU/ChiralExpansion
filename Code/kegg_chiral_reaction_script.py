@@ -241,8 +241,8 @@ def save_to_csv(kegg_data_R, output_file):
 
 # Example usage
 if __name__ == "__main__":
-    compound_file = input("Enter the path to the compound file (kegg_data_C.csv): ")
-    reaction_file = input("Enter the path to the reaction file (kegg_data_R.csv): ")
+    compound_file = input("Enter the path to the compound file (CBRdb_C.csv): ")
+    reaction_file = input("Enter the path to the reaction file (CBRdb_R.csv): ")
     output_file = input("Enter the path for the output file: ")
 
     kegg_data_C, kegg_data_R = load_files(compound_file, reaction_file)
