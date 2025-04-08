@@ -797,53 +797,25 @@ def fig4():
     # Find unversalities, and rank-order each
     # Read in occurence data & create universality percentages
 
-    num_bacteria = 10434
-    num_archaea = 1194
-    num_eukarya = 267
-    num_metagenomes = 6112
-    print(f"- Total JGI Sample Count: {num_bacteria + num_archaea + num_eukarya + num_metagenomes} -")
-
-    with open("../Data/archaea_occurrence.csv") as f:
-        next(f)
-        reader = csv.reader(f, skipinitialspace=True)
-        a_cpd_occurances = dict(reader)
-
-    with open("../Data/bacteria_occurrence.csv") as f:
-        next(f)
-        reader = csv.reader(f, skipinitialspace=True)
-        b_cpd_occurances = dict(reader)
-
-    with open("../Data/eukarya_occurrence.csv") as f:
-        next(f)
-        reader = csv.reader(f, skipinitialspace=True)
-        e_cpd_occurances = dict(reader)
-
-    with open("../Data/metagenome_occurrence.csv") as f:
-        next(f)
-        reader = csv.reader(f, skipinitialspace=True)
-        m_cpd_occurances = dict(reader)
-
+    occurrence_df = pd.read_csv('../Data/omics/compound2occurrence.csv', header=0, index_col=0)
+    order = ['Bacteria', 'Archaea', 'Eukaryota', 'Metagenome']
+    num_samples = occurrence_df.loc['N', order].copy()
+    num_bacteria, num_archaea, num_eukarya, num_metagenomes = num_samples.to_list()
+    occurrence_df = occurrence_df[order].drop(index=['N']).mask(lambda x: x==0)
     # Translate occurances into % universality
-    a_cpd_universality = {}
-    b_cpd_universality = {}
-    e_cpd_universality = {}
-    m_cpd_universality = {}
+    universality_df = (occurrence_df / num_samples)
 
-    # Num archaea: 1194
-    for item in a_cpd_occurances.items():
-        a_cpd_universality[item[0]] = float(item[1]) / num_archaea
-
-    # num bacteria = 10434
-    for item in b_cpd_occurances.items():
-        b_cpd_universality[item[0]] = float(item[1]) / num_bacteria
-
-    # Num eukarya: 267
-    for item in e_cpd_occurances.items():
-        e_cpd_universality[item[0]] = float(item[1]) / num_eukarya
-
-    # Num metagenomes = 6112
-    for item in m_cpd_occurances.items():
-        m_cpd_universality[item[0]] = float(item[1]) / num_metagenomes
+    print(f"- Total JGI Sample Count: {num_bacteria + num_archaea + num_eukarya + num_metagenomes} -")
+    
+    a_cpd_occurances = occurrence_df['Archaea'].dropna().to_dict()
+    b_cpd_occurances = occurrence_df['Bacteria'].dropna().to_dict()
+    e_cpd_occurances = occurrence_df['Eukaryota'].dropna().to_dict()
+    m_cpd_occurances = occurrence_df['Metagenome'].dropna().to_dict()
+    
+    a_cpd_universality = universality_df['Archaea'].dropna().to_dict()
+    b_cpd_universality = universality_df['Bacteria'].dropna().to_dict()
+    e_cpd_universality = universality_df['Eukaryota'].dropna().to_dict()
+    m_cpd_universality = universality_df['Metagenome'].dropna().to_dict()
 
     a_chiral_universality, a_achiral_universality = find_chiral(
         a_cpd_universality, keggC_df)
