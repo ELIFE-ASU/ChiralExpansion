@@ -31,8 +31,8 @@ def get_dir_zoom_out_level(dirname: str, attempts=5):
 
 
 # find relative path to data source
-data_folder = get_dir_zoom_out_level('Data/')
-rxn_db_dir = get_dir_zoom_out_level('CBRdb/')  # Updated to fit CBRdb
+data_folder = '../Data/' # get_dir_zoom_out_level('Data/')
+rxn_db_dir = '../Data/'
 get_sides = lambda x: x[['left', 'right']]
 
 
@@ -75,10 +75,10 @@ def expand_from_seed_set(seeds, reactions: pd.DataFrame, max_gen: int):
     # actual expansion code starts here
     for g in range(1, max_gen + 1):
         has_r = reaction_pool['right'].apply(lambda x: x <= compound_pool)  # are all right-side compounds present?
-        has_r = reaction_pool['left'].apply(lambda x: x <= compound_pool)  # are all left-side compounds present?
-        rns[g] = (has_r + has_r) > 0  # if so, reaction is enabled
-        fwd_rns = fwd_rns.union(set(reaction_pool[has_r > has_r].index))  # new compounds will be from right side
-        bwd_rns = bwd_rns.union(set(reaction_pool[has_r < has_r].index))  # new compounds will be from left side
+        has_l = reaction_pool['left'].apply(lambda x: x <= compound_pool)  # are all left-side compounds present?
+        rns[g] = (has_r + has_l) > 0  # if so, reaction is enabled
+        fwd_rns = fwd_rns.union(set(reaction_pool[has_l > has_r].index))  # new compounds will be from right side
+        bwd_rns = bwd_rns.union(set(reaction_pool[has_l < has_r].index))  # new compounds will be from left side
         compound_pool = set.union(compound_pool,
                                   *reaction_pool.loc[rns[g]].stack())  # add new-compound side to the pool
         cps[g] = dict(zip(compound_pool, len(compound_pool) * [True]))
