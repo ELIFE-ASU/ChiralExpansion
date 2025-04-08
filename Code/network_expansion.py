@@ -174,6 +174,7 @@ chiral_labels['elements'] = chiral_labels['formula'].apply(
     lambda x: set([s.strip('+-1234567890') for s in re.split("([A-Z][^A-Z]*)", x) if s]))
 
 # ec_rns: KEGG reaction-enzyme entry linkages.
-ec_rns = pd.read_csv('https://rest.kegg.jp/link/enzyme/reaction', sep='\t', header=None).applymap(
-    lambda x: x.split(':')[1]).groupby(0)[1].apply(list).apply('|'.join)
+ec_rns = pd.read_csv(f'{data_folder}/CBRdb_R.csv', usecols=['id', 'ec'], index_col=0).iloc[:,0].str.split().explode().reset_index()
+ec_rns = ec_rns.query('~ec.str.contains("-", na=True)').groupby('ec')['id'].apply(list)
+rn_cps = pd.read_csv(f'{data_folder}/CBRdb_R.csv', usecols=['id', 'reaction'], index_col=0).iloc[:,0].str.findall(r'(C\d{5})')
 seed_candidates = pd.read_csv(f'{data_folder}/SampleSeeds.csv', index_col=0)
