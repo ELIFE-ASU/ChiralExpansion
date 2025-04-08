@@ -56,7 +56,7 @@ ecs_present = ecs_present.loc[:, ecs_present_sorted]
 # Output domains for each taxon ID.
 tid2domain = ecs_present.reset_index(level=1)['domain']
 tid2domain.index = tid2domain.index.astype(int)
-tid2domain.to_csv(os.path.join(omics_dir, 'tid2domain.csv.zip'), encoding='utf-8', compression='zip')
+tid2domain.to_csv(os.path.join(omics_dir, 'tid2domain.csv'), encoding='utf-8')
 
 # Output ECs present for each taxon ID.
 ecs_present = ecs_present.reset_index('domain', drop=True).rename_axis(None)
