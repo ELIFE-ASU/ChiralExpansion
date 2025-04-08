@@ -20,8 +20,8 @@ max_generation = 1000  # Arbitrarily large value
 seed_candidates = pd.read_csv('../Data/SampleSeeds.csv.zip',
                               index_col=0,
                               compression='zip')
-keggC_df = pd.read_csv("../../CBRdb/CBRdb_C.csv")
-keggR_df = pd.read_csv("../../CBRdb/CBRdb_R.csv")
+keggC_df = pd.read_csv("../Data/CBRdb_C.csv")
+keggR_df = pd.read_csv("../Data/CBRdb_R.csv")
 
 
 def fig1():
@@ -209,7 +209,7 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     networks_uni = {i: bipartite.projected_graph(networks[i], nodes=compound_nodes[i]) for i in networks.keys()}
     print(networks_uni["impactful_precursor"])
 
-    attributes = pd.read_csv("../../CBRdb/CBRdb_C.csv",
+    attributes = pd.read_csv("../Data/CBRdb_C.csv",
                              index_col=0)
     attributes.drop(labels=["smiles", "formula", "molecular_weight", "n_heavy_atoms"], axis=1,
                     inplace=True)
@@ -1409,7 +1409,7 @@ def main():
 
     # Seed set
     seed_name = "JM|G24|G17|TW"
-    rxn_db_fp = "../../CBRdb/CBRdb_R.csv"
+    rxn_db_fp = "../Data/CBRdb_R.csv"
 
     print("---- Generating Figure 1 ----")
     fig1()

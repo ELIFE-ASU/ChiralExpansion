@@ -2,8 +2,8 @@ import os
 
 import pandas as pd
 
-compound_fname = "https://github.com/ELIFE-ASU/CBRdb/blob/6ea6338cf00cd167d93e2557b5569156826e5cfa/CBRdb_C.csv?raw=true"
-reaction_fname = "https://github.com/ELIFE-ASU/CBRdb/blob/6ea6338cf00cd167d93e2557b5569156826e5cfa/CBRdb_R.csv?raw=true"
+compound_fname = "../Data/CBRdb_C.csv"
+reaction_fname = "../Data/CBRdb_R.csv"
 domain_csv_dir = os.path.abspath(
     '../../../../ASU Dropbox/Elife/Big Data/JGI-Data/October-2023-Pull/Unprocessed-JGI-Oct2023-CSVsOfECCounts/')
 output_dir = os.path.abspath('../Data/')
