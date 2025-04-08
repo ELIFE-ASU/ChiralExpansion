@@ -402,14 +402,14 @@ def get_compound_degrees(cpd_degrees):
     Returns:
     dict: Updated dictionary with the degrees of compounds.
     """
-    # atlas_kegg_processed_merged is the current source of truth (right, @Camerian & @Louie?)
+
     rxn_df = pd.read_csv(
-        "../../lets-get-kegg/Data/atlas_kegg_processed_merged.csv.zip",
+        "../Data/CBRdb_R.csv",
         index_col=0,
         compression="zip")
     rxn_df.drop_duplicates(
         subset="reaction", inplace=True
-    )  # TODO: fully check for duplicates (or wait for lets-get-kegg to be fixed)
+    ) 
 
     rxn_df["reaction"].apply(degrees_per_reaction, args=(cpd_degrees,))
 
@@ -641,9 +641,8 @@ def get_heatmap_array(kegg_c_df):
     rxn_chiral_count = {}
     heatmap_array = []
 
-    # atlas_kegg_processed_merged is the current source of truth (right, @Camerian & @Louie?)
     rxn_df = pd.read_csv(
-        "../../lets-get-kegg/Data/atlas_kegg_processed_merged.csv.zip",
+        "../Data/CBRdb_R.csv",
         index_col=0,
         compression="zip")
 
