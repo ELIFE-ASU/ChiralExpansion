@@ -405,8 +405,7 @@ def get_compound_degrees(cpd_degrees):
 
     rxn_df = pd.read_csv(
         "../Data/CBRdb_R.csv",
-        index_col=0,
-        compression="zip")
+        index_col=0)
     rxn_df.drop_duplicates(
         subset="reaction", inplace=True
     ) 
@@ -643,8 +642,7 @@ def get_heatmap_array(kegg_c_df):
 
     rxn_df = pd.read_csv(
         "../Data/CBRdb_R.csv",
-        index_col=0,
-        compression="zip")
+        index_col=0)
 
     print("- Calculating Reaction Chirality -")
     rxn_df[["Reactant Chiral Count", "Product Chiral Count"
