@@ -17,9 +17,8 @@ from utilities import *
 
 ### Global variables & methods (usually overwriting those from network_expansion.py)
 max_generation = 1000  # Arbitrarily large value
-seed_candidates = pd.read_csv('../Data/SampleSeeds.csv.zip',
-                              index_col=0,
-                              compression='zip')
+seed_candidates = pd.read_csv('../Data/SampleSeeds.csv',
+                              index_col=0)
 keggC_df = pd.read_csv("../Data/CBRdb_C.csv")
 keggR_df = pd.read_csv("../Data/CBRdb_R.csv")
 
