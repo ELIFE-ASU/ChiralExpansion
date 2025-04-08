@@ -2,25 +2,24 @@ import os
 
 import pandas as pd
 
-compound_fname = "../Data/CBRdb_C.csv"
-reaction_fname = "../Data/CBRdb_R.csv"
+compound_fname = os.path.abspath("../Data/CBRdb_C.csv")
+reaction_fname = os.path.abspath("../Data/CBRdb_R.csv")
 domain_csv_dir = os.path.abspath(
     '../../../../ASU Dropbox/Elife/Big Data/JGI-Data/October-2023-Pull/Unprocessed-JGI-Oct2023-CSVsOfECCounts/')
-output_dir = os.path.abspath('../Data/')
+omics_dir = os.path.abspath('../Data/omics/')
 
 keggC_df = pd.read_csv(compound_fname, index_col=0)
 keggC_df['is_chiral'] = keggC_df['n_chiral_centers'].gt(0).astype(int)
 
-listlike_cols = ['ec', 'module', 'orthology', 'pathway', 'rclass', 'rhea', 'id_orig']
-keggR_df = pd.read_csv(reaction_fname, converters=dict(zip(listlike_cols, len(listlike_cols) * [lambda x: x.split()])),
-                       low_memory=False)
+listlike_cols = ['ec', 'id_orig']
+keggR_df = pd.read_csv(reaction_fname, low_memory=False,
+                       converters=dict(zip(['ec', 'id_orig'], 2*[lambda x: x.split()])))
 
+# for easier calculation of occurrance rates
 keggR_df['compounds'] = keggR_df['reaction'].str.findall(r'(C\d{5})')
-keggR_df = keggR_df.join(
-    keggR_df['reaction'].str.split(' <=> ', expand=True).apply(lambda x: x.str.findall(r'(C\d{5})')).rename(
-        columns={0: 'left', 1: 'right'}))
+# for easier filtering-out of ATLAS reactions if requested
 keggR_df['id_orig_sorted'] = keggR_df['id_orig'].map(lambda x: ' '.join(sorted(x, reverse=True)))
-keggR_df = keggR_df.set_index('id_orig_sorted')
+keggR_df = keggR_df.set_index('id_orig_sorted') 
 # to show only kegg-associated reactions: keggR_df.filter(like='R', axis=0)
 
 ec2cp = keggR_df.explode('ec').dropna(subset='ec').query('~ec.str.contains("-")').groupby('ec')['compounds'].apply(
@@ -29,37 +28,55 @@ ec2rn = keggR_df.explode('ec').dropna(subset='ec').query('~ec.str.contains("-")'
     'id'].apply(list).rename('reactions')
 
 domain_dfs = dict()
-compounds_present = dict()
-compound_chirality = dict()
-
-# Measure chemical properties for each domain. Takes ~50s.
+# Read in CSVs for each domain.
 for i in os.listdir(domain_csv_dir):
     domain_name = i.split('_')[1]
     # Change reference so JM code still works
     if domain_name == 'Microbiome':
         domain_name = 'Metagenome'
     # Read in domain EC count CSV
-    domain_dfs[domain_name] = pd.read_csv(os.path.join(domain_csv_dir, i), index_col=0, na_filter=False)
+    ecs = pd.read_csv(os.path.join(domain_csv_dir, i), index_col=0, na_filter=False)
     # Remove EC number prefix for integration with CBRdb_R formatting
-    domain_dfs[domain_name].index = domain_dfs[domain_name].index.str.strip('EC:')
+    ecs.index = ecs.index.str.strip('EC:')
+    # Remove partial EC numbers and transpose
+    ecs = ecs.loc[~ecs.index.str.contains('-'), :].T.assign(domain=domain_name)
+    # Store results for each domain
+    domain_dfs[domain_name] = ecs
 
-# Change references so JM code still works
-domain_names = {"Eukaryota": "eukarya", 'Archaea': 'archaea', 'Bacteria': 'bacteria', 'Metagenome': 'metagenome'}
+# Combine all domain dataframes into one
+ec_counts = pd.concat(domain_dfs.values(), axis=0).fillna(0)
+# Change counts to present/absent
+ecs_present = ec_counts.set_index('domain', append=True).mask(lambda x: x>0).fillna(1).astype(int)
+# Sort EC serial numbers
+ecs_present_sorted = pd.DataFrame(dict(zip(ecs_present.columns, 
+                                           ecs_present.columns.map(lambda x: dict(pd.Series([int(i) for i in x.split('.')])))))
+                                           ).T.sort_values(by=[0,1,2,3]).index
+ecs_present = ecs_present.loc[:, ecs_present_sorted]
 
-# Calculate occurrences for compounds
-for dn, dn_save in domain_names.items():
-    present = domain_dfs[dn].join(ec2cp, how='inner').explode('compounds').groupby('compounds').sum().gt(0)
-    # Identify chirality of present compounds
-    chirality = (present.astype(int)[present].T * keggC_df.loc[present.index, 'is_chiral']).T
-    # Calculate occurrence rates
-    occ_out = present.sum(axis=1).sort_values(ascending=False).rename('Occurrence').rename_axis('Cpd').to_frame()
-    # Store results
-    compounds_present[dn_save] = present
-    compound_chirality[dn_save] = chirality
-    occ_out.to_csv(os.path.join(output_dir, dn_save + '_occurrence.csv'), encoding='utf-8')
+# Output domains for each taxon ID.
+tid2domain = ecs_present.reset_index(level=1)['domain']
+tid2domain.index = tid2domain.index.astype(int)
+tid2domain.to_csv(os.path.join(omics_dir, 'tid2domain.csv.zip'), encoding='utf-8', compression='zip')
 
-# Calculate occurrences for reactions
-for dn, dn_save in domain_names.items():
-    present = domain_dfs[dn].join(ec2rn, how='inner').explode('reactions').groupby('reactions').sum().gt(0)
-    occ_out = present.sum(axis=1).sort_values(ascending=False).rename('Occurrence').rename_axis('Rxn').to_frame()
-    occ_out.to_csv(os.path.join(output_dir, dn + '_occurrence_rxn.csv'), encoding='utf-8')
+# Output ECs present for each taxon ID.
+ecs_present = ecs_present.reset_index('domain', drop=True).rename_axis(None)
+ecs_present.index = ecs_present.index.astype(int)
+ecs_present.to_csv(os.path.join(omics_dir, 'tid2ecs.csv.zip'), encoding='utf-8', compression='zip')
+
+# Calculate compound and reaction occurrence for each taxon ID.
+ecs = ecs_present.T.astype(bool).assign(compounds=ec2cp, reactions=ec2rn).dropna(subset='compounds')
+cps = ecs.drop(columns='reactions').explode('compounds').groupby('compounds').any().T.astype(int)
+rns = ecs.drop(columns='compounds').explode('reactions').groupby('reactions').any().T.astype(int)
+
+# Calculate occurrences for reactions and compounds, for each domain.
+occ = {'compound': cps, 'reaction': rns}
+for k in occ.keys():
+    a = occ[k].groupby(tid2domain).sum().T
+    a.loc['C'] = tid2domain.value_counts()
+    a.sort_index(inplace=True)
+    a.rename({'C': 'N'}, axis=0, inplace=True)
+    a.rename_axis(None, axis=1, inplace=True)
+    occ[k] = a
+    # Output occurrence summary for each domain. N is the number of taxon IDs in that domain.
+    occ[k].to_csv(os.path.join(omics_dir, f'{k}2occurrence.csv'), encoding='utf-8')
+    
