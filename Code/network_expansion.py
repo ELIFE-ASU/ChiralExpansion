@@ -8,19 +8,17 @@ data_folder = '../Data/'
 get_sides = lambda x: x[['left', 'right']]
 
 
-# imports a reaction dataframe, removes glycan reactions and reactions for which chiral info is missing
 def import_reaction_file(fpath=data_folder + 'CBRdb_R.csv'):
-    df = pd.read_csv(fpath, index_col=0).drop(columns=['Unnamed: 0', 'Unnamed: 0.1'], errors='ignore')
+    df = pd.read_csv(fpath, index_col=0)
+    unnamed_cols = df.columns[df.columns.str.contains("Unnamed")]
+    if len(unnamed_cols) > 0:
+        df.drop(columns=unnamed_cols, errors='ignore', inplace=True)
     if 'id' in df.columns:
         df.set_index('id', inplace=True)
-    df[['left', 'right']] = df['reaction'].str.split(' <=> ', expand=True)
-    for i in ['left', 'right']:
-        df[i] = df[i].str.split(' ').apply(lambda x: set([j for j in x if j.startswith('C')]))
-    df['has_chiral_info'] = (get_sides(df).applymap(list).sum(axis=1).apply(set)
-                             - set(chiral_labels.index)).apply(len) == 0
-    df = df.query('has_chiral_info & reaction.str.contains("G")==False')
-    overall_reactions = ['R13204', 'R13205', 'R13206', 'R13207', 'R13208', 'R13209', 'R13210', 'R13211', 'R13222']
-    df.drop(overall_reactions, inplace=True, errors='ignore')
+    df[['left', 'right']] = df['reaction'].str.split(' <=> ', expand=True).apply(lambda x: x.str.findall(r'(C\d{5})'))
+    df['has_chiral_info'] = (df.left + df.right).explode().isin(chiral_labels.index).groupby(level=0).all()
+    if df['has_chiral_info'].all():
+        df.drop(columns='has_chiral_info', inplace=True)
     return df
 
 
