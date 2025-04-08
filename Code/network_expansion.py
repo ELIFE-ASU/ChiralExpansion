@@ -1,43 +1,15 @@
-import os
 import re
 
 import networkx as nx
 import pandas as pd
 
-
-# scans for a directory within higher-level directory structure; means code can run from any subdirectory of ChiralExpansion
-def get_dir_zoom_out_level(dirname: str, attempts=5):
-    """
-    Scans for a directory within a higher-level directory structure, allowing the code to run from any subdirectory of ChiralExpansion.
-
-    Parameters:
-    dirname (str): The name of the directory to search for.
-    attempts (int): The maximum number of levels to move up in the directory structure. Default is 5.
-
-    Returns:
-    str: The path to the found directory.
-
-    Raises:
-    FileNotFoundError: If the directory is not found within the specified number of levels.
-    """
-    n = 0
-    while not os.path.isdir(dirname) and n < attempts:
-        dirname, n = '../' + dirname, n + 1
-    if not os.path.isdir(dirname):
-        raise FileNotFoundError(
-            'Directory "' + dirname.replace('../', '') + '" not found within ' + str(attempts) + ' levels.')
-    else:
-        return dirname
-
-
 # find relative path to data source
-data_folder = '../Data/' # get_dir_zoom_out_level('Data/')
-rxn_db_dir = '../Data/'
+data_folder = '../Data/'
 get_sides = lambda x: x[['left', 'right']]
 
 
 # imports a reaction dataframe, removes glycan reactions and reactions for which chiral info is missing
-def import_reaction_file(fpath=rxn_db_dir + 'CBRdb_R.csv'):
+def import_reaction_file(fpath=data_folder + 'CBRdb_R.csv'):
     df = pd.read_csv(fpath, index_col=0).drop(columns=['Unnamed: 0', 'Unnamed: 0.1'], errors='ignore')
     if 'id' in df.columns:
         df.set_index('id', inplace=True)
@@ -132,7 +104,6 @@ def define_reachable_components(seeds, reactions: pd.DataFrame):
              'reachable_reactions': [i for i in accessible_nodes if i.startswith('R') or i.startswith('A')]})
 
 
-
 def generate_annotated_bipartite_edge_list(single_result):
     """
     Generates an annotated bipartite edge list by first creating a preliminary edge list and then adding context on the essentially of each edge.
@@ -150,7 +121,7 @@ def generate_annotated_bipartite_edge_list(single_result):
     return single_result
 
 
-# generates a bipartite edgelist from expand_from_seed_set's edge_pool output
+# generates a bipartite edge list from expand_from_seed_set's edge_pool output
 def make_bipartite_edge_list(edge_pool: pd.DataFrame):
     df = edge_pool.copy(deep=True)
     df['reaction'] = df['reaction'].str.replace('A', 'T')  # so that max identifies reaction, not compound
@@ -195,15 +166,14 @@ def add_bipartite_edge_context(single_result):
 
 
 # VARIABLES AND DATASETS
-# compound info (from CBRdb)
-chiral_labels = ((pd.read_csv(rxn_db_dir + 'CBRdb_C.csv')
+chiral_labels = ((pd.read_csv(data_folder + 'CBRdb_C.csv')
                   .assign(is_chiral=lambda x: x.n_chiral_centers > 0)
                   .rename(columns={'n_chiral_centers': 'Chiral_Centers'})
                   .set_index('compound_id')))
 chiral_labels['elements'] = chiral_labels['formula'].apply(
     lambda x: set([s.strip('+-1234567890') for s in re.split("([A-Z][^A-Z]*)", x) if s]))
 
-# ec_rns: KEGG reaction-enzyme entry linkages. TODO - remove when this is obtained using lets-get-kegg
+# ec_rns: KEGG reaction-enzyme entry linkages.
 ec_rns = pd.read_csv('https://rest.kegg.jp/link/enzyme/reaction', sep='\t', header=None).applymap(
     lambda x: x.split(':')[1]).groupby(0)[1].apply(list).apply('|'.join)
 seed_candidates = pd.read_csv(f'{data_folder}/SampleSeeds.csv.zip', index_col=0, compression='zip')
