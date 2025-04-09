@@ -158,8 +158,7 @@ chiral_labels = ((pd.read_csv(compound_file)
                   .assign(is_chiral=lambda x: x.n_chiral_centers > 0)
                   .rename(columns={'n_chiral_centers': 'Chiral_Centers'})
                   .set_index('compound_id')))
-chiral_labels['elements'] = chiral_labels['formula'].apply(
-    lambda x: set([s.strip('+-1234567890') for s in re.split("([A-Z][^A-Z]*)", x) if s]))
+
 
 # ec_rns: KEGG reaction-enzyme entry linkages.
 ec_rns = pd.read_csv(reaction_file, usecols=['id', 'ec'], index_col=0).iloc[:,0].str.split().explode().reset_index()
