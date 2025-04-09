@@ -126,15 +126,16 @@ def generate_annotated_bipartite_edge_list(single_result):
 # generates a bipartite edge list from expand_from_seed_set's edge_pool output
 def make_bipartite_edge_list(edge_pool: pd.DataFrame):
     df = edge_pool.copy(deep=True)
-    df['reaction'] = df['reaction'].str.replace('A', 'T')  # so that max identifies reaction, not compound
+    # change notation, so that max still points to reaction (not compound) in cases where reaction is a single atlas entry
+    df['reaction'] = df['reaction'].str.replace('A', 'N')  
     sub_edges = df.explode('source').drop(columns='target').rename(columns={'reaction': 'target'})
     prod_edges = df.explode('target').drop(columns='source').rename(columns={'reaction': 'source'})
     all_edges = pd.concat([sub_edges, prod_edges], axis=0, ignore_index=True)
     all_edges['reaction'] = all_edges[['source', 'target']].max(axis=1)
     all_edges = all_edges.sort_values(by=['step', 'reaction', 'source', 'target']).reset_index(drop=True).loc[:,
                 all_edges.nunique().sort_values().index]
-    all_edges.update(
-        all_edges[['source', 'target', 'reaction']].applymap(lambda x: x.replace('T', 'A')))  # revert back to original
+    cols = ['source', 'target', 'reaction']
+    all_edges.loc[:, cols] = all_edges.loc[:, cols].map(lambda x: x.replace('N', 'A'))  # revert back to original
     return all_edges
 
 
@@ -156,9 +157,9 @@ def get_single_result(x, single_result):
 # adds context to each edge regarding its essentiality
 def add_bipartite_edge_context(single_result):
     df = single_result['bipartite_edgelist']
-    df = (df.join(
-        df[['reaction', 'source', 'target']].applymap(lambda x: get_single_result(x, single_result)).add_suffix(
-            '_step')))
+    steps = single_result['arrival_step']
+    df_arrival_step = df.loc[:,['reaction', 'source', 'target']].map(lambda x: steps.at[x], na_action='ignore').add_suffix('_step')
+    df = df.join(df_arrival_step)
     impactful_precursors = df.query('directed').query(
         '(target==reaction & reaction_step>source_step) | (reaction==source & reaction_step==target_step)').index
     immediate_precursors = df.loc[impactful_precursors].query('~(reaction_step-source_step!=1)').index
