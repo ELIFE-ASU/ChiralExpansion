@@ -1,14 +1,17 @@
 import re
-
+import os
 import networkx as nx
 import pandas as pd
 
 # find relative path to data source
 data_folder = '../Data/'
+reaction_file = os.path.join(data_folder, 'CBRdb_R.csv')
+compound_file = os.path.join(data_folder, 'CBRdb_C.csv')
+seed_file = os.path.join(data_folder, 'SampleSeeds.csv')
 get_sides = lambda x: x[['left', 'right']]
 
 
-def import_reaction_file(fpath=data_folder + 'CBRdb_R.csv'):
+def import_reaction_file(fpath=reaction_file):
     df = pd.read_csv(fpath, index_col=0)
     unnamed_cols = df.columns[df.columns.str.contains("Unnamed")]
     if len(unnamed_cols) > 0:
@@ -165,7 +168,7 @@ def add_bipartite_edge_context(single_result):
 
 
 # VARIABLES AND DATASETS
-chiral_labels = ((pd.read_csv(data_folder + 'CBRdb_C.csv')
+chiral_labels = ((pd.read_csv(compound_file)
                   .assign(is_chiral=lambda x: x.n_chiral_centers > 0)
                   .rename(columns={'n_chiral_centers': 'Chiral_Centers'})
                   .set_index('compound_id')))
@@ -173,7 +176,7 @@ chiral_labels['elements'] = chiral_labels['formula'].apply(
     lambda x: set([s.strip('+-1234567890') for s in re.split("([A-Z][^A-Z]*)", x) if s]))
 
 # ec_rns: KEGG reaction-enzyme entry linkages.
-ec_rns = pd.read_csv(f'{data_folder}/CBRdb_R.csv', usecols=['id', 'ec'], index_col=0).iloc[:,0].str.split().explode().reset_index()
+ec_rns = pd.read_csv(reaction_file, usecols=['id', 'ec'], index_col=0).iloc[:,0].str.split().explode().reset_index()
 ec_rns = ec_rns.query('~ec.str.contains("-", na=True)').groupby('ec')['id'].apply(list)
-rn_cps = pd.read_csv(f'{data_folder}/CBRdb_R.csv', usecols=['id', 'reaction'], index_col=0).iloc[:,0].str.findall(r'(C\d{5})')
-seed_candidates = pd.read_csv(f'{data_folder}/SampleSeeds.csv', index_col=0)
+rn_cps = pd.read_csv(reaction_file, usecols=['id', 'reaction'], index_col=0).iloc[:,0].str.findall(r'(C\d{5})')
+seed_candidates = pd.read_csv(seed_file, index_col=0)
