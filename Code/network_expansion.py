@@ -12,7 +12,7 @@ get_sides = lambda x: x[['left', 'right']]
 
 
 def import_reaction_file(fpath=reaction_file):
-    df = pd.read_csv(fpath, index_col=0)
+    df = pd.read_csv(fpath, index_col=0, dtype='object')
     unnamed_cols = df.columns[df.columns.str.contains("Unnamed")]
     if len(unnamed_cols) > 0:
         df.drop(columns=unnamed_cols, errors='ignore', inplace=True)
