@@ -137,21 +137,21 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
         results[name]['bipartite_edgelist'] = make_bipartite_edge_list(results[name]['edge_pool'])
 
     ### Process expansion (including chiral %s at each step & heavy atom count)
-    def result_to_df(key: str, to_apply):
+    def result_to_df(results: dict, key: str, to_apply):
         return pd.concat(
             {i: results[i][key].apply(to_apply) for i in results.keys()}, axis=1)
 
     summaries = {
         'compound count':
-            result_to_df(key='cps', to_apply=lambda x: x.sum()),
+            result_to_df(results, key='cps', to_apply=lambda x: x.sum()),
         'reaction count':
-            result_to_df(key='rns', to_apply=lambda x: x.sum()),
+            result_to_df(results, key='rns', to_apply=lambda x: x.sum()),
         'chiral compound count':
             get_compound_chiral_count(results[seed_name]["cps"], keggC_df, chiral_flag=True),
         'achiral compound count':
             get_compound_chiral_count(results[seed_name]["cps"], keggC_df, chiral_flag=False),
         'chiral fraction':
-            result_to_df(key='chiral_fraction', to_apply=lambda x: x),
+            result_to_df(results, key='chiral_fraction', to_apply=lambda x: x),
         'chiral avg heavy atoms':
             get_heavy_atoms_per_gen_from_kegg(results[seed_name]["cps"],
                                               keggC_df,
