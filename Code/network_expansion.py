@@ -59,8 +59,9 @@ def expand_from_seed_set(seeds, reactions: pd.DataFrame, max_gen: int):
         if cps[g] == cps[g - 1]:  # if no new compounds were added,
             break  # stop expanding
     # end of actual expansion code, start of processing
-    rns = pd.DataFrame(rns).replace(False, float('nan')).dropna(how='all').fillna(False).T.cummax().T
-    cps = pd.DataFrame(cps).dropna(how='all').fillna(False).T.cummax().T  # store outputs
+    rns, cps = pd.DataFrame(rns), pd.DataFrame(cps)
+    rns = rns[rns.any(axis=1)].cummax(axis=1)
+    cps = cps[cps.any(axis=1)].cummax(axis=1)
     cp_sets = pd.Series(
         {i: set(j) - {''} for i, j in cps.mul(cps.index, axis=0).fillna('').to_dict(orient='list').items()})
     try:
