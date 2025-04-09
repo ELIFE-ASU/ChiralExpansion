@@ -1042,3 +1042,8 @@ def colorize_series(S, cmap='cet_CET_C6s'):
         c_ser = pd.Series(map(tuple, color_map(float_norm(S)(list(S.values)))), index=S.index)
         c_ser = c_ser.apply(to_hex)
     return c_ser
+
+
+def result_to_df(results: dict, key: str, to_apply):
+    """ for each result in results dict, accesses the pd.Series or pd.DataFrame referenced by key and applies the function to_apply to it."""
+    return pd.concat({i: results[i][key].apply(to_apply) for i in results.keys()}, axis=1)
