@@ -1,0 +1,13 @@
+matplotlib
+networkx
+numpy
+pandas
+rdkit
+scipy
+requests
+tqdm
+urllib3
+chemparse
+seaborn
+netgraph
+netwulf

@@ -1,5 +1,14 @@
 # Tracking chirality through Network Expansion
 
+# Installation Instructions
+
+Any environment manager can be used (these installation instructions assume miniconda is pre-installed). Any stable python version can be used. The required pip installed packages are listed in the provided requirements.txt file.
+
+```
+conda create -n myVenv python=3.* -y
+pip install -r requirements.txt
+```
+
 
 # Data pipeline
 KEGG     <-> lets_get_kegg.py <-> mol_to_inchi.py  <-> calc_chirality_kegg.py 
