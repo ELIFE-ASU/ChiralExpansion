@@ -11,10 +11,10 @@ def make_lists_printable(df):
     df (pandas.DataFrame): The input dataframe containing list-like entries.
 
     Returns:
-    pandas.DataFrame: A dataframe with list-like entries converted to strings.
+    pandas.DataFrame: A dataframe with list-like entries converted to space-separated strings.
     """
     list_like_cols = df.loc[:, df.iloc[0].apply(type).apply(lambda x: x in [set, list])]
-    printable_cols = list_like_cols.applymap(' '.join)
+    printable_cols = list_like_cols.map(lambda x: ' '.join(x), na_action='ignore')
     printable_df = df.copy(deep=True)
     printable_df.loc[:, printable_cols.columns] = printable_cols
     return printable_df
