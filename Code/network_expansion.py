@@ -97,13 +97,13 @@ def expand_from_seed_set(seeds, reactions: pd.DataFrame, max_gen: int):
 
 # identifies what compounds and reactions in the database are reachable from at least one seed compound
 def define_reachable_components(seeds, reactions: pd.DataFrame):
-    bipartite_edges = reactions.applymap(list).stack().groupby(level=0).sum().explode().reset_index()
+    bipartite_edges = reactions.map(list).stack().groupby(level=0).sum().explode().reset_index()
     bipartite_graph = nx.from_pandas_edgelist(bipartite_edges, source='id', target=0, create_using=nx.Graph)
     accessible_nodes = set.union(*[nx.node_connected_component(bipartite_graph, i) for i in seeds])
     del bipartite_graph
     del bipartite_edges
     return ({'reachable_compounds': [i for i in accessible_nodes if i.startswith('C')],
-             'reachable_reactions': [i for i in accessible_nodes if i.startswith('R') or i.startswith('A')]})
+             'reachable_reactions': [i for i in accessible_nodes if not i.startswith('C')]})
 
 
 def generate_annotated_bipartite_edge_list(single_result):
