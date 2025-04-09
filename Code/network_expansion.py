@@ -19,7 +19,7 @@ def import_reaction_file(fpath=reaction_file):
     if 'id' in df.columns:
         df.set_index('id', inplace=True)
     df[['left', 'right']] = df['reaction'].str.split(' <=> ', expand=True).apply(lambda x: x.str.findall(r'(C\d{5})'))
-    df['has_chiral_info'] = (df.left + df.right).explode().isin(chiral_labels.index).groupby(level=0).all()
+    df['has_chiral_info'] = (df.left + df.right).explode().isin(C_df.index).groupby(level=0).all()
     if df['has_chiral_info'].all():
         df.drop(columns='has_chiral_info', inplace=True)
     df.loc[:,['left', 'right']] = df.loc[:,['left', 'right']].map(set)
@@ -68,7 +68,7 @@ def expand_from_seed_set(seeds, reactions: pd.DataFrame, max_gen: int):
         rn_sets = get_rn_sets(rns)
     except:
         rn_sets = pd.Series(index=cp_sets.index, data=float('nan'))
-    chiral_fraction = cp_sets.apply(lambda x: chiral_labels.loc[list(x), 'is_chiral'].mean())
+    chiral_fraction = cp_sets.apply(lambda x: C_df.loc[list(x), 'is_chiral'].mean())
     participants = pd.DataFrame({'reactions': rn_sets, 'compounds': cp_sets})
     try:
         participants.loc[0, 'reactions'] = set(seeds) - set(seeds)
@@ -155,7 +155,7 @@ def add_bipartite_edge_context(single_result):
 
 
 # VARIABLES AND DATASETS
-chiral_labels = (pd.read_csv(compound_file)
+C_df = (pd.read_csv(compound_file)
                   .assign(is_chiral=lambda x: x.n_chiral_centers > 0)
                   .set_index('compound_id'))
 
