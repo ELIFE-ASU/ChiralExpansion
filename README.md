@@ -6,6 +6,7 @@ Any environment manager can be used (these installation instructions assume [min
 
 ```
 conda create -n myVenv python=3.11 -y
+conda activate myVenv
 pip install -r requirements.txt
 ```
 
