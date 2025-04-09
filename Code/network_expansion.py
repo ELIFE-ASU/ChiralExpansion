@@ -154,10 +154,9 @@ def add_bipartite_edge_context(single_result):
 
 
 # VARIABLES AND DATASETS
-chiral_labels = ((pd.read_csv(compound_file)
+chiral_labels = (pd.read_csv(compound_file)
                   .assign(is_chiral=lambda x: x.n_chiral_centers > 0)
-                  .rename(columns={'n_chiral_centers': 'Chiral_Centers'})
-                  .set_index('compound_id')))
+                  .set_index('compound_id'))
 
 
 # ec_rns: KEGG reaction-enzyme entry linkages.
