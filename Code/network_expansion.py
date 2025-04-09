@@ -19,6 +19,7 @@ def import_reaction_file(fpath=data_folder + 'CBRdb_R.csv'):
     df['has_chiral_info'] = (df.left + df.right).explode().isin(chiral_labels.index).groupby(level=0).all()
     if df['has_chiral_info'].all():
         df.drop(columns='has_chiral_info', inplace=True)
+    df.loc[:,['left', 'right']] = df.loc[:,['left', 'right']].map(set)
     return df
 
 
