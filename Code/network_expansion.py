@@ -139,21 +139,6 @@ def make_bipartite_edge_list(edge_pool: pd.DataFrame):
     return all_edges
 
 
-def get_single_result(x, single_result):
-    """
-    Retrieves the arrival step of a given compound or reaction from the single_result dictionary.
-
-    Parameters:
-    x (str): The compound or reaction identifier.
-    single_result (dict): A dictionary containing the arrival steps of compounds and reactions.
-
-    Returns:
-    int: The arrival step of the given compound or reaction if it exists in single_result['arrival_step'].
-    """
-    if x in single_result['arrival_step']:
-        return single_result['arrival_step'][x]
-
-
 # adds context to each edge regarding its essentiality
 def add_bipartite_edge_context(single_result):
     df = single_result['bipartite_edgelist']
