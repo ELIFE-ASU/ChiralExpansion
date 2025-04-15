@@ -22,7 +22,8 @@ def import_reaction_file(fpath=reaction_file):
     df['has_chiral_info'] = (df.left + df.right).explode().isin(C_df.index).groupby(level=0).all()
     if df['has_chiral_info'].all():
         df.drop(columns='has_chiral_info', inplace=True)
-    df.loc[:,['left', 'right']] = df.loc[:,['left', 'right']].map(set)
+    df['compounds'] = df.loc[:, ['left', 'right']].sum(axis=1)
+    df.loc[:, ['left', 'right']] = df.loc[:, ['left', 'right']].map(set)
     return df
 
 
@@ -44,7 +45,7 @@ def expand_from_seed_set(seeds, reactions: pd.DataFrame, max_gen: int):
     # reactions : pool of reactions to draw from; if all compounds on one side of a reaction are present, the reaction is enabled
     # max_gen : max # of expansion generations calculated, e.g. if you only care about early stages.
     rns, cps = dict(), {0: dict(zip(seeds, len(seeds) * [True]))}
-    compound_pool, reaction_pool = set(seeds), reactions
+    compound_pool, reaction_pool = set(seeds), reactions[['left', 'right']]
     fwd_rns, bwd_rns = set(), set()
     # actual expansion code starts here
     for g in range(1, max_gen + 1):
@@ -159,6 +160,7 @@ C_df = (pd.read_csv(compound_file)
                   .assign(is_chiral=lambda x: x.n_chiral_centers > 0)
                   .set_index('compound_id'))
 
+R_df = import_reaction_file(reaction_file)
 
 # ec_rns: KEGG reaction-enzyme entry linkages.
 ec_rns = pd.read_csv(reaction_file, usecols=['id', 'ec'], index_col=0).iloc[:,0].str.split().explode().reset_index()
