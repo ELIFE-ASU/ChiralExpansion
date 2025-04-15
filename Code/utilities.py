@@ -669,7 +669,7 @@ def get_chiral_modulations(step_reaction_df, rxn_df):
     Calculate the number of chiral-modulating, chiral-conserving, and achiral-conserving reactions.
 
     Parameters:
-    stepRxn_df (pandas.DataFrame): DataFrame containing step reaction data, with each row representing a step and a column 'reactions' containing reaction IDs.
+    step_reaction_df (pandas.DataFrame): DataFrame containing step reaction data, with each row representing a step and a column 'reactions' containing reaction IDs.
     rxn_df (pandas.DataFrame): DataFrame containing reaction data, including 'id', 'Reactant Chiral Count', and 'Product Chiral Count' columns.
 
     Returns:
@@ -680,7 +680,9 @@ def get_chiral_modulations(step_reaction_df, rxn_df):
     achiral_conserving = []
 
     for _, row in step_reaction_df.iterrows():
-        sub_rxn_df = rxn_df[rxn_df["id"].isin(row["reactions"])]
+        if 'id' in rxn_df.columns:
+            rxn_df = rxn_df.set_index('id')
+        sub_rxn_df = rxn_df.loc[rxn_df.index.intersection(row["reactions"])]
         chiral_modulating.append(
             len(sub_rxn_df[sub_rxn_df["Reactant Chiral Count"] !=
                            sub_rxn_df["Product Chiral Count"]]))
