@@ -71,7 +71,8 @@ def expand_from_seed_set(seeds, reactions: pd.DataFrame, max_gen: int):
     rns, cps = pd.DataFrame(rns), pd.DataFrame(cps)
     rns = rns[rns.any(axis=1)].cummax(axis=1)
     cps = cps[cps.any(axis=1)].cummax(axis=1)
-    cp_sets = cps.apply(lambda x: set((x*x.index).dropna()))
+    cp_sets = pd.Series(
+         {i: set(j) - {''} for i, j in cps.mul(cps.index, axis=0).fillna('').to_dict(orient='list').items()})
     try:
         rn_sets = get_rn_sets(rns)
     except:
@@ -82,7 +83,7 @@ def expand_from_seed_set(seeds, reactions: pd.DataFrame, max_gen: int):
         participants.loc[0, 'reactions'] = set(seeds) - set(seeds)
     except:
         participants.loc[0, 'reactions'] = pd.NA
-    arrival_step = cps.idxmax(axis=1)
+    arrival_step = pd.concat([cps.idxmax(axis=1), rns.idxmax(axis=1)])
     participants = participants.join(participants.diff().fillna(participants).add_prefix('new '))
     # generate info for edge lists
     steps = rns.idxmax(axis=1)  # note first appearance of each reaction
