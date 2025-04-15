@@ -90,7 +90,7 @@ def fig1():
     ax3.set_ylim(-0.05, 1.05)
     ax3.set_xticks(list(np.arange(0, 16)), minor=True)
     ax3.set_xlabel("Heavy Atoms Per Molecule")
-    ax3.set_ylabel("Chiral Order Parameter $\mathbb{C}$")
+    ax3.set_ylabel(r"Chiral Order Parameter $\mathbb{C}$")
     ax3.annotate(
         xy=(0.7, 0.7),
         text=r"$\mathbb{C} = \frac{C}{C+A}$",
@@ -536,7 +536,7 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     ax.set_ylim([0, 1.05])
 
     ax.set_xlabel("Expansion Generation")
-    ax.set_ylabel("Chiral Order Parameter $\mathbb{C}$")
+    ax.set_ylabel(r"Chiral Order Parameter $\mathbb{C}$")
     ax.legend(prop={"size": 18})  # bbox_to_anchor=(1.05,0.60))
     ax.annotate("D", xy=(-2, 1.07), color="k", weight="bold", annotation_clip=False)
 
@@ -908,7 +908,7 @@ def fig4():
     font_size = 14
     ax1.set_xlabel("System Size (Unique Molecules)"
                    )  # TODO: why isn't this label showing up
-    ax1.set_ylabel("Chiral Order Parameter $\mathbb{C}$")
+    ax1.set_ylabel(r"Chiral Order Parameter $\mathbb{C}$")
     ax1.legend(bbox_to_anchor=(1.43, 1.2),
                markerscale=5,
                handles=handles,
@@ -958,7 +958,7 @@ def fig4():
     y = df["LUCA"].ratio_chiral
 
     # Labels
-    ax2.set_ylabel("Chiral Order Parameter $\mathbb{C}$")
+    ax2.set_ylabel(r"Chiral Order Parameter $\mathbb{C}$")
     ax2.set_xlabel("Number of Genomic\nSamples")
 
     ax2.set_xscale('log')
@@ -1318,7 +1318,7 @@ def fig5(seed_name, rxn_db, crossover_step, first_chiral_step):
     for patch, c in zip(bplot["boxes"], color_list):
         patch.set_color(c)
 
-    ax.set_ylabel("Chiral Order\nParameter $\mathbb{C}$", fontsize=30)
+    ax.set_ylabel(r"Chiral Order\nParameter $\mathbb{C}$", fontsize=30)
     ax.xaxis.set_ticks([])
 
     # legend of label colors
@@ -1353,7 +1353,7 @@ def fig5(seed_name, rxn_db, crossover_step, first_chiral_step):
                c=pathway_df['Group'].map(colors),
                s=50)
 
-    ax.set_ylabel("Chiral Order\nParameter $\mathbb{C}$", fontsize=30)
+    ax.set_ylabel(r"Chiral Order\nParameter $\mathbb{C}$", fontsize=30)
     ax.set_xlabel("System Size (Unique Molecules Per Pathway)")
     loc = plticker.MultipleLocator(
         base=20.0)  # this locator puts ticks at regular intervals
