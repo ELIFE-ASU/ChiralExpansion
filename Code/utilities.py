@@ -193,17 +193,15 @@ def get_compound_chiral_count(cpd_df, kegg_df, chiral_flag):
     Returns:
     pandas.DataFrame: DataFrame containing the count of chiral or achiral compounds for each column in cpd_df.
     """
-    count = list()
-    for i in range(len(cpd_df.columns)):
-        sub_df = kegg_df[kegg_df["compound_id"].isin(
-            cpd_df.index[cpd_df[i] == True].tolist())]
-        if chiral_flag:
-            count.append(len(sub_df[sub_df["n_chiral_centers"] != 0]))
-        else:
-            count.append(len(sub_df[sub_df["n_chiral_centers"] == 0]))
-
-    return pd.DataFrame(count)
-
+    if 'compound_id' in kegg_df.columns:
+        kegg_df = kegg_df.set_index("compound_id")
+    if 'is_chiral' not in kegg_df.columns:
+        kegg_df["is_chiral"] = kegg_df["n_chiral_centers"].gt(0)
+    if chiral_flag:
+        count = cpd_df[kegg_df.loc[cpd_df.index, 'is_chiral']].count().to_frame()
+    else:
+        count = cpd_df[~kegg_df.loc[cpd_df.index, 'is_chiral']].count().to_frame()
+    return count
 
 def get_heavy_atoms_per_gen_from_kegg(cpd_df, kegg_df, chiral_flag, calc):
     """
@@ -242,19 +240,22 @@ def get_heavy_atoms_per_gen_from_kegg(cpd_df, kegg_df, chiral_flag, calc):
     return pd.DataFrame(heavy_atoms)
 
 
-def get_random_seed_set(kegg_df, size, chirality="both"):
+def get_random_seed_set(kegg_df, size, random_state, chirality="both"):
     """
     Return a seed set of a given size that is ready to be thrown into the network expansion algorithm.
 
     Parameters:
     kegg_df (pandas.DataFrame): DataFrame containing KEGG compound data.
     size (int): The size of the seed set to be returned.
+    random_state (int): Random state for reproducibility.
     chirality (str, optional): Chirality options, either "both" (default), "chiral", or "achiral".
 
     Returns:
     numpy.ndarray: An array of compound IDs representing the seed set.
     """
 
+    if 'compound_id' not in kegg_df.columns:
+        kegg_df = kegg_df.reset_index()
     if chirality == "chiral":
         sub_df = kegg_df[kegg_df["n_chiral_centers"] != 0]
     elif chirality == "achiral":
@@ -262,7 +263,7 @@ def get_random_seed_set(kegg_df, size, chirality="both"):
     else:
         sub_df = kegg_df  # To ensure remainder of code works
 
-    return sub_df["compound_id"].sample(size).values
+    return sub_df["compound_id"].sample(size, random_state=random_state).values
 
 
 def get_chiral_percentage(cum_chiral, cum_achiral):
@@ -669,7 +670,7 @@ def get_chiral_modulations(step_reaction_df, rxn_df):
     Calculate the number of chiral-modulating, chiral-conserving, and achiral-conserving reactions.
 
     Parameters:
-    stepRxn_df (pandas.DataFrame): DataFrame containing step reaction data, with each row representing a step and a column 'reactions' containing reaction IDs.
+    step_reaction_df (pandas.DataFrame): DataFrame containing step reaction data, with each row representing a step and a column 'reactions' containing reaction IDs.
     rxn_df (pandas.DataFrame): DataFrame containing reaction data, including 'id', 'Reactant Chiral Count', and 'Product Chiral Count' columns.
 
     Returns:
@@ -680,7 +681,9 @@ def get_chiral_modulations(step_reaction_df, rxn_df):
     achiral_conserving = []
 
     for _, row in step_reaction_df.iterrows():
-        sub_rxn_df = rxn_df[rxn_df["id"].isin(row["reactions"])]
+        if 'id' in rxn_df.columns:
+            rxn_df = rxn_df.set_index('id')
+        sub_rxn_df = rxn_df.loc[rxn_df.index.intersection(row["reactions"])]
         chiral_modulating.append(
             len(sub_rxn_df[sub_rxn_df["Reactant Chiral Count"] !=
                            sub_rxn_df["Product Chiral Count"]]))
