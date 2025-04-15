@@ -83,7 +83,7 @@ def expand_from_seed_set(seeds, reactions: pd.DataFrame, max_gen: int):
         participants.loc[0, 'reactions'] = set(seeds) - set(seeds)
     except:
         participants.loc[0, 'reactions'] = pd.NA
-    arrival_step = pd.concat([cps.idxmax(axis=1), rns.idxmax(axis=1)])
+    arrival_step = participants.stack().explode().drop_duplicates().dropna().reset_index().set_index(0)['level_0']
     participants = participants.join(participants.diff().fillna(participants).add_prefix('new '))
     # generate info for edge lists
     steps = rns.idxmax(axis=1)  # note first appearance of each reaction
