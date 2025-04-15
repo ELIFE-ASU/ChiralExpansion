@@ -426,39 +426,44 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
 
     add_patch(lgd3)
 
-    ### Get X random seed sets, both chiral & achiral
-    randAchiral_results = dict()
-    randChiral_results = dict()
-    random_achiral_seeds = dict()
-    random_chiral_seeds = dict()
-    for random_ss_size in range(min_ss_size, max_ss_size + 1):
-        for i in range(n_iter):
-            random_achiral_seeds[f"Random_{random_ss_size}_{i}"] = get_random_seed_set(
-                keggC_df, random_ss_size, chirality="achiral", random_state=i)
-            random_chiral_seeds[f"Random_{random_ss_size}_{i}"] = get_random_seed_set(
-                keggC_df, random_ss_size, chirality="chiral", random_state=i)
+    # ### Get X random seed sets, both chiral & achiral
+    # randAchiral_results = dict()
+    # randChiral_results = dict()
+    # random_achiral_seeds = dict()
+    # random_chiral_seeds = dict()
+    # for random_ss_size in range(min_ss_size, max_ss_size + 1):
+    #     for i in range(n_iter):
+    #         random_achiral_seeds[f"Random_{random_ss_size}_{i}"] = get_random_seed_set(
+    #             keggC_df, random_ss_size, chirality="achiral", random_state=i)
+    #         random_chiral_seeds[f"Random_{random_ss_size}_{i}"] = get_random_seed_set(
+    #             keggC_df, random_ss_size, chirality="chiral", random_state=i)
 
-    print(f"- Expanding {n_iter * (max_ss_size - min_ss_size + 1)} Achiral Seed Sets -")
-    achiral_full_chiral_count = list()
-    achiral_full_achiral_count = list()
-    for name, seeds in tqdm(random_achiral_seeds.items(), total=n_iter * (max_ss_size - min_ss_size + 1)):
-        randAchiral_results = expand_from_seed_set(
-            seeds=seeds, reactions=reaction_scope, max_gen=max_generation)
-        achiral_full_chiral_count.append(
-            get_compound_chiral_count(randAchiral_results["cps"], keggC_df, chiral_flag=True)[0].to_list())
-        achiral_full_achiral_count.append(
-            get_compound_chiral_count(randAchiral_results["cps"], keggC_df, chiral_flag=False)[0].to_list())
+    # print(f"- Expanding {n_iter * (max_ss_size - min_ss_size + 1)} Achiral Seed Sets -")
+    # achiral_full_chiral_count = list()
+    # achiral_full_achiral_count = list()
+    # for name, seeds in tqdm(random_achiral_seeds.items(), total=n_iter * (max_ss_size - min_ss_size + 1)):
+    #     randAchiral_results = expand_from_seed_set(
+    #         seeds=seeds, reactions=reaction_scope, max_gen=max_generation)
+    #     achiral_full_chiral_count.append(
+    #         get_compound_chiral_count(randAchiral_results["cps"], keggC_df, chiral_flag=True)[0].to_list())
+    #     achiral_full_achiral_count.append(
+    #         get_compound_chiral_count(randAchiral_results["cps"], keggC_df, chiral_flag=False)[0].to_list())
 
-    print(f"- Expanding {n_iter * (max_ss_size - min_ss_size + 1)} Chiral Seed Sets -")
-    chiral_full_chiral_count = list()
-    chiral_full_achiral_count = list()
-    for name, seeds in tqdm(random_chiral_seeds.items(), total=n_iter * (max_ss_size - min_ss_size + 1)):
-        randChiral_results = expand_from_seed_set(
-            seeds=seeds, reactions=reaction_scope, max_gen=max_generation)
-        chiral_full_chiral_count.append(
-            get_compound_chiral_count(randChiral_results["cps"], keggC_df, chiral_flag=True)[0].to_list())
-        chiral_full_achiral_count.append(
-            get_compound_chiral_count(randChiral_results["cps"], keggC_df, chiral_flag=False)[0].to_list())
+    # print(f"- Expanding {n_iter * (max_ss_size - min_ss_size + 1)} Chiral Seed Sets -")
+    # chiral_full_chiral_count = list()
+    # chiral_full_achiral_count = list()
+    # for name, seeds in tqdm(random_chiral_seeds.items(), total=n_iter * (max_ss_size - min_ss_size + 1)):
+    #     randChiral_results = expand_from_seed_set(
+    #         seeds=seeds, reactions=reaction_scope, max_gen=max_generation)
+    #     chiral_full_chiral_count.append(
+    #         get_compound_chiral_count(randChiral_results["cps"], keggC_df, chiral_flag=True)[0].to_list())
+    #     chiral_full_achiral_count.append(
+    #         get_compound_chiral_count(randChiral_results["cps"], keggC_df, chiral_flag=False)[0].to_list())
+        
+    achiral_full_chiral_count = pickle.load(open("../Data/RandomSeedSets_AchiralFullChiralCount.pkl", "rb"))
+    achiral_full_achiral_count = pickle.load(open("../Data/RandomSeedSets_AchiralFullAchiralCount.pkl", "rb"))
+    chiral_full_chiral_count = pickle.load(open("../Data/RandomSeedSets_ChiralFullChiralCount.pkl", "rb"))
+    chiral_full_achiral_count = pickle.load(open("../Data/RandomSeedSets_ChiralFullAchiralCount.pkl", "rb"))
 
     achiral_chiralPercentage = []
     chiral_chiralPercentage = []
