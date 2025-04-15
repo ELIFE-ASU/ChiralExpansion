@@ -49,22 +49,29 @@ def expand_from_seed_set(seeds, reactions: pd.DataFrame, max_gen: int):
     fwd_rns, bwd_rns = set(), set()
     # actual expansion code starts here
     for g in range(1, max_gen + 1):
-        has_r = reaction_pool['right'].apply(lambda x: x <= compound_pool)  # are all right-side compounds present?
-        has_l = reaction_pool['left'].apply(lambda x: x <= compound_pool)  # are all left-side compounds present?
-        rns[g] = (has_r + has_l) > 0  # if so, reaction is enabled
-        fwd_rns = fwd_rns.union(set(reaction_pool[has_l > has_r].index))  # new compounds will be from right side
-        bwd_rns = bwd_rns.union(set(reaction_pool[has_l < has_r].index))  # new compounds will be from left side
+        # are all right-side compounds present?
+        has_r = reaction_pool['right'].apply(lambda x: x <= compound_pool)
+        # are all left-side compounds present?
+        has_l = reaction_pool['left'].apply(lambda x: x <= compound_pool)
+        # if so, reaction is enabled
+        rns[g] = (has_r + has_l) > 0
+        # new compounds will be from right side
+        fwd_rns = fwd_rns.union(set(reaction_pool[has_l > has_r].index)) 
+        # or new compounds will be from left side
+        bwd_rns = bwd_rns.union(set(reaction_pool[has_l < has_r].index))
+        # add new-compound side to the pool
         compound_pool = set.union(compound_pool,
-                                  *reaction_pool.loc[rns[g]].stack())  # add new-compound side to the pool
+                                  *reaction_pool.loc[rns[g]].stack())
         cps[g] = dict(zip(compound_pool, len(compound_pool) * [True]))
-        if cps[g] == cps[g - 1]:  # if no new compounds were added,
-            break  # stop expanding
+        # if no new compounds were added...
+        if cps[g] == cps[g - 1]:  
+            # stop expanding
+            break
     # end of actual expansion code, start of processing
     rns, cps = pd.DataFrame(rns), pd.DataFrame(cps)
     rns = rns[rns.any(axis=1)].cummax(axis=1)
     cps = cps[cps.any(axis=1)].cummax(axis=1)
-    cp_sets = pd.Series(
-        {i: set(j) - {''} for i, j in cps.mul(cps.index, axis=0).fillna('').to_dict(orient='list').items()})
+    cp_sets = cps.apply(lambda x: set((x*x.index).dropna()))
     try:
         rn_sets = get_rn_sets(rns)
     except:
@@ -75,10 +82,10 @@ def expand_from_seed_set(seeds, reactions: pd.DataFrame, max_gen: int):
         participants.loc[0, 'reactions'] = set(seeds) - set(seeds)
     except:
         participants.loc[0, 'reactions'] = pd.NA
-    arrival_step = participants.stack().explode().drop_duplicates().dropna().reset_index().set_index(0)['level_0']
+    arrival_step = cps.idxmax(axis=1)
     participants = participants.join(participants.diff().fillna(participants).add_prefix('new '))
     # generate info for edge lists
-    steps = rns.T.idxmax()  # note first appearance of each reaction
+    steps = rns.idxmax(axis=1)  # note first appearance of each reaction
     edge_pool = reaction_pool.loc[rns.index].copy(deep=True).assign(
         step=rns.index.map(steps))  # these reactions were enabled
     edge_pool['directed'] = edge_pool.index.isin(
@@ -92,7 +99,7 @@ def expand_from_seed_set(seeds, reactions: pd.DataFrame, max_gen: int):
     edge_pool.drop(columns=['left', 'right'], inplace=True)
     edge_pool.reset_index(drop=False, names='reaction', inplace=True)
     return (
-        {'rns': rns, 'cps': cps, 'participants': participants, 'reaction_pool': list(reaction_pool.index),
+        {'rns': rns, 'cps': cps, 'participants': participants,
          'seeds': seeds, 'arrival_step': arrival_step,
          'chiral_fraction': chiral_fraction, 'edge_pool': edge_pool})
 
