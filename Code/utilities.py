@@ -253,6 +253,8 @@ def get_random_seed_set(kegg_df, size, chirality="both"):
     numpy.ndarray: An array of compound IDs representing the seed set.
     """
 
+    if 'compound_id' not in kegg_df.columns:
+        kegg_df = kegg_df.reset_index()
     if chirality == "chiral":
         sub_df = kegg_df[kegg_df["n_chiral_centers"] != 0]
     elif chirality == "achiral":
@@ -260,7 +262,7 @@ def get_random_seed_set(kegg_df, size, chirality="both"):
     else:
         sub_df = kegg_df  # To ensure remainder of code works
 
-    return sub_df["compound_id"].sample(size).values
+    return sub_df["compound_id"].sample(size, random_state=2).values
 
 
 def get_chiral_percentage(cum_chiral, cum_achiral):
