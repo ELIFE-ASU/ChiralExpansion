@@ -586,10 +586,11 @@ def fig3(seed_name, rxn_db, crossover_step, attributes, networks_uni):
     print("- Generating Network Figure (click 'Post To Python' in browser pop-up window to continue code) -")
     size_nodes_by = 'degree'
     max_node_size = 25
+    max_figure_degree = 50
 
     G = networks_uni['directed'].copy()
     deg = G.degree()
-    nodes_to_remove = [n[0] for n in deg if n[1] < 50]
+    nodes_to_remove = [n[0] for n in deg if n[1] < max_figure_degree]
     print(f"\tFiltering network to remove {len(nodes_to_remove)} nodes due to degree...")
     G.remove_nodes_from(nodes_to_remove)
 
@@ -1127,8 +1128,9 @@ def fig5(seed_name, rxn_db, crossover_step, first_chiral_step):
     ax1.set_ylabel("Substrate Chiral Compounds", fontsize=18)
     ax1.set_xlabel("Product Chiral Compounds", fontsize=18)
 
-    for i in range(5):
-        for j in range(5):
+    n_rows = 5
+    for i in range(n_rows):
+        for j in range(n_rows):
             if i == 1 and j == 1:
                 c = "k"
             else:
