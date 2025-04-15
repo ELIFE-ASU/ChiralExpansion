@@ -21,6 +21,7 @@ max_generation = 1000  # Arbitrarily large value
 seed_candidates = pd.read_csv('../Data/SampleSeeds.csv',
                               index_col=0)
 keggC_df = pd.read_csv("../Data/CBRdb_C.csv")
+keggC_df = keggC_df.assign(is_chiral=lambda x: x['n_chiral_centers'].gt(0))
 keggR_df = pd.read_csv("../Data/CBRdb_R.csv")
 
 
@@ -433,9 +434,9 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     for random_ss_size in range(min_ss_size, max_ss_size + 1):
         for i in range(n_iter):
             random_achiral_seeds[f"Random_{random_ss_size}_{i}"] = get_random_seed_set(
-                keggC_df, random_ss_size, chirality="achiral")
+                keggC_df, random_ss_size, chirality="achiral", random_state=i)
             random_chiral_seeds[f"Random_{random_ss_size}_{i}"] = get_random_seed_set(
-                keggC_df, random_ss_size, chirality="chiral")
+                keggC_df, random_ss_size, chirality="chiral", random_state=i)
 
     print(f"- Expanding {n_iter * (max_ss_size - min_ss_size + 1)} Achiral Seed Sets -")
     achiral_full_chiral_count = list()

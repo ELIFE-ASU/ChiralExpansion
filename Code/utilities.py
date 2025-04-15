@@ -240,13 +240,14 @@ def get_heavy_atoms_per_gen_from_kegg(cpd_df, kegg_df, chiral_flag, calc):
     return pd.DataFrame(heavy_atoms)
 
 
-def get_random_seed_set(kegg_df, size, chirality="both"):
+def get_random_seed_set(kegg_df, size, random_state, chirality="both"):
     """
     Return a seed set of a given size that is ready to be thrown into the network expansion algorithm.
 
     Parameters:
     kegg_df (pandas.DataFrame): DataFrame containing KEGG compound data.
     size (int): The size of the seed set to be returned.
+    random_state (int): Random state for reproducibility.
     chirality (str, optional): Chirality options, either "both" (default), "chiral", or "achiral".
 
     Returns:
@@ -262,7 +263,7 @@ def get_random_seed_set(kegg_df, size, chirality="both"):
     else:
         sub_df = kegg_df  # To ensure remainder of code works
 
-    return sub_df["compound_id"].sample(size, random_state=2).values
+    return sub_df["compound_id"].sample(size, random_state=random_state).values
 
 
 def get_chiral_percentage(cum_chiral, cum_achiral):
