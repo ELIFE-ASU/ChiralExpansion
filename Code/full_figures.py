@@ -436,6 +436,9 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
             get_compound_chiral_count(randAchiral_results["cps"], keggC_df, chiral_flag=True)[0].to_list())
         achiral_full_achiral_count.append(
             get_compound_chiral_count(randAchiral_results["cps"], keggC_df, chiral_flag=False)[0].to_list())
+        
+    pickle.dump(achiral_full_chiral_count, open("../Data/RandomSeedSets_AchiralFullChiralCount.pkl", "wb"))
+    pickle.dump(achiral_full_achiral_count, open("../Data/RandomSeedSets_AchiralFullAchiralCount.pkl", "wb"))
 
     print(f"- Expanding {n_iter * (max_ss_size - min_ss_size + 1)} Chiral Seed Sets -")
     chiral_full_chiral_count = list()
@@ -447,6 +450,9 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
             get_compound_chiral_count(randChiral_results["cps"], keggC_df, chiral_flag=True)[0].to_list())
         chiral_full_achiral_count.append(
             get_compound_chiral_count(randChiral_results["cps"], keggC_df, chiral_flag=False)[0].to_list())
+        
+    pickle.dump(chiral_full_chiral_count, open("../Data/RandomSeedSets_ChiralFullChiralCount.pkl", "wb"))
+    pickle.dump(chiral_full_achiral_count, open("../Data/RandomSeedSets_ChiralFullAchiralCount.pkl", "wb"))
 
     achiral_chiralPercentage = []
     chiral_chiralPercentage = []
