@@ -193,17 +193,15 @@ def get_compound_chiral_count(cpd_df, kegg_df, chiral_flag):
     Returns:
     pandas.DataFrame: DataFrame containing the count of chiral or achiral compounds for each column in cpd_df.
     """
-    count = list()
-    for i in range(len(cpd_df.columns)):
-        sub_df = kegg_df[kegg_df["compound_id"].isin(
-            cpd_df.index[cpd_df[i] == True].tolist())]
-        if chiral_flag:
-            count.append(len(sub_df[sub_df["n_chiral_centers"] != 0]))
-        else:
-            count.append(len(sub_df[sub_df["n_chiral_centers"] == 0]))
-
-    return pd.DataFrame(count)
-
+    if 'compound_id' in kegg_df.columns:
+        kegg_df = kegg_df.set_index("compound_id")
+    if 'is_chiral' not in kegg_df.columns:
+        kegg_df["is_chiral"] = kegg_df["n_chiral_centers"].gt(0)
+    if chiral_flag:
+        count = cpd_df[kegg_df.loc[cpd_df.index, 'is_chiral']].count().to_frame()
+    else:
+        count = cpd_df[~kegg_df.loc[cpd_df.index, 'is_chiral']].count().to_frame()
+    return count
 
 def get_heavy_atoms_per_gen_from_kegg(cpd_df, kegg_df, chiral_flag, calc):
     """
