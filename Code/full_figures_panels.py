@@ -67,8 +67,7 @@ def fig1():
              label="Achiral",
              color=achiral_color)
     ax2.plot(chiral_fraction, linewidth=3, label="Chiral", color=chiral_color)
-    ax2.axvspan(8,
-                9,
+    ax2.axvspan(8, 9,
                 alpha=0.5,
                 color='grey',
                 label="Phase Boundary")
@@ -608,7 +607,7 @@ def fig3(seed_name, rxn_db, crossover_step, attributes, networks_uni):
         G.remove_node(n)
 
     fig = plt.figure(figsize=(12, 12), layout="constrained")
-    stylized_network, config = nw.visualize(G, config={"zoom": 1.08,
+    stylized_network, config = nw.visualize(G, config={"zoom": 1.05,
                                                        "node_charge": -100,
                                                        "node_gravity": 0.4,
                                                        "link_distance": 0,
@@ -1082,8 +1081,8 @@ def fig4():
                  va='center',
                  zorder=3)
     ax4.annotate("More Achiral",
-                 xy=(55, -0.15),
-                 xytext=(30, -0.24),
+                 xy=(45, -0.15),
+                 xytext=(20, -0.18),
                  color="k",
                  arrowprops={
                      "arrowstyle": "simple",
