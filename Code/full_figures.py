@@ -1298,7 +1298,7 @@ def fig5(seed_name, rxn_db, crossover_step, first_chiral_step):
     label_pos = ax.get_rlabel_position()
     ax.text(np.radians(label_pos + 10),
             ax.get_rmax() / 2. + 0.05,
-            "$\mathbb{C}$",
+            r"$\mathbb{C}$",
             rotation=label_pos + 4,
             ha='center',
             va='center',
@@ -1390,7 +1390,7 @@ def main():
 
     # Seed set
     seed_name = "JM|G24|G17|TW"
-    rxn_db_fp = "../Data/CBRdb_R.csv"
+    rxn_db_fp = reaction_file
 
     print("---- Generating Figure 1 ----")
     fig1()
