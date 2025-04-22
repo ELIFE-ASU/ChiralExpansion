@@ -200,8 +200,8 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     print("- Generating Network Figure -")
     result_network = generate_annotated_bipartite_edge_list(results[seed_name])
     # summary_network = generate_expansion_summary(result_network)
-    transition_edge_df = result_network['bipartite_edgelist'].query('step <= @achiral_chiral_crossover_step').copy(
-        deep=True)
+    transition_edge_df = result_network['bipartite_edgelist'].copy(deep=True) #.query('step <= @achiral_chiral_crossover_step').copy(deep=True)
+
     networks = {i: nx.from_pandas_edgelist(transition_edge_df[transition_edge_df[i]],
                                            source='source', target='target', edge_attr=True, create_using=nx.DiGraph())
                 for i in ['impactful_precursor', 'immediate_precursor', 'directed']}
@@ -224,8 +224,9 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
                 steps.append(step)
                 step_found = True
             step += 1
-            if step > achiral_chiral_crossover_step:
-                break
+            ### NOTE: Removing for full figure
+            # if step > achiral_chiral_crossover_step:
+            #     break
         if not step_found:
             steps.append(np.nan)
 
@@ -242,11 +243,11 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     # Remove G nodes that are not in attributes df
     nodes_to_keep = attributes.index.to_list()
     nodes_to_remove = [n for n in nodes_to_keep if n not in G1.nodes()]
-    print(f"\tFiltering  network to remove {len(nodes_to_remove)} nodes, as they are not in KEGG...")
+    print(f"\tFiltering network to remove {len(nodes_to_remove)} nodes, as they are not in KEGG...")
     G1.remove_nodes_from(nodes_to_remove)
 
     nx.set_node_attributes(G1, attributes['is_chiral_color'], 'is_chiral_color')
-    layers = [list(i) for i in attributes.loc[list(G1.nodes())].groupby(by='gen').groups.values()][:-1]
+    layers = [list(i) for i in attributes.loc[list(G1.nodes())].groupby(by='gen').groups.values()]
     pos = get_multipartite_layout(edges=list(G1.edges), layers=layers, reduce_edge_crossings=True)
     # for i in layers[-1]: del pos[i] # remove last layer
     for n in pos.keys(): pos[n][0] = (pos[n][0] + 0.2) ** 2  # spread out later gens to reduce extreme angles
@@ -259,7 +260,7 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
                      linewidths=0.2, node_size=100, node_shape='s', alpha=0.99,
                      with_labels=False)
 
-    plt.legend(loc='lower left', borderpad=8, frameon=False, handles=[
+    plt.legend(loc='lower right', borderpad=8, frameon=False, handles=[
         plt.Line2D([0], [0], marker='s', color='w', markeredgecolor='k', markeredgewidth=0.2, markerfacecolor='#34CCFF',
                    markersize=20, label='Chiral'),
         plt.Line2D([0], [0], marker='s', color='w', markerfacecolor='#FFC012', markeredgecolor='k', markeredgewidth=0.2,
@@ -274,7 +275,6 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     # Read in LUCA compounds & get percentages
     print("- Calculating LUCA Percentage Per Expansion Step -")
     percent_luca = get_luca_percentage(results[seed_name]["participants"])
-    del (results)
     full_luca_exp = 0
     for step in range(len(percent_luca)):
         if percent_luca[step] == percent_luca[-1]:
@@ -318,7 +318,7 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     ax2.axvline(x=first_chiral_step, color="k", linestyle=":", alpha=0.5)
 
     ax2.annotate(
-        f"Achiral-to-Chiral\nCrossover Step {achiral_chiral_crossover_step}",
+        f"Phase Boundary\nCrossed Step {achiral_chiral_crossover_step}",
         xy=(achiral_chiral_crossover_step, 6000),
         xytext=(achiral_chiral_crossover_step + 8, 6150),
         color="k",
@@ -368,7 +368,7 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
 
     ax3.axhspan(
         8, 9, alpha=0.5, color='grey',
-        label="Phase Boundary\nin Chemical Space")  ### TODO: depends on Fig 1 (check this?)
+        label="Phase Boundary\nin Chemical Space")
 
     ax3.errorbar(x=np.arange(
         0, len(summaries["achiral avg heavy atoms"][0].to_list()), 1),
@@ -398,14 +398,14 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
 
     ax3.axvline(x=first_chiral_step, color="k", alpha=0.5, linestyle=":")
 
-    ax3.set_ylim([0, 55])
-
     ax3.set_ylabel("Average Heavy Atoms Per Molecule")
     ax3.set_xlabel("Expansion Generation")
 
+    ax3.set_ylim([0, 60])
+    ax3.annotate("C", xy=(-1.5, 61), color="k", weight="bold", annotation_clip=False)
+
     # ax.legend(prop={"size": 14})
-    ax3.annotate("C", xy=(-1.5, 56), color="k", weight="bold", annotation_clip=False)
-    lgd3 = ax3.legend(prop={"size": 16}, frameon=False, bbox_to_anchor=(1.5, 1.15))
+    lgd3 = ax3.legend(bbox_to_anchor=(0.25,1.1), prop={"size": 14}, frameon=False, ncol=2)
 
     def add_patch(legend):
         ax = legend.axes
@@ -416,7 +416,7 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
         # labels.append("Phase Boundary in Chemical Space")
 
         handles.append(Patch(facecolor=luca_color, edgecolor=luca_color, alpha=0.5))
-        labels.append("Percent LUCA\nCoverage")
+        labels.append("Percent LUCA Coverage")
 
         legend._legend_box = None
         legend._init_legend_box(handles, labels)
@@ -424,6 +424,7 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
         # legend.set_title(legend.get_title().get_text())
 
     add_patch(lgd3)
+
 
     # ### Get X random seed sets, both chiral & achiral
     # randAchiral_results = dict()
@@ -551,15 +552,15 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     ax4.axvline(x=first_chiral_step, color="k", linestyle=":", alpha=0.5)
 
     ax4.set_ylim([0, 1.05])
-    ax4.set_xlim([-1, 76])
+    #ax4.set_xlim([-1, 76])
 
     # Remove x-axis spine past 55
-    ax4.spines['bottom'].set_bounds(-1, 60)
+    # ax4.spines['bottom'].set_bounds(-1, 60)
 
     # Remove 100 & 120 from xticks
-    ax4_xticks = ax4.xaxis.get_major_ticks()
-    ax4_xticks[-1].set_visible(False)
-    ax4_xticks[-2].set_visible(False)
+    # ax4_xticks = ax4.xaxis.get_major_ticks()
+    # ax4_xticks[-1].set_visible(False)
+    # ax4_xticks[-2].set_visible(False)
     # ax4_xticks[-3].set_visible(False)
     # ax4_xticks[-4].set_visible(False)
     # ax4_xticks[-5].set_visible(False)
@@ -569,7 +570,7 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
 
     ax4.set_xlabel("Expansion Generation")
     ax4.set_ylabel(r"Chiral Order\nParameter $\mathbb{C}$")
-    lgd4 = ax4.legend(prop={"size": 16}, frameon=False, bbox_to_anchor=(0.85, 1))
+    lgd4 = ax4.legend(loc="upper right", prop={"size": 14}, frameon=False, ncol=3)
     ax4.annotate("D", xy=(-0.5, 1.07), color="k", weight="bold", annotation_clip=False)
 
     plt.tight_layout()
@@ -577,6 +578,44 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     plt.savefig("../Figures/Fig2.svg", format="svg")
     plt.savefig("../Figures/Fig2.png", format="png")
     plt.close()
+
+    print("- Generating network for Figure 3 -")
+    result_network = generate_annotated_bipartite_edge_list(results[seed_name])
+    transition_edge_df = result_network['bipartite_edgelist'].query('step <= @achiral_chiral_crossover_step').copy(deep=True)
+    networks = {i: nx.from_pandas_edgelist(transition_edge_df[transition_edge_df[i]],
+                                           source='source', target='target', edge_attr=True, create_using=nx.DiGraph())
+                for i in ['impactful_precursor', 'immediate_precursor', 'directed']}
+    compound_nodes = {i: set(j.nodes()).difference(reaction_scope.index) for i, j in networks.items()}
+    networks_uni = {i: bipartite.projected_graph(networks[i], nodes=compound_nodes[i]) for i in networks.keys()}
+
+    attributes = pd.read_csv("../Data/CBRdb_C.csv",
+                             index_col=0)
+    attributes.drop(labels=["smiles", "formula", "molecular_weight", "n_heavy_atoms"], axis=1,
+                    inplace=True)
+    attributes["is_chiral"] = attributes['n_chiral_centers'].map(lambda x: x > 0)
+    attributes['is_chiral_color'] = attributes['is_chiral'].map({True: '#34CCFF', False: '#FFC012'}).fillna("#FFFFFF")
+
+    steps = []
+    for index, _ in attributes.iterrows():
+        step = 0
+        step_found = False
+        for new_cpds in results[seed_name]["participants"]["new compounds"]:
+            if index in new_cpds:
+                steps.append(step)
+                step_found = True
+            step += 1
+            ### NOTE: Putting back in for figure 3
+            if step > achiral_chiral_crossover_step:
+                break
+        if not step_found:
+            steps.append(np.nan)
+
+    attributes['gen'] = steps
+    attributes.sort_values(by='gen', inplace=True)
+    gen_color = 'Greys'
+    attributes['gen_color'] = colorize_series(attributes['gen'], cmap=gen_color).tolist()
+
+    del (results)
 
     return achiral_chiral_crossover_step, first_chiral_step, attributes, networks_uni
 
