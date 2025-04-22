@@ -1448,7 +1448,7 @@ def main():
     # Seed set
     seed_name = "JM|G24|G17|TW"
     # rxn_db_fp = "../../lets-get-kegg/Data/atlas_kegg_processed_merged_deduped.csv.zip"
-    rxn_db_fp = "../Data/CBRdb_R.csv"
+    rxn_db_fp = reaction_file
 
     print("---- Generating Figure 1 ----")
     fig1()

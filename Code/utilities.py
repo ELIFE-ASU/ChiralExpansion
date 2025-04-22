@@ -1049,4 +1049,9 @@ def colorize_series(S, cmap='cet_CET_C6s'):
 
 def result_to_df(results: dict, key: str, to_apply):
     """ for each result in results dict, accesses the pd.Series or pd.DataFrame referenced by key and applies the function to_apply to it."""
-    return pd.concat({i: results[i][key].apply(to_apply) for i in results.keys()}, axis=1)
+    if key in results.keys():
+        return(results[key].apply(to_apply).to_frame())
+    elif key in results[list(results.keys())[0]].keys():
+        return(pd.concat({i: results[i][key].apply(to_apply) for i in results.keys()}, axis=1))
+    else:
+        raise ValueError(f"Key {key} not found in results or in the first result's keys.")
