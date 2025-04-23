@@ -645,6 +645,7 @@ def fig3(seed_name, rxn_db, crossover_step, attributes, networks_uni):
                                                        "display_singleton_nodes": True,
                                                        "min_link_weight_percentile": 0,
                                                        "max_link_weight_percentile": 1})
+    
     fig, ax = nw.draw_netwulf(stylized_network)
 
     a = stylized_network.copy()
@@ -656,13 +657,13 @@ def fig3(seed_name, rxn_db, crossover_step, attributes, networks_uni):
     nw.draw_netwulf(a, fig=fig, ax=ax, draw_links=False)
 
     nodes = pd.DataFrame(a['nodes'])
-    gens_shown = \
-        pd.DataFrame(
+    gens_shown = pd.DataFrame(
             {'gen': nodes['id'].map(attributes['gen']), 'color': nodes['color']}).drop_duplicates().sort_values(
             by='gen').set_index('gen')['color']
     handles = [plt.Line2D([0], [0], marker='o', color='w', markeredgecolor='k', markeredgewidth=0, markerfacecolor=j,
                           markersize=10, label=str(i)) for i, j in gens_shown.items()]
-    plt.legend(loc='lower left', frameon=False, handles=handles, handletextpad=0.01, title='Gen', title_fontsize=14, prop={"size": 10})
+    plt.legend(frameon=False, handles=handles, handletextpad=0.01, title='GEN', title_fontsize=10, 
+               prop={"size": 8}, bbox_to_anchor=(0.15, 0.3))    
     plt.annotate("A", xy=(25, 600), color="k", weight="bold", annotation_clip=False)
 
     plt.savefig("../Figures/Fig3A.svg", format="svg")
@@ -946,12 +947,12 @@ def fig4():
                               color=chnops_color,
                               marker="o",
                               markersize=2,
-                              label='Synthesizable Chemistry: CHNOPS')
+                              label='All Known Molecules: CHNOPS')
     kegg_patch = plt.Line2D([], [],
                             color=kegg_color,
                             marker="o",
                             markersize=2,
-                            label='Synthesizable Chemistry: All Metabolic Elements')
+                            label='All Known Molecules: All Metabolic Elements')
     handles.extend([chnops_patch, kegg_patch])
 
     # Labels
@@ -1009,7 +1010,7 @@ def fig4():
 
     # Labels
     ax2.set_ylabel(r"Chiral Order Parameter $\mathbb{C}$")
-    ax2.set_xlabel("Number of Genomic\nSamples")
+    ax2.set_xlabel("Number of\nSamples")
 
     ax2.set_xscale('log')
     ax2.tick_params(axis="both", which="major")
