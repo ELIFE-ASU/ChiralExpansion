@@ -670,7 +670,7 @@ def fig3(seed_name, rxn_db, crossover_step, attributes, networks_uni):
                                                        "min_link_weight_percentile": 0,
                                                        "max_link_weight_percentile": 1})
 
-    print(stylized_network)
+    # print(stylized_network)
 
     fig, ax = nw.draw_netwulf(stylized_network)
 
@@ -849,6 +849,10 @@ def fig4():
     universality_df = (occurrence_df / num_samples)
 
     print(f"- Total JGI Sample Count: {num_bacteria + num_archaea + num_eukarya + num_metagenomes} -")
+    print(f"\tN Bacteria Samples: {num_bacteria}")
+    print(f"\tN Archaea Samples: {num_archaea}")
+    print(f"\tN Eukarya Samples: {num_eukarya}")
+    print(f"\tN Metagenomic Samples: {num_metagenomes}")
     
     a_cpd_occurances = occurrence_df['Archaea'].dropna().to_dict()
     b_cpd_occurances = occurrence_df['Bacteria'].dropna().to_dict()
