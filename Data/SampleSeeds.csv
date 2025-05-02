@@ -3,12 +3,12 @@ C00697,Nitrogen;~N2,G17,False
 C00033,Acetate;~Acetic acid;~Ethanoic acid,G17 G24 LUCA,False
 C00058,Formate;~Methanoic acid;~Formic acid,G17 G24,False
 C00283,Hydrogen sulfide;~Hydrogen-sulfide;~H2S;~Sulfide,G17 G24 LUCA,False
-C00288,HCO3-;~Hydrogencarbonate;~Bicarbonate;~Hydrogen carbonate;~Acid carbonate,G17 G24 LUCA LUCA LUCA,False
-C00001,H2O;~Water,G17 JM G24 LUCA,False
-C00009,Orthophosphate;~Phosphate;~Phosphoric acid;~Orthophosphoric acid,JM G24 LUCA,False
-C00011,CO2;~Carbon dioxide,G17 JM G24 LUCA,False
-C00014,Ammonia;~NH3,G17 JM G24 LUCA,False
-C00080,H+;~Hydron,G17 JM G24 LUCA,False
+C00288,HCO3-;~Hydrogencarbonate;~Bicarbonate;~Hydrogen carbonate;~Acid carbonate,G17 G24 LUCA,False
+C00001,H2O;~Water,G17 G24 JM LUCA,False
+C00009,Orthophosphate;~Phosphate;~Phosphoric acid;~Orthophosphoric acid,G24 JM LUCA,False
+C00011,CO2;~Carbon dioxide,G17 G24 JM LUCA,False
+C00014,Ammonia;~NH3,G17 G24 JM LUCA,False
+C00080,H+;~Hydron,G17 G24 JM LUCA,False
 C00059,Sulfate;~Sulfuric acid,JM,False
 C00022,Pyruvate;~Pyruvic acid;~2-Oxopropanoate;~2-Oxopropanoic acid;~Pyroracemic acid,G24 LUCA,False
 C00023,Iron,G24,False
@@ -56,11 +56,11 @@ C98924,Phenol;~Benzenol;~Hydroxybenzene;~Phenic acid;~Phenylic acid,TW,False
 C19610,Manganese(2+);~Mn2+;~Mn(II),TW,False
 C19611,Manganese(3+);~Mn3+;~Mn(III),TW,False
 C20396,Methylphosphonate,TW,False
-C00067,Formaldehyde;~Methanal;~Oxomethane;~Oxomethylene;~Methylene oxide;~Formalin,TW ,False
-C00111,Glycerone phosphate;~Dihydroxyacetone phosphate;~3-Hydroxy-2-oxopropyl phosphate,TW LUCA,False
-C00708,Iodide;~I-;~Iodide ion,TW ,False
-C01353,Carbonic acid;~Dihydrogen carbonate;~H2CO3,TW ,False
-C05684,Selenite,TW LUCA,False
+C00067,Formaldehyde;~Methanal;~Oxomethane;~Oxomethylene;~Methylene oxide;~Formalin,TW,False
+C00111,Glycerone phosphate;~Dihydroxyacetone phosphate;~3-Hydroxy-2-oxopropyl phosphate,LUCA TW,False
+C00708,Iodide;~I-;~Iodide ion,TW,False
+C01353,Carbonic acid;~Dihydrogen carbonate;~H2CO3,TW,False
+C05684,Selenite,LUCA TW,False
 C00002,ATP;~Adenosine 5'-triphosphate,LUCA,False
 C00003,NAD+;~NAD;~Nicotinamide adenine dinucleotide;~DPN;~Diphosphopyridine nucleotide;~Nadide;~beta-NAD+,LUCA,False
 C00004,NADH;~DPNH;~Reduced nicotinamide adenine dinucleotide,LUCA,False
@@ -437,7 +437,6 @@ C14463,(R)-3-Hydroxy-3-methyl-2-oxopentanoate;~(R)-3-Hydroxy-3-methyl-2-oxopenta
 C15541,NDP-glucose;~NDP-D-glucose;~NDP-alpha-D-glucose,LUCA,False
 C15585,TODO,LUCA,False
 C98925,"Hydroquinone;~p-Benzenediol;~1,4-Benzenediol;~1,4-Dihydroxybenzene;~Benzene-1,4-diol;~Quinol;~4-Hydroxyphenol",LUCA,False
-C98925,"Hydroquinone;~p-Benzenediol;~1,4-Benzenediol;~1,4-Dihydroxybenzene;~Benzene-1,4-diol;~Quinol;~4-Hydroxyphenol",LUCA,False
 C15667,5-Carboxyamino-1-(5-phospho-D-ribosyl)imidazole,LUCA,False
 C15972,Enzyme N6-(lipoyl)lysine;~Lipoamide-E;~[E2 protein]-N6-lipoyl-L-lysine;~[Lipoyl-carrier protein E2]-N6-lipoyl-L-lysine,LUCA,False
 C15973,Enzyme N6-(dihydrolipoyl)lysine;~Dihydrolipoamide-E;~[E2 protein]-N6-[(R)-dihydrolipoyl]-L-lysine;~[Lipoyl-carrier protein E2]-N6-[(R)-dihydrolipoyl]-L-lysine,LUCA,False
@@ -480,10 +479,3 @@ C21748,5-Fluorouridine diphosphate,LUCA,False
 C21749,5-Fluorouridine triphosphate,LUCA,False
 C21750,5-Fluorodeoxyuridine diphosphate,LUCA,False
 C21751,5-Fluorodeoxyuridine triphosphate,LUCA,False
-C00134,TODO,LUCA,False
-C00180,TODO,LUCA,False
-C00511,TODO,LUCA,False
-C03541,TODO,LUCA,False
-C03687,TODO,LUCA,False
-C15602,TODO,LUCA,False
-C15603,TODO,LUCA,False
