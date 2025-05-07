@@ -163,12 +163,115 @@ def add_bipartite_edge_context(single_result):
     return single_result
 
 
+def bulk_measure_reaction_chirality(reactions: pd.DataFrame, compounds: pd.DataFrame):
+
+    ccs = compounds['n_chiral_centers']
+
+    def _explode_side_components(side_Series: pd.Series) -> pd.DataFrame:
+        return (side_Series.explode()
+                .str.split(' ', expand=True)
+                .rename(columns={0:'n', 1:'id'})
+                .rename_axis('rid')
+                .assign(ccs = lambda x: x.id.map(ccs)))
+
+    def _sum_chiral_centers(df: pd.DataFrame) -> pd.Series:
+        """ Calculate the total number of chiral centers per index. """
+        return(df.drop(columns='id').astype(int)
+            .prod(axis=1)
+            .groupby(level=0)
+            .sum().copy(deep=True))
+
+    def _find_n_gte_1(s, letter='n'):
+        """ Find a positive integer value of n such that a string expression s containing n evaluates to a positive integer. """
+        n = 1
+        keep_going = True
+        while keep_going:
+            out = eval(s.replace(letter, str(n)))
+            if out > 0:
+                keep_going = False
+            else:
+                n += 1
+        return n
+
+    # Identify reactions with alpha coefficients (n/m/x/y/z/w).
+    alpha_ids = reactions.query('~reaction.str.isupper()').index
+
+    # Identify reactions with negative coefficients.
+    negative_ids = reactions.query('reaction.str.startswith("-") or reaction.str.contains(" -")').index
+
+    # Drop those. Separate reactions into sides and their components. Each component has a coefficient and id.
+    sides = (reactions.reaction.str.split(' <=> ', expand=True)).map(lambda s: s.split(' + ')).drop(negative_ids)
+    L = _explode_side_components(sides[0])
+    R = _explode_side_components(sides[1])
+
+    # Calculate #CCs per side for reactions without alpha coefficients, then isolate remaining reactions.
+    rxn_ccs = pd.DataFrame({'L': _sum_chiral_centers(L.drop(alpha_ids)),
+                            'R': _sum_chiral_centers(R.drop(alpha_ids))})
+    L = L.drop(rxn_ccs.index)
+    R = R.drop(rxn_ccs.index)
+
+    # Isolate remaining reactions and format alpha coefficients for evaluation.
+    _format_mult_str = lambda Ser: Ser.str.replace(r'(?<=\d)(?=[a-z])|(?<=[a-z])(?=[a-z])', '*', regex=True)
+    L['n'] = _format_mult_str(L['n'])
+    R['n'] = _format_mult_str(R['n'])
+
+    # Update selected coefficients to eliminate false "minus" signs in next step.
+    to_correct = {'n-x+x': 'n', 'm-1+n+1': 'n+m'}
+    L['n'] = L['n'].replace(to_correct)
+    R['n'] = R['n'].replace(to_correct)
+
+    # ASSESS ALPHA COEFFICIENTS
+    # If all alpha coeffs are set to 1, coeffs with a minus sign somewhere (e.g. "n-1") could net to zero.
+    # To avoid this, for each reaction, we find the smallest value(s) of n/m/x/y/z/w such that all coefficients net to >= 1.
+    # NOTE: NO attempt is made to balance the actual reaction. i.e., we do not check how a given alpha-substitution affects
+    # the overall stoichiometry.
+
+    min_vals = pd.concat([L, R]).query('n.str.contains("-")')
+
+    # Since some reactions have multiple alpha coeffs (e.g. n and m), label which one is having its value set through this process.
+    min_vals['letter'] = min_vals['n'].str.findall(r'[a-z]').map(''.join)
+
+    # If there's more than one letter in a single coefficient with a minus sign (e.g. n-m C00001, n+m-5 C00002)...
+    # the smallest acceptable values would co-vary. Future updates should handle those cases if they occur, i.e.:
+    # TODO: For reactions w/'-' and multiple letters, add a check: do the answers from single-letter components produce a positive coeff?
+    exceptions = min_vals.query('letter.str.len()>1').copy(deep=True)
+    if len(exceptions.index) > 0:
+        print('multi-alpha exception(s) found in reactions: ', exceptions.index)
+    
+    min_vals = min_vals.query('letter.str.len()==1')
+    min_vals = min_vals.assign(v = lambda x: x['n'].map(_find_n_gte_1))
+    min_vals = min_vals.groupby(by=['rid', 'letter'])['v'].max()
+
+    # Replace the alpha coefficients for which a miniumum value was found.
+    for (rn, ltr), v in min_vals.items():
+        L.loc[[rn], 'n'] = L.loc[[rn], 'n'].str.replace(ltr, str(v))
+        R.loc[[rn], 'n'] = R.loc[[rn], 'n'].str.replace(ltr, str(v))
+
+    # Then replace outstanding alpha coeffs with 1.
+    letter_coeffs = pd.concat([L, R]).query('n.str.islower()')['n'].str.findall(r'[a-z]').explode().unique()
+    for ltr in letter_coeffs:
+        L.loc[:, 'n'] = L['n'].str.replace(ltr, '1')
+        R.loc[:, 'n'] = R['n'].str.replace(ltr, '1')
+    L['n'], R['n'] = L['n'].map(eval), R['n'].map(eval)
+
+    # Finally, calculate the total #CCs per side.
+    rxn_ccs_alpha = pd.DataFrame(
+        {'L': (L.ccs * L.n).groupby(level=0).sum(),
+        'R': (R.ccs * R.n).groupby(level=0).sum()})
+
+    rxn_ccs = pd.concat([rxn_ccs, rxn_ccs_alpha]).add_suffix('_ccs').rename_axis('id')
+
+    return rxn_ccs
+
+
 # VARIABLES AND DATASETS
 C_df = (pd.read_csv(compound_file)
                   .assign(is_chiral=lambda x: x.n_chiral_centers > 0)
                   .set_index('compound_id'))
 
 R_df = import_reaction_file(reaction_file)
+
+rxn_ccs = bulk_measure_reaction_chirality(R_df, C_df)
 
 # ec_rns: KEGG reaction-enzyme entry linkages.
 ec_rns = pd.read_csv(reaction_file, usecols=['id', 'ec'], index_col=0).iloc[:,0].str.split().explode().reset_index()
