@@ -259,7 +259,8 @@ def bulk_measure_reaction_chirality(reactions: pd.DataFrame, compounds: pd.DataF
         {'L': (L.ccs * L.n).groupby(level=0).sum(),
         'R': (R.ccs * R.n).groupby(level=0).sum()})
 
-    rxn_ccs = pd.concat([rxn_ccs, rxn_ccs_alpha]).add_suffix('_ccs').rename_axis('id')
+    rxn_ccs = pd.concat([rxn_ccs, rxn_ccs_alpha]).rename_axis('id')
+    rxn_ccs.columns = ['Reactant Chiral Count', 'Product Chiral Count']
 
     return rxn_ccs
 
