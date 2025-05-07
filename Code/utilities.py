@@ -646,7 +646,7 @@ def get_heatmap_array(kegg_c_df):
         index_col=0)
 
     print("- Calculating Reaction Chirality -")
-    rxn_df[["Reactant Chiral Count", "Product Chiral Count"
+    rxn_df.loc[:,["Reactant Chiral Count", "Product Chiral Count"
             ]] = rxn_df["reaction"].progress_apply(check_rxn_chirality,
                                                    args=(kegg_c_df,
                                                          rxn_chiral_count))
