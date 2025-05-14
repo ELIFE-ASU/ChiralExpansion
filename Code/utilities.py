@@ -24,6 +24,8 @@ tqdm.pandas()
 lg = RDLogger.logger()
 lg.setLevel(RDLogger.CRITICAL)
 
+import network_expansion
+
 plt.rcParams['axes.linewidth'] = 2.0
 
 
@@ -637,30 +639,27 @@ def get_heatmap_array(kegg_c_df):
     Returns:
     tuple: A tuple containing the heatmap array and the updated reaction DataFrame.
     """
-    kegg_c_df = kegg_c_df.set_index("compound_id")
-    rxn_chiral_count = {}
-    heatmap_array = []
+    # Ensure compound_id is the index
+    if 'compound_id' in kegg_c_df.columns:
+        kegg_c_df = kegg_c_df.set_index("compound_id")
 
-    rxn_df = pd.read_csv(
-        "../Data/CBRdb_R.csv",
-        index_col=0)
+    # Get the reaction DataFrame
+    rxn_df = network_expansion.R_df
 
     print("- Calculating Reaction Chirality -")
-    rxn_df.loc[:,["Reactant Chiral Count", "Product Chiral Count"
-            ]] = rxn_df["reaction"].progress_apply(check_rxn_chirality,
-                                                   args=(kegg_c_df,
-                                                         rxn_chiral_count))
+    # Count the chiral compounds on either side of each reaction
+    chiral_compounds = set(kegg_c_df.query('n_chiral_centers > 0').index)
+    chiral_counts = rxn_df[['left', 'right']].map(lambda x: len(x.intersection(chiral_compounds)))
+    chiral_counts.columns = ['Reactant Chiral Count', 'Product Chiral Count']
+    rxn_df = rxn_df.join(chiral_counts)
+    print("- Done -")
 
-    print(rxn_df)
-    for i in range(5):
-        row = []
-        for j in range(5):
-            chiral_str = f"{i}_{j}"
-            if chiral_str in rxn_chiral_count:
-                row.append(rxn_chiral_count[f"{i}_{j}"])
-            else:
-                row.append(0)
-        heatmap_array.append(row)
+    # Generate an array for the heatmap
+    lim = 5
+    df = rxn_df.query('`Reactant Chiral Count` < @lim and `Product Chiral Count` < @lim').copy(deep=True)
+    df = df.groupby(['Reactant Chiral Count', 'Product Chiral Count'], as_index=False).size()
+    df = df.pivot_table(values='size', index='Reactant Chiral Count', columns='Product Chiral Count')
+    heatmap_array = df.fillna(0).astype(int).to_numpy().tolist()
 
     return heatmap_array, rxn_df
 
