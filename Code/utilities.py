@@ -629,22 +629,20 @@ def check_rxn_chirality(reactions_string, kegg_c_df, rxn_chiral_count):
                      index=["Reactant Chiral Count", "Product Chiral Count"])
 
 
-def get_heatmap_array(kegg_c_df):
+def get_heatmap_array(kegg_c_df, rxn_df):
     """
     Generate a heatmap array based on the chirality of reactions.
 
     Parameters:
     keggC_df (pandas.DataFrame): DataFrame containing KEGG compound data, including 'compound_id' and 'n_chiral_centers' columns.
-
+    rxn_df (pandas.DataFrame): DataFrame containing reaction data, including 'left' and 'right' columns.
+    
     Returns:
     tuple: A tuple containing the heatmap array and the updated reaction DataFrame.
     """
     # Ensure compound_id is the index
     if 'compound_id' in kegg_c_df.columns:
         kegg_c_df = kegg_c_df.set_index("compound_id")
-
-    # Get the reaction DataFrame
-    rxn_df = network_expansion.R_df
 
     print("- Calculating Reaction Chirality -")
     # Count the chiral compounds on either side of each reaction

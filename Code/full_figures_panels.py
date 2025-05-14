@@ -22,7 +22,7 @@ seed_candidates = pd.read_csv('../Data/SampleSeeds.csv',
                               index_col=0)
 keggC_df = pd.read_csv("../Data/CBRdb_C.csv")
 keggC_df = keggC_df.assign(is_chiral=lambda x: x['n_chiral_centers'].gt(0))
-keggR_df = pd.read_csv("../Data/CBRdb_R.csv")
+keggR_df = import_reaction_file("../Data/CBRdb_R.csv").reset_index()
 
 
 def fig1():
@@ -1155,7 +1155,9 @@ def fig4():
 
 def fig5(seed_name, rxn_db, crossover_step, first_chiral_step):
     ### Panel 5A - chiral rxn counts
-    heatmap_array, rxn_df = get_heatmap_array(keggC_df)
+    rxn_df = import_reaction_file(rxn_db)
+    # measure and plot the number of chiral reactants/products per reaction.
+    heatmap_array, rxn_df = get_heatmap_array(keggC_df, rxn_df)
 
     fig = plt.figure(figsize=(24, 21))
     gs = gridspec.GridSpec(12, 6)
@@ -1194,9 +1196,16 @@ def fig5(seed_name, rxn_db, crossover_step, first_chiral_step):
     ax1.annotate("A", xy=(-0.5, -0.55), color="k", weight="bold", annotation_clip=False)
 
     ### Panel 5B - achiral/chiral modulating &conserving
+    rxn_df = import_reaction_file(rxn_db)
+    # measure and plot the number of **chiral centers** on each side of each reaction.
+    ccs_per_side = bulk_measure_reaction_chirality(rxn_df, keggC_df.set_index('compound_id'))
+    rxn_df = rxn_df.join(ccs_per_side, how='left')
+    # remove reactions with negative coefficients --> NaNs for chiral center counts.
+    rxn_df = rxn_df.dropna(subset=['Reactant Chiral Count', 'Product Chiral Count'])
+
     ### Get full seed set & reaction set
     seed_groups = [seed_name]
-    reaction_scope = get_sides(import_reaction_file(rxn_db))
+    reaction_scope = get_sides(rxn_df)
 
     compound_scope = set.union(*reaction_scope.stack())
     seed_scope = seed_candidates.loc[seed_candidates.index.isin(compound_scope)]
