@@ -757,8 +757,7 @@ def fig3(seed_name, rxn_db, crossover_step, attributes, networks_uni):
     plt.close()
 
     ### Get degrees for each compound & merge into expansion arrival dataframe
-    cpd_degrees = dict.fromkeys(expansion_arrival_df["compound_id"], 0)
-    cpd_degrees = get_compound_degrees(cpd_degrees=cpd_degrees)
+    cpd_degrees = get_compound_degrees(rxn_df=import_reaction_file(rxn_db))
 
     expansion_arrival_df["degree"] = expansion_arrival_df["compound_id"].map(
         cpd_degrees)

@@ -395,25 +395,27 @@ def degrees_per_reaction(reaction_string, cpd_degrees):
             cpd_degrees[cpd] += len(reactant_cpds)
 
 
-def get_compound_degrees(cpd_degrees):
+def get_compound_degrees(rxn_df):
     """
-    Calculate the degrees of compounds based on reactions and update the compound degrees dictionary.
+    Calculate each compound's degree, as the number of unique compounds opposite it in a reaction.
 
     Parameters:
-    cpd_degrees (dict): A dictionary where the keys are compound IDs and the values are their degrees.
+    rxn_df (pandas.DataFrame): DataFrame containing reaction data (either full DB or a subset).
 
     Returns:
-    dict: Updated dictionary with the degrees of compounds.
+    pd.Series: pandas.Series of compound degrees WRT the input rxn_df.
     """
-
-    rxn_df = pd.read_csv(
-        "../Data/CBRdb_R.csv",
-        index_col=0)
-    rxn_df.drop_duplicates(
-        subset="reaction", inplace=True
-    ) 
-
-    rxn_df["reaction"].apply(degrees_per_reaction, args=(cpd_degrees,))
+    rxn_df.drop_duplicates(subset="reaction", inplace=True)
+    # Get the compounds on each side of each reaction.
+    df = rxn_df['reaction'].str.split('<=>', expand=True).apply(lambda x: x.str.findall(r'(C\d{5})'))
+    # Connect each compound to its neighbors opposite it in a reaction.
+    df = df.explode(0).explode(1)
+    # Merge in- and out-edges.
+    df = df.assign(a=df.max(axis=1), b=df.min(axis=1)).drop(columns=[0, 1])
+    # Remove self-loops and duplicate edges.
+    df = df.query("a.ne(b)").drop_duplicates()
+    # Count the number of unique compounds opposite each compound.
+    cpd_degrees = df.stack().value_counts()
 
     return cpd_degrees
 
