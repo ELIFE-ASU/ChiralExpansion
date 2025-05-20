@@ -134,7 +134,8 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
         results[name] = expand_from_seed_set(seeds=seeds,
                                              reactions=reaction_scope,
                                              max_gen=max_generation)
-        results[name]['bipartite_edgelist'] = make_bipartite_edge_list(results[name]['edge_pool'])
+        results[name] = generate_annotated_bipartite_edge_list(results[name])
+        results[name] = generate_immediate_precursor_unipartite_edge_list(results[name])
 
     ### Process expansion (including chiral %s at each step & heavy atom count)
     summaries = {
@@ -204,9 +205,11 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
 
     networks = {i: nx.from_pandas_edgelist(transition_edge_df[transition_edge_df[i]],
                                            source='source', target='target', edge_attr=True, create_using=nx.DiGraph())
-                for i in ['impactful_precursor', 'immediate_precursor', 'directed']}
+                for i in ['impactful_precursor', 'directed']}
     compound_nodes = {i: set(j.nodes()).difference(reaction_scope.index) for i, j in networks.items()}
     networks_uni = {i: bipartite.projected_graph(networks[i], nodes=compound_nodes[i]) for i in networks.keys()}
+    networks_uni['immediate_precursor'] = nx.from_pandas_edgelist(results[seed_name]['immediate_precursor_unipartite_edgelist'],
+                                                                source='source', target='target', edge_attr=True, create_using=nx.DiGraph())
 
     attributes = pd.read_csv("../Data/CBRdb_C.csv",
                              index_col=0)
@@ -236,7 +239,7 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     attributes['gen_color'] = colorize_series(attributes['gen'], cmap=gen_color).tolist()
 
     ### Network figure
-    show = 'impactful_precursor'
+    show = 'immediate_precursor'
     rotate = False
 
     G1 = networks_uni[show]  # using impactful_precursor from network generation
@@ -250,20 +253,20 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     layers = [list(i) for i in attributes.loc[list(G1.nodes())].groupby(by='gen').groups.values()]
     pos = get_multipartite_layout(edges=list(G1.edges), layers=layers, reduce_edge_crossings=True)
     # for i in layers[-1]: del pos[i] # remove last layer
-    for n in pos.keys(): pos[n][0] = (pos[n][0] + 0.2) ** 2  # spread out later gens to reduce extreme angles
+    for n in pos.keys(): pos[n][0] = (pos[n][0] + 0.2) ** 0.05  # spread out earlier gens to reduce extreme angles
     if rotate: pos = {i: j[::-1] for i, j in pos.items()}
 
     fig, ax = plt.subplots(figsize=(15, 15), layout='constrained')
     nx.draw_networkx(G1.subgraph(pos.keys()), pos=pos, ax=ax, edge_color=[0.5, 0.5, 0.5, 0.5],
-                     node_color=list(gna(G1.subgraph(pos.keys()), 'is_chiral_color').values()),
+                     node_color=list(gna(G1.subgraph(pos.keys()), 'is_chiral_color').values()), 
                      edgecolors='k', width=0.03, arrows=False,
-                     linewidths=0.2, node_size=100, node_shape='s', alpha=0.99,
+                     linewidths=1.0,  node_size=100, node_shape='_', alpha=0.99,
                      with_labels=False)
 
     plt.legend(loc='lower right', borderpad=8, frameon=False, handles=[
-        plt.Line2D([0], [0], marker='s', color='w', markeredgecolor='k', markeredgewidth=0.2, markerfacecolor='#34CCFF',
+        plt.Line2D([0], [0], marker='_', color='w', markerfacecolor='#34CCFF', markeredgecolor='#34CCFF', markeredgewidth=4.0, 
                    markersize=20, label='Chiral'),
-        plt.Line2D([0], [0], marker='s', color='w', markerfacecolor='#FFC012', markeredgecolor='k', markeredgewidth=0.2,
+        plt.Line2D([0], [0], marker='_', color='w', markerfacecolor='#FFC012', markeredgecolor='#FFC012', markeredgewidth=4.0,
                    markersize=20, label='Achiral')], prop={'size': 20})
 
     ax.annotate("A", xy=(1.31, 1), color="k", weight="bold", annotation_clip=False)
@@ -584,9 +587,11 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     transition_edge_df = result_network['bipartite_edgelist'].query('step <= @achiral_chiral_crossover_step').copy(deep=True)
     networks = {i: nx.from_pandas_edgelist(transition_edge_df[transition_edge_df[i]],
                                            source='source', target='target', edge_attr=True, create_using=nx.DiGraph())
-                for i in ['impactful_precursor', 'immediate_precursor', 'directed']}
+                for i in ['impactful_precursor', 'directed']}
     compound_nodes = {i: set(j.nodes()).difference(reaction_scope.index) for i, j in networks.items()}
     networks_uni = {i: bipartite.projected_graph(networks[i], nodes=compound_nodes[i]) for i in networks.keys()}
+    networks_uni['immediate_precursor'] = nx.from_pandas_edgelist(results[seed_name]['immediate_precursor_unipartite_edgelist'],
+                                                                source='source', target='target', edge_attr=True, create_using=nx.DiGraph())
 
     attributes = pd.read_csv("../Data/CBRdb_C.csv",
                              index_col=0)
@@ -717,6 +722,8 @@ def fig3(seed_name, rxn_db, crossover_step, attributes, networks_uni):
         results[name] = expand_from_seed_set(seeds=seeds,
                                              reactions=reaction_scope,
                                              max_gen=max_generation)
+        results[name] = generate_annotated_bipartite_edge_list(results[name])
+        results[name] = generate_immediate_precursor_unipartite_edge_list(results[name])
 
     expansion_arrival_df = link_arrival_step_heavy_atoms(
         results[name]['arrival_step'], keggC_df)

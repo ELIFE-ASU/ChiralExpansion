@@ -157,9 +157,28 @@ def add_bipartite_edge_context(single_result):
     df = df.join(df_arrival_step)
     impactful_precursors = df.query('directed').query(
         '(target==reaction & reaction_step>source_step) | (reaction==source & reaction_step==target_step)').index
-    immediate_precursors = df.loc[impactful_precursors].query('~(reaction_step-source_step!=1)').index
-    single_result['bipartite_edgelist'] = df.assign(impactful_precursor=df.index.isin(impactful_precursors),
-                                                    immediate_precursor=df.index.isin(immediate_precursors))
+    single_result['bipartite_edgelist'] = df.assign(impactful_precursor=df.index.isin(impactful_precursors))
+    return single_result
+
+
+def generate_immediate_precursor_unipartite_edge_list(single_result):
+    """
+    Get each compound's immediate precursor compounds (last-arriving prerequisites).
+    """
+    # Declare shorthand vars
+    (s, t) = ('source', 'target')
+    arr = single_result['arrival_step']
+    # Get all edges between compounds.
+    ep = single_result['edge_pool'].explode(s).explode(t).query(f'{s}!={t}')
+    # Remove "infill" reactions; keep only the first instance of each edge.
+    ep = ep.query('directed').sort_values(by='step').drop_duplicates(subset=[s, t])
+    # Reset index so it's edge-based not reaction-based.
+    ep = ep.reset_index(drop=True)
+    # Keep only edges where source arrived immediately before target.
+    ep = ep.loc[ep.eval(f'{t}.map(@arr) - {s}.map(@arr) == 1')].reset_index(drop=True)
+    # Add this to the single_result dict.
+    single_result.update({'immediate_precursor_unipartite_edgelist': ep})
+    # Return the outcome
     return single_result
 
 
