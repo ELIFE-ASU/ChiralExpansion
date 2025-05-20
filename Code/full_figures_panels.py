@@ -112,7 +112,7 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     seed_groups = [seed_name]
     reaction_scope = get_sides(import_reaction_file(rxn_db))
 
-    compound_scope = set.union(*reaction_scope.stack())
+    compound_scope = keggC_df['compound_id'].unique()
     seed_scope = seed_candidates.loc[seed_candidates.index.isin(compound_scope)]
     seed_sets = {
         i: seed_scope.query('Source.str.contains("' + i + '")').index
@@ -707,7 +707,7 @@ def fig3(seed_name, rxn_db, crossover_step, attributes, networks_uni):
     # rxn_db = "../../lets-get-kegg/Data/kegg_data_R_processed.csv.zip"  # Default in NetworkExpansion.import_reaction_file
     reaction_scope = get_sides(import_reaction_file(rxn_db))
 
-    compound_scope = set.union(*reaction_scope.stack())
+    compound_scope = keggC_df['compound_id'].unique()
     seed_scope = seed_candidates.loc[seed_candidates.index.isin(compound_scope)]
     seed_sets = {
         i: seed_scope.query('Source.str.contains("' + i + '")').index
@@ -1213,7 +1213,7 @@ def fig5(seed_name, rxn_db, crossover_step, first_chiral_step):
     seed_groups = [seed_name]
     reaction_scope = get_sides(rxn_df)
 
-    compound_scope = set.union(*reaction_scope.stack())
+    compound_scope = keggC_df['compound_id'].unique()
     seed_scope = seed_candidates.loc[seed_candidates.index.isin(compound_scope)]
     seed_sets = {
         i: seed_scope.query('Source.str.contains("' + i + '")').index
