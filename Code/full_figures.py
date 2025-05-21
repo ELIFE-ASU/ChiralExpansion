@@ -550,7 +550,7 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     ax.set_ylim([0, 1.05])
 
     ax.set_xlabel("Expansion Generation")
-    ax.set_ylabel(r"Chiral Order Parameter $\mathbb{C}$")
+    ax.set_ylabel(r"$\mathbb{C}$")
     ax.legend(loc="upper right", prop={"size": 14}, ncol=3)  # bbox_to_anchor=(1.05,0.60))
     ax.annotate("D", xy=(-2, 1.07), color="k", weight="bold", annotation_clip=False)
 
@@ -722,7 +722,7 @@ def fig3(seed_name, rxn_db, crossover_step, attributes, networks_uni):
     g.ax_joint.axvline(x=crossover_step,
                        color="k",
                        linestyle="--",
-                       label=f"Original Crossover\n(Step {crossover_step})")
+                       label=f"Phase Boundary\nStep {crossover_step})")
     g.set_axis_labels(xlabel="Expansion Generation", ylabel="Chiral Centers")
 
     g.figure.set_size_inches((16, 8))
@@ -747,7 +747,6 @@ def fig3(seed_name, rxn_db, crossover_step, attributes, networks_uni):
     # expansion_arrival_df.sort_values(by=["degree", "n_chiral_centers"], inplace=True, ascending=[False, True])
     expansion_arrival_df.sort_values(by="degree", inplace=True, ascending=False)
     columns_to_write = ["compound_id", "formula", "n_chiral_centers", "degree"]
-    expansion_arrival_df.head(50).to_csv("../Data/top50_highestDegreeNodes.csv", columns=columns_to_write, index=False)
 
     fig = plt.figure(figsize=(16, 8))
     gs = fig.add_gridspec(2,
@@ -953,12 +952,12 @@ def fig4():
                               color=chnops_color,
                               marker="o",
                               markersize=2,
-                              label='All Known Molecules: CHNOPS')
+                              label='Chemical Space: CHNOPS')
     kegg_patch = plt.Line2D([], [],
                             color=kegg_color,
                             marker="o",
                             markersize=2,
-                            label='All Known Molecules: All Metabolic Elements')
+                            label='Chemical Space: All Metabolic Elements')
     handles.extend([chnops_patch, kegg_patch])
 
     # Labels
@@ -983,13 +982,13 @@ def fig4():
     # Graph Reaxys graphs first so they're in the back
     ax2.hist([x for sub in kegg for x in sub],
              num_bins,
-             label="Reaxys:\nKEGG Elements",
+             label=f"Reaxys:\nKEGG Elements",
              facecolor=kegg_color,
              alpha=0.8,
              orientation="horizontal")
     ax2.hist([x for sub in chnops for x in sub],
              num_bins,
-             label="Reaxys:\nCHNOPS Elements",
+             label=f"Reaxys:\nCHNOPS Elements",
              facecolor=chnops_color,
              alpha=0.8,
              orientation="horizontal")
@@ -1016,7 +1015,7 @@ def fig4():
 
     # Labels
     ax2.set_ylabel(r"Chiral Order Parameter $\mathbb{C}$")
-    ax2.set_xlabel("Number of\nSamples")
+    ax2.set_xlabel(f"Number of\nSamples")
 
     ax2.set_xscale('log')
     ax2.tick_params(axis="both", which="major")
@@ -1227,7 +1226,7 @@ def fig5(seed_name, rxn_db, crossover_step, first_chiral_step):
 
     ax.axvline(x=crossover_step, color="k", linestyle="--", alpha=0.9)
     ax.axvline(x=first_chiral_step, color="k", linestyle=":", alpha=0.5)
-    ax.annotate(f"Achiral-to-Chiral\nCrossover\nStep {crossover_step}",
+    ax.annotate(f"Achiral-to-Chiral\nPhase\nBoundary {crossover_step}",
                 xy=(crossover_step, 83000),
                 xytext=(crossover_step + 8, 85000),
                 color="k",
@@ -1385,7 +1384,7 @@ def fig5(seed_name, rxn_db, crossover_step, first_chiral_step):
     for patch, c in zip(bplot["boxes"], color_list):
         patch.set_color(c)
 
-    ax.set_ylabel(r"Chiral Order\nParameter $\mathbb{C}$", fontsize=30)
+    ax.set_ylabel(f"Chiral Order\nParameter "+r"$\mathbb{C}$", fontsize=30)
     ax.xaxis.set_ticks([])
 
     # legend of label colors
@@ -1420,7 +1419,7 @@ def fig5(seed_name, rxn_db, crossover_step, first_chiral_step):
                c=pathway_df['Group'].map(colors),
                s=50)
 
-    ax.set_ylabel(r"Chiral Order\nParameter $\mathbb{C}$", fontsize=30)
+    ax.set_ylabel(f"Chiral Order\nParameter "+r"$\mathbb{C}$", fontsize=30)
     ax.set_xlabel("System Size (Unique Molecules Per Pathway)")
     loc = plticker.MultipleLocator(
         base=20.0)  # this locator puts ticks at regular intervals
