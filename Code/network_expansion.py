@@ -40,10 +40,10 @@ def get_rn_sets(rndf: pd.DataFrame):
     return rndf[rndf].apply(lambda x: set(x.dropna().index))
 
 
-def expand_from_seed_set(seeds, reactions: pd.DataFrame, max_gen: int):
+def expand_from_seed_set(seeds, reactions: pd.DataFrame, max_gen=1000):
     # seeds : list-like, the seed set of compounds from which to start the expansion
     # reactions : pool of reactions to draw from; if all compounds on one side of a reaction are present, the reaction is enabled
-    # max_gen : max # of expansion generations calculated, e.g. if you only care about early stages.
+    # max_gen : max # of expansion generations calculated, default 1000. make small if you only care about early stages.
     rns, cps = dict(), {0: dict(zip(seeds, len(seeds) * [True]))}
     compound_pool, reaction_pool = set(seeds), reactions[['left', 'right']]
     fwd_rns, bwd_rns = set(), set()
