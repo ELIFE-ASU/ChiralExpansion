@@ -11,6 +11,68 @@ seed_file = os.path.join(data_folder, 'SampleSeeds.csv')
 get_sides = lambda x: x[['left', 'right']]
 
 
+def single_expansion(seed_ids, rxn_db_fp=reaction_file, cpd_db_fp=compound_file, max_gen=1000, edgelist=True):
+
+    # STEP 1: load the databases underlying expansion process
+    if isinstance(rxn_db_fp, str):
+        # import reaction database if a file path is given
+        rxns = import_reaction_file(rxn_db_fp)
+    elif isinstance(rxn_db_fp, pd.DataFrame):
+        # if pre-processed reaction DF is given, use that
+        rxns = rxn_db_fp
+        if 'id' in rxns.columns:
+            rxns = rxns.set_index('id')
+
+    if isinstance(cpd_db_fp, str):
+        # import compound database if a file path is given
+        cpds = pd.read_csv(cpd_db_fp, index_col=0)
+        cpds['is_chiral'] = cpds['n_chiral_centers'].gt(0)
+    elif isinstance(cpd_db_fp, pd.DataFrame):
+        # if pre-processed compound DF is given, use that
+        cpds = cpd_db_fp
+        if 'compound_id' in cpds.columns:
+            cpds = cpds.set_index('compound_id')
+    
+    # STEP 2: perform the expansion
+    result = expand_from_seed_set(seeds=seed_ids, reactions=rxns, max_gen=max_gen)
+
+    # STEP 3: generate edge lists if requested
+    if edgelist == True:
+        result = generate_annotated_bipartite_edge_list(result)
+        result = generate_immediate_precursor_unipartite_edge_list(result)
+    
+    return result
+
+
+def get_single_expansion_compound_summary(result, cpd_db):
+
+    scope_chirality = cpd_db.loc[result['cps'].index, 'is_chiral'].copy()
+    cps_chirality = result['cps'].mul(scope_chirality, axis=0)
+    cps_heavyatom = result['cps'].astype(float).mul(result['cps'].index.map(cpd_db['n_heavy_atoms']), axis=0)
+    chir_heavyatom = cps_heavyatom[cps_chirality.eq(1)]
+    achir_heavyatom = cps_heavyatom[cps_chirality.eq(0)]
+    
+    result.update({'scope_chirality': scope_chirality,
+                     'cps_chirality': cps_chirality,
+                     'cps_heavyatom': cps_heavyatom})
+
+    summary = pd.DataFrame(
+        {'compound count': result['cps'].count(),
+        'reaction count': result['rns'].sum(),
+        'chiral compound count': cps_chirality.gt(0).sum(),
+        'achiral compound count': cps_chirality.eq(0).sum(),
+        'chiral fraction': cps_chirality.mean(),
+        'chiral avg heavy atoms': chir_heavyatom.mean(),
+        'achiral avg heavy atoms': achir_heavyatom.mean(),
+        'chiral std heavy atoms': chir_heavyatom.std(),
+        'achiral std heavy atoms': achir_heavyatom.std()}).fillna(0)
+    
+    new_counts = summary.filter(like='count').diff().fillna(summary).add_prefix('new ')
+    summary = summary.join(new_counts).convert_dtypes()
+
+    return summary
+
+
 def import_reaction_file(fpath=reaction_file):
     df = pd.read_csv(fpath, index_col=0, dtype='object')
     unnamed_cols = df.columns[df.columns.str.contains("Unnamed")]
