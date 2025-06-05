@@ -65,7 +65,8 @@ def get_single_expansion_compound_summary(result, cpd_db):
         'chiral avg heavy atoms': chir_heavyatom.mean(),
         'achiral avg heavy atoms': achir_heavyatom.mean(),
         'chiral std heavy atoms': chir_heavyatom.std(),
-        'achiral std heavy atoms': achir_heavyatom.std()}).fillna(0)
+        'achiral std heavy atoms': achir_heavyatom.std()})
+    summary = summary.astype(float).fillna(0.0)
     
     new_counts = summary.filter(like='count').diff().fillna(summary).add_prefix('new ')
     summary = summary.join(new_counts).convert_dtypes()
