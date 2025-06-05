@@ -722,7 +722,7 @@ def fig3(seed_name, rxn_db, crossover_step, attributes, networks_uni):
     g.ax_joint.axvline(x=crossover_step,
                        color="k",
                        linestyle="--",
-                       label=f"Phase Boundary\nStep {crossover_step})")
+                       label=f"Phase Boundary\n(Step {crossover_step})")
     g.set_axis_labels(xlabel="Expansion Generation", ylabel="Chiral Centers")
 
     g.figure.set_size_inches((16, 8))
