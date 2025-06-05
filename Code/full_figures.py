@@ -740,7 +740,7 @@ def fig3(seed_name, rxn_db, crossover_step, attributes, networks_uni):
     cpd_degrees = get_compound_degrees(rxn_df=rxns_observed)
 
     expansion_arrival_df["degree"] = expansion_arrival_df["compound_id"].map(
-        cpd_degrees)
+        cpd_degrees).fillna(0.0).astype(int)
     print("- Writing out full degree/compoundID/chiral-center-count dataframe to Data/expansion_arrival.csv -")
     expansion_arrival_df.to_csv("../Data/expansion_arrival.csv")
 
@@ -748,6 +748,7 @@ def fig3(seed_name, rxn_db, crossover_step, attributes, networks_uni):
     # expansion_arrival_df.sort_values(by=["degree", "n_chiral_centers"], inplace=True, ascending=[False, True])
     expansion_arrival_df.sort_values(by="degree", inplace=True, ascending=False)
     columns_to_write = ["compound_id", "formula", "n_chiral_centers", "degree"]
+    expansion_arrival_df.head(50).to_csv("../Data/top50_highestDegreeNodes.csv", columns=columns_to_write, index=False)
 
     fig = plt.figure(figsize=(16, 8))
     gs = fig.add_gridspec(2,
