@@ -32,13 +32,16 @@ def single_expansion(seed_ids, rxn_db_fp=reaction_file, cpd_db_fp=compound_file,
         cpds = cpd_db_fp
         if 'compound_id' in cpds.columns:
             cpds = cpds.set_index('compound_id')
-    
+        if not 'is_chiral' in cpds.columns:
+            cpds['is_chiral'] = cpds['n_chiral_centers'].gt(0)
+   
     # STEP 2: perform the expansion
     result = expand_from_seed_set(seeds=seed_ids, reactions=rxns, max_gen=max_gen)
 
     # STEP 3: generate edge lists if requested
     if edgelist == True:
         result = generate_annotated_bipartite_edge_list(result)
+        result = generate_annotated_unipartite_edge_list(result, cpds)
         result = generate_immediate_precursor_unipartite_edge_list(result)
     
     return result
@@ -181,10 +184,10 @@ def define_reachable_components(seeds, reactions: pd.DataFrame):
 
 def generate_annotated_bipartite_edge_list(single_result):
     """
-    Generates an annotated bipartite edge list by first creating a preliminary edge list and then adding context on the essentially of each edge.
+    Generates a bipartite (C-R & R-C) edge list from a single expansion; annotates edges with context about their essentiality.
 
     Parameters:
-    single_result (dict): A dictionary containing the results of the network expansion, including the edge pool.
+    single_result (dict): A dictionary containing the results of the network expansion, including edge_pool and arrival_step.
 
     Returns:
     dict: The updated single_result dictionary with the annotated bipartite edge list.
@@ -193,6 +196,29 @@ def generate_annotated_bipartite_edge_list(single_result):
     single_result['bipartite_edgelist'] = make_bipartite_edge_list(single_result['edge_pool'])
     # use add_bipartite_edge_context to add context on essentiality of each edge
     single_result = add_bipartite_edge_context(single_result)
+    return single_result
+
+
+def generate_annotated_unipartite_edge_list(single_result, cpd_db):
+    """
+    Generates a unipartite (C-C) edge list from a single expansion; annotates edges for easier pruning, subsetting, and/or bundling.
+    Self-loops are removed. Edges are nonunique (i.e. source-target pairs will recur if seen in multiple reactions).
+
+    Parameters:
+    single_result (dict): A dictionary containing the results of the network expansion, including edge_pool and arrival_step.
+    cpd_db (pd.DataFrame): A DataFrame containing compound data, including chirality information.
+
+    Returns:
+    dict: The updated single_result dictionary with the annotated unipartite edge list.
+    """
+    edges = single_result['edge_pool'].explode('source').explode('target').query('source!=target')
+    edges['source_chiral'] = edges['source'].map(cpd_db['is_chiral'])
+    edges['target_chiral'] = edges['target'].map(cpd_db['is_chiral']) 
+    edges['source_step'] = edges['source'].map(single_result['arrival_step'])
+    edges['target_step'] = edges['target'].map(single_result['arrival_step'])
+    edges['contingent'] = edges.target_step.eq(edges.step) & edges.source_step.lt(edges.target_step)
+    edges['immediate_precursor'] = edges.eval('(target_step - source_step == 1) & contingent')
+    single_result['unipartite_edgelist'] = edges
     return single_result
 
 
@@ -234,11 +260,12 @@ def generate_immediate_precursor_unipartite_edge_list(single_result):
     # Get all edges between compounds.
     ep = single_result['edge_pool'].explode(s).explode(t).query(f'{s}!={t}')
     # Remove "infill" reactions; keep only the first instance of each edge.
-    ep = ep.query('directed').sort_values(by='step').drop_duplicates(subset=[s, t])
+    ep = ep.query('directed').sort_values(by=['step', 'reaction'])
     # Reset index so it's edge-based not reaction-based.
     ep = ep.reset_index(drop=True)
-    # Keep only edges where source arrived immediately before target.
-    ep = ep.loc[ep.eval(f'{t}.map(@arr) - {s}.map(@arr) == 1')].reset_index(drop=True)
+    # Keep only edges where source arrived immediately before target, and reaction is actually producing the target.
+    ep = ep.loc[ep.eval(f'({t}.map(@arr) - {s}.map(@arr) == 1) & {t}.map(@arr)==step')]
+    ep = ep.drop_duplicates(subset=[s, t]).reset_index(drop=True)
     # Add this to the single_result dict.
     single_result.update({'immediate_precursor_unipartite_edgelist': ep})
     # Return the outcome
