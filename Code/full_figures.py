@@ -747,7 +747,7 @@ def fig3(seed_name, rxn_db, crossover_step, attributes, networks_uni):
     print("- Writing out top 50 highest degree nodes to Data/top50_highestDegreeNodes.csv -")
     # expansion_arrival_df.sort_values(by=["degree", "n_chiral_centers"], inplace=True, ascending=[False, True])
     expansion_arrival_df.sort_values(by="degree", inplace=True, ascending=False)
-    columns_to_write = ["compound_id", "formula", "n_chiral_centers", "degree"]
+    columns_to_write = ["compound_id", "nickname", "formula", "n_chiral_centers", "n_heavy_atoms", "degree"]
     expansion_arrival_df.head(50).to_csv("../Data/top50_highestDegreeNodes.csv", columns=columns_to_write, index=False)
 
     fig = plt.figure(figsize=(16, 8))
