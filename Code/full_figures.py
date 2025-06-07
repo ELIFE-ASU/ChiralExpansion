@@ -105,35 +105,17 @@ def fig1():
     plt.close()
 
 
-def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
+def fig2(seed_name, results, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     ### Get full seed set & reaction set
-    seed_groups = [seed_name]
     reaction_scope = get_sides(import_reaction_file(rxn_db))
 
-    compound_scope = keggC_df['compound_id'].unique()
-    seed_scope = seed_candidates.loc[seed_candidates.index.isin(compound_scope)]
-    seed_sets = {
-        i: seed_scope.query('Source.str.contains("' + i + '")').index
-        for i in seed_groups
-    }
-
-    print(f"- Seed Set ({seed_name}) -")
-
-    ### Run network expansion on original seed set
-    results = dict()
     print("- Writing curated seed set to ../Data/curated_SeedSets.csv -")
-    for name, seeds in seed_sets.items():
-        print(f"- Seed Set Size: {len(seeds)}")
-        print(seeds)
-        curated_SS_df = pd.DataFrame(columns=[seed_name])
-        curated_SS_df[seed_name] = list(seeds)
-        curated_SS_df.to_csv("../Data/curated_SeedSets.csv")  ### Will be re-used for LUCA in SI figure notebook
-
-        results[name] = expand_from_seed_set(seeds=seeds,
-                                             reactions=reaction_scope,
-                                             max_gen=max_generation)
-        results[name] = generate_annotated_bipartite_edge_list(results[name])
-        results[name] = generate_immediate_precursor_unipartite_edge_list(results[name])
+    seeds = results[seed_name]['seeds']
+    print(f"- Seed Set Size: {len(seeds)}")
+    print(seeds)
+    curated_SS_df = pd.DataFrame(columns=[seed_name])
+    curated_SS_df[seed_name] = seeds
+    curated_SS_df.to_csv("../Data/curated_SeedSets.csv")  ### Will be re-used for LUCA in SI figure notebook
 
     ### Process expansion (including chiral %s at each step & heavy atom count)
 
@@ -196,19 +178,13 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
 
     ### Network figure
     print("- Generating Network Figure -")
-    result_network = generate_annotated_bipartite_edge_list(results[seed_name])
-    transition_edge_df = result_network['bipartite_edgelist'] #.query('step <= @achiral_chiral_crossover_step').copy(deep=True)
-    networks = {i: nx.from_pandas_edgelist(transition_edge_df[transition_edge_df[i]],
-                                           source='source', target='target', edge_attr=True, create_using=nx.DiGraph())
-                for i in ['impactful_precursor', 'directed']}
-    compound_nodes = {i: set(j.nodes()).difference(reaction_scope.index) for i, j in networks.items()}
-    networks_uni = {i: bipartite.projected_graph(networks[i], nodes=compound_nodes[i]) for i in networks.keys()}
-    networks_uni['immediate_precursor'] = nx.from_pandas_edgelist(results[seed_name]['immediate_precursor_unipartite_edgelist'],
-                                                                source='source', target='target', edge_attr=True, create_using=nx.DiGraph())
-    print(networks_uni["impactful_precursor"])
+    uni_edges = results[seed_name]['unipartite_edgelist']
+    networks_uni = dict()
+    for i in ['directed', 'contingent', 'immediate_precursor']:
+        edges = uni_edges.query(i).drop_duplicates(subset=['source','target'])
+        networks_uni[i] = nx.from_pandas_edgelist(edges, source='source', target='target', create_using=nx.DiGraph(), edge_attr=True)
 
-    attributes = pd.read_csv("../Data/CBRdb_C.csv",
-                             index_col=0)
+    attributes = keggC_df.copy(deep=True).set_index('compound_id')
     attributes.drop(labels=["smiles", "formula", "molecular_weight", "n_heavy_atoms"], axis=1,
                     inplace=True)
     attributes["is_chiral"] = attributes['n_chiral_centers'].map(lambda x: x > 0)
@@ -559,18 +535,11 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     plt.close()
 
     print("-- Generating network for Figure 3 --")
-    result_network = generate_annotated_bipartite_edge_list(results[seed_name])
-    transition_edge_df = result_network['bipartite_edgelist'].query('step <= @achiral_chiral_crossover_step').copy(deep=True)
-    networks = {i: nx.from_pandas_edgelist(transition_edge_df[transition_edge_df[i]],
-                                           source='source', target='target', edge_attr=True, create_using=nx.DiGraph())
-                for i in ['impactful_precursor', 'directed']}
-    compound_nodes = {i: set(j.nodes()).difference(reaction_scope.index) for i, j in networks.items()}
-    networks_uni = {i: bipartite.projected_graph(networks[i], nodes=compound_nodes[i]) for i in networks.keys()}
-    networks_uni['immediate_precursor'] = nx.from_pandas_edgelist(results[seed_name]['immediate_precursor_unipartite_edgelist'],
-                                                                source='source', target='target', edge_attr=True, create_using=nx.DiGraph())
-
-    attributes = pd.read_csv("../Data/CBRdb_C.csv",
-                             index_col=0)
+    networks_uni = dict()
+    for i in ['directed', 'contingent', 'immediate_precursor']:
+        edges = uni_edges.query(i).query('step <= @achiral_chiral_crossover_step').drop_duplicates(subset=['source','target'])
+        networks_uni[i] = nx.from_pandas_edgelist(edges, source='source', target='target', create_using=nx.DiGraph(), edge_attr=True)
+    attributes = keggC_df.copy(deep=True).set_index('compound_id')
     attributes.drop(labels=["smiles", "formula", "molecular_weight", "n_heavy_atoms"], axis=1,
                     inplace=True)
     attributes["is_chiral"] = attributes['n_chiral_centers'].map(lambda x: x > 0)
@@ -596,13 +565,10 @@ def fig2(seed_name, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000):
     gen_color = 'Greys'
     attributes['gen_color'] = colorize_series(attributes['gen'], cmap=gen_color).tolist()
 
-    del (results)
-
-
     return achiral_chiral_crossover_step, first_chiral_step, attributes, networks_uni
 
-def fig3(seed_name, rxn_db, crossover_step, attributes, networks_uni):
-    print("- Generating Network Figure (click 'Post To Python' in browser pop-up window to continue code) -")
+def fig3(seed_name, results, rxn_db, crossover_step, attributes, networks_uni):
+    print("- Generating Network Figure (click 'Post To Python' in browser pop-up window to continue code, once node positions have stabilized) -")
     size_nodes_by = 'degree'
     max_node_size = 25
     max_figure_degree = 50
@@ -675,30 +641,8 @@ def fig3(seed_name, rxn_db, crossover_step, attributes, networks_uni):
     plt.savefig("../Figures/Fig3A.png", format="png")
     plt.close()
 
-    ### Get full seed set & reaction set
-    seed_groups = [seed_name]
-    reaction_scope = get_sides(import_reaction_file(rxn_db))
-
-    compound_scope = keggC_df['compound_id'].unique()
-    seed_scope = seed_candidates.loc[seed_candidates.index.isin(compound_scope)]
-    seed_sets = {
-        i: seed_scope.query('Source.str.contains("' + i + '")').index
-        for i in seed_groups
-    }
-    print("- Seed Set -")
-
-    ### Run network expansion on original seed set
-    results = dict()
-    for name, seeds in seed_sets.items():
-        print(seeds)
-        results[name] = expand_from_seed_set(seeds=seeds,
-                                             reactions=reaction_scope,
-                                             max_gen=max_generation)
-        results[name] = generate_annotated_bipartite_edge_list(results[name])
-        results[name] = generate_immediate_precursor_unipartite_edge_list(results[name])
-
     expansion_arrival_df = link_arrival_step_heavy_atoms(
-        results[name]['arrival_step'], keggC_df)
+        results[seed_name]['arrival_step'], keggC_df)
 
     sns.set_palette(sns.color_palette("copper"))
     g = sns.jointplot(data=expansion_arrival_df.sort_values(by="n_heavy_atoms"),
@@ -736,7 +680,7 @@ def fig3(seed_name, rxn_db, crossover_step, attributes, networks_uni):
     plt.close()
 
     ### Get degrees for each compound & merge into expansion arrival dataframe
-    rxns_observed = import_reaction_file(rxn_db).loc[results[name]['rns'].index]
+    rxns_observed = import_reaction_file(rxn_db).loc[results[seed_name]['rns'].index]
     cpd_degrees = get_compound_degrees(rxn_df=rxns_observed)
 
     expansion_arrival_df["degree"] = expansion_arrival_df["compound_id"].map(
@@ -1125,7 +1069,7 @@ def fig4():
     plt.savefig("../Figures/Fig4.png", format="png")
 
 
-def fig5(seed_name, rxn_db, crossover_step, first_chiral_step):
+def fig5(seed_name, results, rxn_db, crossover_step, first_chiral_step):
     ### Panel 5A - chiral rxn counts
     rxn_df = import_reaction_file(rxn_db)
     # measure and plot the number of chiral reactants/products per reaction.
@@ -1177,29 +1121,8 @@ def fig5(seed_name, rxn_db, crossover_step, first_chiral_step):
     # remove reactions with negative coefficients --> NaNs for chiral center counts.
     rxn_df = rxn_df.dropna(subset=['Reactant Chiral Count', 'Product Chiral Count'])
 
-    ### Get full seed set & reaction set
-    seed_groups = [seed_name]
-    reaction_scope = get_sides(rxn_df)
-
-    compound_scope = keggC_df['compound_id'].unique()
-    seed_scope = seed_candidates.loc[seed_candidates.index.isin(compound_scope)]
-    seed_sets = {
-        i: seed_scope.query('Source.str.contains("' + i + '")').index
-        for i in seed_groups
-    }
-    print("- Seed Set -")
-
-    ### Run network expansion on original seed set
-    results = dict()
-    for name, seeds in seed_sets.items():
-        print(f"- Seed Set Size: {len(seeds)}")
-        print(seeds)
-        results[name] = expand_from_seed_set(seeds=seeds,
-                                             reactions=reaction_scope,
-                                             max_gen=max_generation)
-
     chiral_modulating, chiral_conserving, achiral_conserving = get_chiral_modulations(
-        results[name]["participants"], rxn_df)
+        results[seed_name]["participants"], rxn_df)
     total_rxns = chiral_modulating[-1] + chiral_conserving[-1] + achiral_conserving[-1]
     print(
         f"- Total Chiral Modulating Reactions: {chiral_modulating[-1]}, {round((chiral_modulating[-1] / total_rxns) * 100, 3)}% -")
@@ -1446,6 +1369,12 @@ def main():
     seed_name = "JM|G24|G17|TW"
     rxn_db_fp = reaction_file
 
+    print('---- Running network expansion algorithm on primordial seed set ----')
+    seeds = seed_candidates.query(f'Source.str.contains("{seed_name}")').index.to_list()
+    primordial_exp = single_expansion(seed_ids=seeds, rxn_db_fp=rxn_db_fp, cpd_db_fp=keggC_df, edgelist=True)
+    primordial_summary = get_single_expansion_compound_summary(primordial_exp, cpd_db=keggC_df.set_index('compound_id')) #this also updates primordial_exp
+    results = {seed_name: primordial_exp}
+
     print("---- Generating Figure 1 ----")
     fig1()
 
@@ -1456,6 +1385,7 @@ def main():
     n_iter = 100
     crossover_step, first_chiral_step, attributes, networks_uni = fig2(
         seed_name=seed_name,
+        results=results,
         rxn_db=rxn_db_fp,
         min_ss_size=min_ss_size,
         max_ss_size=max_ss_size,
@@ -1463,6 +1393,7 @@ def main():
 
     print("---- Generating Figure 3 ----")
     fig3(seed_name=seed_name,
+         results=results,
          rxn_db=rxn_db_fp,
          crossover_step=crossover_step,
          attributes=attributes,
@@ -1473,6 +1404,7 @@ def main():
 
     print("---- Generating Figure 5 ----")
     fig5(seed_name=seed_name,
+         results=results,
          rxn_db=rxn_db_fp,
          crossover_step=crossover_step,
          first_chiral_step=first_chiral_step)
