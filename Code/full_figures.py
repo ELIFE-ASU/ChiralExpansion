@@ -189,23 +189,8 @@ def fig2(seed_name, results, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000)
                     inplace=True)
     attributes["is_chiral"] = attributes['n_chiral_centers'].map(lambda x: x > 0)
     attributes['is_chiral_color'] = attributes['is_chiral'].map({True: '#34CCFF', False: '#FFC012'}).fillna("#FFFFFF")
-
-    steps = []
-    for index, _ in attributes.iterrows():
-        step = 0
-        step_found = False
-        for new_cpds in results[seed_name]["participants"]["new compounds"]:
-            if index in new_cpds:
-                steps.append(step)
-                step_found = True
-            step += 1
-            ### NOTE: Removing for full figure
-            # if step > achiral_chiral_crossover_step:
-            #     break
-        if not step_found:
-            steps.append(np.nan)
-
-    attributes['gen'] = steps
+    steps = results[seed_name]['arrival_step']
+    attributes['gen'] = attributes.index.map(steps)
     attributes.sort_values(by='gen', inplace=True)
     gen_color = 'Greys'
     attributes['gen_color'] = colorize_series(attributes['gen'], cmap=gen_color).tolist()
@@ -544,23 +529,8 @@ def fig2(seed_name, results, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000)
                     inplace=True)
     attributes["is_chiral"] = attributes['n_chiral_centers'].map(lambda x: x > 0)
     attributes['is_chiral_color'] = attributes['is_chiral'].map({True: '#34CCFF', False: '#FFC012'}).fillna("#FFFFFF")
-
-    steps = []
-    for index, _ in attributes.iterrows():
-        step = 0
-        step_found = False
-        for new_cpds in results[seed_name]["participants"]["new compounds"]:
-            if index in new_cpds:
-                steps.append(step)
-                step_found = True
-            step += 1
-            ### NOTE: Putting back in for figure 3
-            if step > achiral_chiral_crossover_step:
-                break
-        if not step_found:
-            steps.append(np.nan)
-
-    attributes['gen'] = steps
+    steps = results[seed_name]['arrival_step'].mask(lambda x: x.gt(achiral_chiral_crossover_step))
+    attributes['gen'] = attributes.index.map(steps)
     attributes.sort_values(by='gen', inplace=True)
     gen_color = 'Greys'
     attributes['gen_color'] = colorize_series(attributes['gen'], cmap=gen_color).tolist()
@@ -694,6 +664,7 @@ def fig3(seed_name, results, rxn_db, crossover_step, attributes, networks_uni):
     columns_to_write = ["compound_id", "nickname", "formula", "n_chiral_centers", "n_heavy_atoms", "degree"]
     expansion_arrival_df.head(50).to_csv("../Data/top50_highestDegreeNodes.csv", columns=columns_to_write, index=False)
 
+    print("- Generating degree vs chiral centers scatter plot -")
     fig = plt.figure(figsize=(16, 8))
     gs = fig.add_gridspec(2,
                           2,
@@ -1398,7 +1369,7 @@ def main():
          crossover_step=crossover_step,
          attributes=attributes,
          networks_uni=networks_uni)
-
+"""
     print("---- Generating Figure 4 ----")
     fig4()
 
@@ -1409,6 +1380,6 @@ def main():
          crossover_step=crossover_step,
          first_chiral_step=first_chiral_step)
 
-
+"""
 if __name__ == "__main__":
     main()
