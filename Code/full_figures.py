@@ -165,9 +165,9 @@ def fig2(seed_name, results, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000)
 
     print("- Chirality Statistics -")
     print(f"\tAchiral To Chiral Crossover Step: {achiral_chiral_crossover_step}")
-    print(f"\tFirst Chiral Compound Appearence Step: {first_chiral_step}")
+    print(f"\tFirst Chiral Compound Appearance Step: {first_chiral_step}")
     print(
-        f"\tExpansion Size At First Chiral Compound Appearence: {summaries['compound count'].iloc[first_chiral_step][seed_name]} Compounds, {summaries['reaction count'].iloc[first_chiral_step][seed_name]} Reactions")
+        f"\tExpansion Size At First Chiral Compound Appearance: {summaries['compound count'].iloc[first_chiral_step][seed_name]} Compounds, {summaries['reaction count'].iloc[first_chiral_step][seed_name]} Reactions")
     print(
         f"\tAverage Achiral Heavy Atoms At Crossover Step: {round(summaries['achiral avg heavy atoms'].iloc[achiral_chiral_crossover_step][0], 3)}")
     print(
@@ -199,7 +199,7 @@ def fig2(seed_name, results, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000)
     show = 'immediate_precursor'
     rotate = False
 
-    G1 = networks_uni[show]  # using impactful_precursor from network generation
+    G1 = networks_uni[show]
     # Remove G nodes that are not in attributes df
     nodes_to_keep = attributes.index.to_list()
     nodes_to_remove = [n for n in nodes_to_keep if n not in G1.nodes()]
@@ -209,7 +209,6 @@ def fig2(seed_name, results, rxn_db, min_ss_size=2, max_ss_size=10, n_iter=1000)
     nx.set_node_attributes(G1, attributes['is_chiral_color'], 'is_chiral_color')
     layers = [list(i) for i in attributes.loc[list(G1.nodes())].groupby(by='gen').groups.values()]
     pos = get_multipartite_layout(edges=list(G1.edges), layers=layers, reduce_edge_crossings=True)
-    # for i in layers[-1]: del pos[i] # remove last layer
     for n in pos.keys(): pos[n][0] = (pos[n][0] + 0.2) ** 0.05  # spread out earlier gens to reduce extreme angles
     if rotate: pos = {i: j[::-1] for i, j in pos.items()}
 
@@ -1369,7 +1368,7 @@ def main():
          crossover_step=crossover_step,
          attributes=attributes,
          networks_uni=networks_uni)
-"""
+
     print("---- Generating Figure 4 ----")
     fig4()
 
@@ -1380,6 +1379,6 @@ def main():
          crossover_step=crossover_step,
          first_chiral_step=first_chiral_step)
 
-"""
+
 if __name__ == "__main__":
     main()
