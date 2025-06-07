@@ -218,7 +218,8 @@ def generate_annotated_unipartite_edge_list(single_result, cpd_db):
     edges['target_step'] = edges['target'].map(single_result['arrival_step'])
     edges['contingent'] = edges.target_step.eq(edges.step) & edges.source_step.lt(edges.target_step)
     edges['immediate_precursor'] = edges.eval('(target_step - source_step == 1) & contingent')
-    single_result['unipartite_edgelist'] = edges.reset_index(drop=True)
+    edges = edges.sort_values(by=['step', 'reaction']).reset_index(drop=True)
+    single_result['unipartite_edgelist'] = edges
     return single_result
 
 
