@@ -471,6 +471,7 @@ def scatter_hist(x, y, ax, ax_histy, c):
             bar.set_facecolor(achiral_color)
         else:
             bar.set_facecolor(chiral_color)
+    return ax, ax_histy
 
 
 def find_fit(X, Y, color):

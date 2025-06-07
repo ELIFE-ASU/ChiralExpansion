@@ -763,7 +763,7 @@ def fig3(seed_name, rxn_db, crossover_step, attributes, networks_uni):
                           hspace=0.05)
     ax = fig.add_subplot(gs[1, 0])
     ax_histy = fig.add_subplot(gs[1, 1], sharey=ax)
-    scatter_hist(list(expansion_arrival_df["degree"]),
+    ax, ax_histy = scatter_hist(list(expansion_arrival_df["degree"]),
                  list(expansion_arrival_df["n_chiral_centers"]), ax, ax_histy,
                  "k")
 
