@@ -287,7 +287,7 @@ def get_chiral_percentage(cum_chiral, cum_achiral):
     return chiral_percent
 
 
-def get_luca_percentage(df):
+def get_luca_percentage(df, convert_to_CBRdb=True):
     """
     Given a dataframe with sets of compounds per network expansion step, calculate the percentage of compounds
     that show up in LUCA compounds.
@@ -302,6 +302,11 @@ def get_luca_percentage(df):
     with open(fpath) as f:
         data = json.load(f)
         luca_cpds = data["Luca"]
+    
+    if convert_to_CBRdb == True:
+        # Convert LUCA KEGG compound IDs to their associated CBRdb IDs if using CBRdb and not original KEGG
+        kegg2cbrdb = pd.read_csv('../Data/kegg2cbrdb.csv', index_col=0).iloc[:,0]
+        luca_cpds = pd.Series(luca_cpds).replace(kegg2cbrdb).drop_duplicates().to_list()
 
     percent_luca = []
     for _, row in tqdm(df.iterrows(), total=len(df)):
