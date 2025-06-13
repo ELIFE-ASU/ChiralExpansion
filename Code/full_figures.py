@@ -24,6 +24,48 @@ keggC_df = keggC_df.assign(is_chiral=lambda x: x['n_chiral_centers'].gt(0))
 keggR_df = import_reaction_file("../Data/CBRdb_R.csv").reset_index()
 
 
+def fig1_alt():
+
+    # get chiral order parameter for chemical space
+    gdb_cop = pd.read_csv("../Data/GDB_output.csv", index_col='nA')['fraction_chiral']
+    
+    # calculate chiral order parameter for metabolism
+    kegg_small = keggC_df.query("n_heavy_atoms <= @gdb_cop.index.max()")
+    n_heavy_groups = kegg_small.groupby(by='n_heavy_atoms')
+    enough_samples = n_heavy_groups.size().gt(10)
+    kegg_cop = n_heavy_groups['is_chiral'].mean().loc[enough_samples]
+
+    #combine into one DataFrame
+    COPs = pd.concat([gdb_cop.rename("Chemical Space"), kegg_cop.rename("Metabolism")], axis=1)
+    highest_heavy, lowest_heavy = COPs.index.max(), COPs.index.min()
+
+    # instantiate figure - customize font size for this plot's scale
+    fig, ax = plt.subplots(figsize=(7,6), layout='constrained')
+
+    # instantiate major figure elements
+    ax.axvspan(8, 9, alpha=0.5, color='silver', label='Phase Boundary')
+    COPs[['Chemical Space']].plot(ax=ax, linewidth=3, c='k', linestyle=':')
+    COPs[['Metabolism']].plot(ax=ax, linewidth=3, c='k', linestyle='--',
+                                xlim=(lowest_heavy, highest_heavy),
+                                xticks=np.arange(0, highest_heavy, 5), 
+                                ylim=(-0.05, 1.05),
+                                yticks=np.arange(0, 1.1, 0.25))
+    equation = r"$\mathbb{C} = \frac{C}{C+A}$"
+    ax.annotate(text=equation, xy=(2, 0.6),  c='k', annotation_clip=False,
+                fontsize=plt.rcParams['font.size'] * 1.3)
+
+    ax.legend(loc='upper left', facecolor='w', framealpha=0.3, edgecolor='w')
+
+    ax.grid(visible=True, which='both')
+    ax.set_xlabel('Heavy Atoms Per Molecule')
+    ax.set_ylabel(r"Chiral Order Parameter $\mathbb{C}$")
+
+    plt.savefig("../Figures/Fig1_alt.svg", format="svg")
+    plt.savefig("../Figures/Fig1_alt.png", format="png")
+    
+    plt.close()
+
+
 def fig1():
     # GDB data
     gdb_df = pd.read_csv("../Data/GDB_output.csv")
@@ -48,7 +90,7 @@ def fig1():
              linewidth=3,
              label="Chiral",
              color=chiral_color)
-    ax1.axvspan(7, 12, alpha=0.5, color='grey')
+    ax1.axvspan(8, 9, alpha=0.5, color='grey')
 
     ax1.xaxis.grid(visible=True, which="both")
     ax1.yaxis.grid(visible=True, which="both")
@@ -1347,6 +1389,7 @@ def main():
 
     print("---- Generating Figure 1 ----")
     fig1()
+    fig1_alt()
 
     print("---- Generating Figure 2 ----")
     # ~Five hours for full expansion (n_iter=100, min=2, max=10)
