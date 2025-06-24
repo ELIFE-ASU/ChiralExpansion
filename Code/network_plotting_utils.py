@@ -113,27 +113,45 @@ def subgraph_at_gen(exp, to_show='immediate_precursor', max_gen=1000):
     return G
 
 
-def layered_plot(exp, to_show, sort_by, ascending, max_layer):
+def apply_spread_minimum(pos, frac_threshold=0.025):
+    positions = pd.DataFrame(pos).T
+    xvals = positions[0].drop_duplicates().reset_index(drop=True)
+    newxs = xvals.copy(deep=True)
+    for gen in newxs.index[1:]:
+        diff = float(newxs.loc[gen] - newxs.loc[gen-1])
+        if diff < frac_threshold:
+            newxs.update((newxs.loc[gen:] - diff) + frac_threshold)
+    newxs = newxs.transform(lambda x: (x-x.min())/(x.max()-x.min()) )#* 0.95 + 0.025)
+    xval2layer = xvals.reset_index().set_index(0)['index']
+    positions[0] = positions[0].map(xval2layer).map(newxs)
+    pos_new = {i: j.values for i,j in positions.T.items()}
+    return pos_new
+
+
+def layered_plot(exp, to_show, sort_by, ascending, max_layer, frac_threshold=0.025, fig=None, ax=None):
+
+    if fig is None or ax is None:
+        fig, ax = plt.subplots(figsize=(7, 5))
+
     layers = gens_as_layers(exp, to_show=to_show, sort_by=sort_by, ascending=ascending)
     pos = position_layers(exp, to_show=to_show, layers=layers, max_layer=max_layer)
     pos_new = spread_position_layers(pos=pos, layers=layers, max_layer=max_layer)
+    pos_new = apply_spread_minimum(pos_new, frac_threshold=frac_threshold)
     G = subgraph_at_gen(exp, to_show=to_show, max_gen=max_layer)
     pos_colors = pd.DataFrame(G.nodes(data='is_chiral_color'))[1].to_list()
 
-    fig, ax = plt.subplots(figsize=(25, 15), layout='constrained')
     ax.axis("off")
-    nx.draw_networkx(G, pos=pos_new, ax=ax, edge_color=[0.5, 0.5, 0.5, 0.1], 
+    nx.draw_networkx(G, pos=pos_new, ax=ax, edge_color=[0.4,0.4,0.4,0.1], 
                         node_color=pos_colors,
-                        width=0.03, arrows=False,
-                        linewidths=1.0,  node_size=100, node_shape='_', alpha=0.99,
+                        width=0.2, arrows=False,
+                        linewidths=0.5,  node_size=30, node_shape='_',
                         with_labels=False)
     
     annot_locs = pd.DataFrame(pos_new).T.sort_values(by=[0,1], ascending=[True, False]).drop_duplicates(subset=0).reset_index(drop=True)
     annot_locs = annot_locs.T.to_dict(orient='list')
     for igen, ipos in annot_locs.items():
         if igen < len(annot_locs.keys()):
-            ax.annotate(str(igen), xy=ipos, ha='center', va='bottom', fontsize=23, c='k')
-
-    plt.margins(0, 0)
+            ax.annotate(str(igen), xy=ipos, ha='center', va='bottom', c='k', fontsize=plt.rcParams['font.size']*0.8)
+    plt.margins(0,0)
 
     return G, fig
