@@ -1,2 +1,2 @@
-taxaID,total_size,nbr_chiral,nbr_achiral,nbr_unknown,ratio_chiral,ratio_achiral,ratio_unknown
-1,7256,4588,2458,210,0.6323043,0.338754135,0.028941566
+taxaID,total_size,nbr_chiral,nbr_achiral,nbr_unknown,ratio_chiral,ratio_achiral,ratio_unknown,kegg_size
+1,7206,5084,1935,187,0.7055231751318346,0.268526228143214,0.025950596724951428,7256
